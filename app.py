@@ -42,7 +42,7 @@ app_config_dict = {}
 
 for key, val in dict(app.config).items():
     if type(val) is str or type(val) is bool:
-        print(key, val, type(val))
+        # print(key, val, type(val))
         app_config_dict[key] = val
 
 print_app_config = json.dumps(app_config_dict, indent=4, sort_keys=True)
