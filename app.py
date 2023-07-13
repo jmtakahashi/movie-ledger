@@ -10,8 +10,8 @@ from sqlalchemy.sql import text
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_cors import CORS
 
-from forms import (UserAddForm, LoginForm, UserEditForm, 
-                    UserDeleteForm, MovieAddEditForm )
+from forms import (UserAddForm, LoginForm, UserEditForm,
+                   UserDeleteForm, MovieAddEditForm)
 from models import db, connect_db, User, Movie
 from services import movie_search, movie_search_by_id
 
@@ -27,6 +27,8 @@ app.config['SQLALCHEMY_ECHO'] = True
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 
+print("=> ", app.config)
+print("=> ", os.environ)
 
 connect_db(app)
 
@@ -36,6 +38,7 @@ CURR_USER_KEY = "curr_user"
 
 ###############################################################################
 # do this before every request!
+
 
 @app.before_request
 def add_user_to_g():
@@ -54,6 +57,7 @@ def add_user_to_g():
 
 ###############################################################################
 # login, signup, logout
+
 
 def do_login(user):
     """Log in user."""
@@ -89,7 +93,7 @@ def signup():
                 username=form.username.data,
                 password=form.password.data,
                 email=form.email.data,
-                img_url=form.img_url.data # or User.img_url.default.arg
+                img_url=form.img_url.data  # or User.img_url.default.arg
             )
 
             db.session.commit()
@@ -112,7 +116,7 @@ def signup():
 @app.route('/login', methods=["GET", "POST"])
 def login():
     """Handle login of user.
-    
+
     Authenticate credentials and redirect to the movies page.
     """
 
@@ -125,7 +129,7 @@ def login():
             do_login(u)
 
             return redirect("/movies")
-        
+
         flash("Invalid login credentials.", 'danger')
         return redirect('/login')
 
@@ -175,8 +179,8 @@ def edit_profile():
                     newPW = User.hash_password(editForm.new_password.data)
                     u.password = newPW
 
-                # we do not need to db.session.add() since sqlalchemy 
-                # already has the user in memory        
+                # we do not need to db.session.add() since sqlalchemy
+                # already has the user in memory
                 db.session.commit()
 
             except IntegrityError as exc:
@@ -220,7 +224,7 @@ def delete_profile():
 
         flash("Incorrect password! Your profile has not been deleted!", "danger")
         return redirect("/profile")
-    
+
     return redirect("/profile")
 
 
@@ -279,7 +283,7 @@ def show_my_movies():
             filters["sort"] = 'date_viewed'
 
         # if there's an order, append the order to our sort_str
-        if request.args.get("order"):           
+        if request.args.get("order"):
 
             # ascending order
             if request.args['order'] == "asc":
@@ -291,19 +295,17 @@ def show_my_movies():
                 sort_str = sort_str + " desc"
                 filters["order"] = 'descending'
 
-
         # WITH SORT TERM: make our final query using our built sort_str
         movies = Movie.query.filter_by(**kwargs).order_by(text(sort_str)).all()
 
         # be sure to pass the necessary flags to the template
         return render_template('movies.html', user=g.user, movies=movies, filters=filters)
 
-
     # NO SORT TERM: our final query with filter_by(**kwargs) only
     movies = Movie.query.filter_by(**kwargs).all()
 
     return render_template('movies.html', user=g.user, movies=movies, filters=filters)
-    
+
 
 @app.route("/movie/<movie_id>", methods=["GET", "POST"])
 def handle_movie(movie_id):
@@ -317,23 +319,20 @@ def handle_movie(movie_id):
     # movie exists in our db).
     #
     # if the movie already exists in our database, we should
-    # should replace the "add to ledger" button with an "update" 
+    # should replace the "add to ledger" button with an "update"
     # button and a note that the movie is
     # already in our list.
-    # 
+    #
     # on submission of the form, we should check to see if the
     # movie is in our db again
     #
-
 
     # if a user is NOT in the session then redirect to login
     if not g.user:
         flash("Please login!", "danger")
         return redirect("/login")
 
-
     form = MovieAddEditForm()
-
 
     ##############################################
     # add movie by form (our movie detail page)
@@ -343,12 +342,13 @@ def handle_movie(movie_id):
         if form.date_added.data:
 
             # query our movie object from the db
-            m = Movie.query.filter_by(imdb_id=movie_id, user_id=g.user.id).first()
-            
+            m = Movie.query.filter_by(
+                imdb_id=movie_id, user_id=g.user.id).first()
+
             # update values.  there will only be 3 that we can modify
-            m.favorite=form.favorite.data
-            m.platform=None if not form.platform.data else form.platform.data
-            m.date_viewed=form.date_viewed.data
+            m.favorite = form.favorite.data
+            m.platform = None if not form.platform.data else form.platform.data
+            m.date_viewed = form.date_viewed.data
 
             db.session.commit()
 
@@ -368,15 +368,15 @@ def handle_movie(movie_id):
             #   store that empty string in our db.
 
             m = Movie(imdb_id=movie_id,
-                        user_id=g.user.id,
-                        title=form.title.data,
-                        year=form.year.data[0:4],
-                        actors=form.actors.data,
-                        favorite=form.favorite.data,
-                        platform=None if not form.platform.data else form.platform.data,
-                        date_viewed=form.date_viewed.data,
-                        imdb_img=form.imdb_img.data
-                        )
+                      user_id=g.user.id,
+                      title=form.title.data,
+                      year=form.year.data[0:4],
+                      actors=form.actors.data,
+                      favorite=form.favorite.data,
+                      platform=None if not form.platform.data else form.platform.data,
+                      date_viewed=form.date_viewed.data,
+                      imdb_img=form.imdb_img.data
+                      )
 
             try:
                 db.session.add(m)
@@ -390,7 +390,6 @@ def handle_movie(movie_id):
             flash("Movie added to your list!", "success")
 
         return redirect("/movies")
-
 
     ##############################################
     # add movie with json (our search page)
@@ -408,12 +407,12 @@ def handle_movie(movie_id):
         # platform is optional so None <class 'NoneType'> will
         #   be our value and db field will be blank
         m = Movie(imdb_id=request.json["imdb_id"],
-                    user_id=g.user.id,
-                    title=request.json["title"],
-                    year=request.json["year"][0:4],
-                    actors=movie['Actors'],
-                    imdb_img=request.json["imdb_img"]
-                    )
+                  user_id=g.user.id,
+                  title=request.json["title"],
+                  year=request.json["year"][0:4],
+                  actors=movie['Actors'],
+                  imdb_img=request.json["imdb_img"]
+                  )
 
         try:
             db.session.add(m)
@@ -427,7 +426,6 @@ def handle_movie(movie_id):
         # success response goes here
         resp = jsonify({"message": "Movie added to list!"})
         return (resp, 201)
-
 
     # the functionality below is placed there because we don't
     # need this functionality to run on a post request.  if we
@@ -452,18 +450,18 @@ def handle_movie(movie_id):
         flash("Sorry, we can't find the movie you are looking for.", "danger")
         return redirect("/movie-search")
 
-
     # update our wtform data on the front end to match the movie
     # details of the movie we are viewing, so when we submit the
     # add-movie-form our values will correct
-    form.title.data=movie['Title']
-    form.year.data=movie['Year']
-    form.actors.data=movie['Actors']
-    form.imdb_img.data=movie['Poster']
+    form.title.data = movie['Title']
+    form.year.data = movie['Year']
+    form.actors.data = movie['Actors']
+    form.imdb_img.data = movie['Poster']
 
     # check if this movie is already in our database...
     # .first() returns the movie, or no movies
-    movie_in_db = Movie.query.filter_by(imdb_id=movie_id, user_id=g.user.id).first()
+    movie_in_db = Movie.query.filter_by(
+        imdb_id=movie_id, user_id=g.user.id).first()
 
     # if the movie is already in our ledger we can pre-populate
     # the date that is exclusive to our db into our form as well.
@@ -471,10 +469,10 @@ def handle_movie(movie_id):
     # for our post route so we can determine if the post is a
     # new save, or an update
     if movie_in_db:
-        form.favorite.data=movie_in_db.favorite
-        form.platform.data=movie_in_db.platform
-        form.date_viewed.data=movie_in_db.date_viewed
-        form.date_added.data=movie_in_db.date_added
+        form.favorite.data = movie_in_db.favorite
+        form.platform.data = movie_in_db.platform
+        form.date_viewed.data = movie_in_db.date_viewed
+        form.date_added.data = movie_in_db.date_added
 
     return render_template("movie-detail.html", form=form, movie=movie, movie_in_db=movie_in_db)
 
@@ -503,9 +501,9 @@ def add_remove_favorite(movie_id):
 
     m.favorite = not m.favorite
 
-    db.session.commit();
+    db.session.commit()
 
-    # send back our boolean value for "favorite"so we can 
+    # send back our boolean value for "favorite"so we can
     # keep the front end in sync with our database data
     resp = jsonify({"message": "success", "favorite": m.favorite})
 
@@ -519,33 +517,33 @@ def add_remove_favorite(movie_id):
 @app.route("/movie-search")
 def search_movies():
     """Get all the movies based on a search term from form data"""
-     
+
     # if a user is NOT in the session then redirect to login
     if not g.user:
         flash("Please login!", "danger")
         return redirect("/login")
-    
+
     # if a search term is provided, process the search
     if request.args.get('term'):
 
         search_term = request.args['term']
 
-        # get our requested page from the query string.  
-        # 
+        # get our requested page from the query string.
+        #
         # if there is no page in the
         # query string, default to page 1, and pass to our api req.
-        # 
-        # page needs to contain an int so that we can check: 
+        #
+        # page needs to contain an int so that we can check:
         # if page > 1 then render our prev page when necessary.
-        page = int(request.args['page']) if request.args.get('page') else 1 
+        page = int(request.args['page']) if request.args.get('page') else 1
 
         # make the call to our external api
         #
         # results will be a python dictionary (from services.py)
         results_curr = movie_search(search_term, page=page)
 
-        # if we get an search results in our CURRENT api call, 
-        # run a check to see if any of the returned results 
+        # if we get an search results in our CURRENT api call,
+        # run a check to see if any of the returned results
         # are already in our list
         #
         # if so, set a new attribute "ml_inList" on our movie
@@ -559,7 +557,7 @@ def search_movies():
             for movie in results_curr['Search']:
                 if movie['imdbID'] in user_movies:
                     movie["ml_inList"] = True
-        
+
         # make the call to our external api for the NEXT page
         #
         # pass the "Rsponse" returned to our template
@@ -585,5 +583,5 @@ def search_movies():
 @app.route("/")
 def homepage():
     """Show homepage."""
-    
+
     return render_template("home.html")
