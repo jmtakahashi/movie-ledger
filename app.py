@@ -30,8 +30,10 @@ app.config['SQLALCHEMY_ECHO'] = True
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 
+print("type of config: ", type(app.config))
 print(colored("=> ", "blue"), json.dumps(
     colored(app.config, "white\n"), indent=4, sort_keys=True))
+print("type of os.environ: ", type(os.environ))
 print(colored("=> ", "blue"), json.dumps(
     colored(os.environ, "white"), indent=4, sort_keys=True))
 
