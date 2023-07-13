@@ -36,6 +36,10 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 
 app_config_dict = {}
 
+# dict(app.config).items() returns a list of tuples
+# we iterate through the tuples, check the val and add it to our
+# app_config_dict if the val can be serialized by json.dumps()
+
 for key, val in dict(app.config).items():
     if type(val) is str or type(val) is bool:
         print(key, val, type(val))
@@ -44,8 +48,10 @@ for key, val in dict(app.config).items():
 print_app_config = json.dumps(app_config_dict, indent=4, sort_keys=True)
 print_os_environ = json.dumps(dict(os.environ), indent=4, sort_keys=True)
 
-print(colored("=> app.config", "blue"), colored(print_app_config, "white"))
-print(colored("=> os.environ: ", "blue"), colored(print_os_environ, "white"))
+print("\033[1m\033[96m=> app.config: \033[0m",
+      colored(print_app_config, "white"))
+print("\033[1m\033[96m=> os.environ: \033[0m",
+      colored(print_os_environ, "white"))
 ###############################################################################
 
 
