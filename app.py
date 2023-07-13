@@ -1,4 +1,5 @@
 import os
+import json
 
 from termcolor import colored
 
@@ -29,8 +30,10 @@ app.config['SQLALCHEMY_ECHO'] = True
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 
-print(colored("=> ", 'cyan'), colored(app.config, "white"))
-print(colored("=> ", 'cyan'), colored(os.environ, "white"))
+print(colored("=> ", "blue"), json.dumps(
+    colored(app.config, "white\n"), indent=4))
+print(colored("=> ", "blue"), json.dumps(
+    colored(os.environ, "white"), indent=4))
 
 connect_db(app)
 
