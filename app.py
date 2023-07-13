@@ -31,9 +31,9 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 
 print(colored("=> ", "blue"), json.dumps(
-    colored(app.config, "white\n"), indent=4))
+    colored(app.config, "white\n"), indent=4, sort_keys=True))
 print(colored("=> ", "blue"), json.dumps(
-    colored(os.environ, "white"), indent=4))
+    colored(os.environ, "white"), indent=4, sort_keys=True))
 
 connect_db(app)
 
