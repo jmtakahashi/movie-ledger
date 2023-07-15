@@ -66,3 +66,20 @@ start command: gunicorn app:app
 
 add environmental vars:
 DATABASE_URL: URL from ElephantSQL (change postgres: → postgresql:)SECRET_KEY: anything you want (to be secure: long and random)PYTHON_VERSION: 3.X.X - whichever version you are using
+
+Tables
+
+Users (
+id (PrimaryKey, Autoincrement),
+username (Unique),
+password
+email
+img_url
+)
+
+Movies (
+imdb_id (PrimaryKey),
+user_id (ForeignKey (Users.id), PrimaryKey),
+year,
+poster
+)

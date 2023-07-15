@@ -1,63 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/index.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,200;0,600;1,400&display=swap" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/css/index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        rel="stylesheet"
-        href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
-        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
-        crossorigin="anonymous">
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,200;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+      integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
+      crossorigin="anonymous"
+    />
     <title>{% block pagetitle %}{% endblock %}</title>
-</head>
-<body>
+  </head>
+  <body>
     <div class="ml__main">
-        <header>
-            <nav>
-                <div class="nav-brand">
-                    <a href="/">TheMovieLedger</a>
-                </div>
-        
-                {% if g.user %}
-                    <div class="nav-links">
-                        <a href="/movies">My List</a>
-                        <a href="/movie-search">Movie Search</a>
-                        <a href="/profile">Profile</a>
-                    </div>
-                {% endif %}
-        
-                <div class="nav-links">
-                    {% if g.user %}
-                        <a href="/logout">Logout</a>
-                    {% else %}
-                        <a href="/login">Login</a>
-                        <a href="/signup">Signup</a>
-                    {% endif %}
-                </div>
-            </nav>
-        </header>
+      <header>
+        <nav>
+          <div class="nav-brand">
+            <a href="/">TheMovieLedger</a>
+          </div>
 
-        {% for category,msg in get_flashed_messages(with_categories=true) %}
-            <p class="flash {{ category }}">{{ msg }}</p>
-        {% endfor %}
-    
-        <main>
-            <section class="ml__content-container">
-                <div id="mainContent" class="ml__content">
-                    {% block pagecontent %}{% endblock %}
-                </div>
-            </section>
-        </main>
-        
-        <footer>
-            <p class="copyright">© 2023 | The Movie Ledger</p>
-            <p class="credit">powered by the OMDB api</p>
-        </footer>
+          {% if g.user %}
+          <div class="nav-links">
+            <a href="/movies">My List</a>
+            <a href="/movie-search">Movie Search</a>
+            <a href="/profile">Profile</a>
+          </div>
+          {% endif %}
+
+          <div class="nav-links">
+            {% if g.user %}
+            <a href="/logout">Logout</a>
+            {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Signup</a>
+            {% endif %}
+          </div>
+        </nav>
+      </header>
+
+      {% for category,msg in get_flashed_messages(with_categories=true) %}
+      <p class="flash {{ category }}">{{ msg }}</p>
+      {% endfor %}
+
+      <main>
+        <section class="ml__content-container">
+          <div id="mainContent" class="ml__content">
+            {% block pagecontent %}{% endblock %}
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <p class="copyright">© 2023 | The Movie Ledger</p>
+        <p class="credit">
+          <a href="https://whoisjaytee.com">Who is Jaytee?</a>
+        </p>
+      </footer>
     </div>
-</body>
+  </body>
 </html>

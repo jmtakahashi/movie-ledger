@@ -10,7 +10,8 @@ class UserAddForm(FlaskForm):
 
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('E-mail', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Password', validators=[
+                             DataRequired(), Length(min=6)])
     img_url = StringField('(Optional) Image URL')
 
 
@@ -18,7 +19,8 @@ class LoginForm(FlaskForm):
     """Login form."""
 
     username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Password', validators=[
+                             DataRequired(), Length(min=6)])
 
 
 class UserEditForm(FlaskForm):
@@ -26,15 +28,18 @@ class UserEditForm(FlaskForm):
 
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('E-mail', validators=[DataRequired(), Email()])
-    new_password = PasswordField('New Password', validators=[Optional(), Length(min=6)])
+    new_password = PasswordField('New Password', validators=[
+                                 Optional(), Length(min=6)])
     img_url = StringField('(Optional) Image URL')
-    password = PasswordField('Current Password', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Current Password', validators=[
+                             DataRequired(), Length(min=6)])
 
 
 class UserDeleteForm(FlaskForm):
     """Movie search form."""
 
-    password = PasswordField('Enter Password to Confirm', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Enter Password to Confirm', validators=[
+                             DataRequired(), Length(min=6)])
 
 
 class MovieAddEditForm(FlaskForm):
@@ -46,14 +51,14 @@ class MovieAddEditForm(FlaskForm):
     imdb_img = HiddenField("imdb_img")
     favorite = BooleanField("Favorite")
     platform = SelectField("Platform (optional)",
-                choices=[
-                    ("", ""),
-                    ("netflix", "Netflix"),
-                    ("amazon prime", "Amazon Prime"),
-                    ("hbo max", "HBO Max"),
-                    ("hulu", "Hulu"),
-                    ("apple tv", "Apple TV")
-                    ]
-                )
+                           choices=[
+                               ("", ""),
+                               ("netflix", "Netflix"),
+                               ("amazon prime", "Amazon Prime"),
+                               ("hbo max", "HBO Max"),
+                               ("hulu", "Hulu"),
+                               ("apple tv", "Apple TV")
+                           ]
+                           )
     date_viewed = DateField("Date Viewed", validators=[Optional()])
     date_added = HiddenField("data_added")

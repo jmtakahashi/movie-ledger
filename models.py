@@ -19,19 +19,18 @@ class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer,
-                    primary_key=True,
-                    autoincrement=True)
+                   primary_key=True,
+                   autoincrement=True)
     username = db.Column(db.String(20),
-                    unique=True,
-                    nullable=False)
+                         unique=True,
+                         nullable=False)
     email = db.Column(db.Text,
-                    nullable=False)
+                      nullable=False)
     password = db.Column(db.Text,
-                    nullable=False)
-    img_url = db.Column(db.String(50), 
-                    default=None,
-                    nullable=False)
-
+                         nullable=False)
+    img_url = db.Column(db.String(50),
+                        default=None,
+                        nullable=False)
 
     # define our relationship for users to movies, and backref
     #
@@ -39,12 +38,10 @@ class User(db.Model):
     # of the model we want to reference with this relationship
     movies = db.relationship('Movie', backref='user', cascade='all, delete')
 
-
     def __repr__(self):
         """Show Info about pet"""
         u = self
         return f"<User id={u.id} username={u.username} img_url={u.img_url}>"
-
 
     @classmethod
     def signup(cls, username, password, email, img_url=None):
@@ -57,16 +54,15 @@ class User(db.Model):
         # create our user object with the newly hashed password and
         # the data passed from app.py/signup
         user = User(
-                username=username,
-                password=hashed_pwd,
-                email=email,
-                img_url=img_url
-            )
+            username=username,
+            password=hashed_pwd,
+            email=email,
+            img_url=img_url
+        )
 
         db.session.add(user)
 
-        return user   
-
+        return user
 
     @classmethod
     def authenticate(cls, username, password):
@@ -80,13 +76,11 @@ class User(db.Model):
         else:
             return False
 
-
     def hash_password(password):
         # hash our users password with bcrypt
         hashed = bcrypt.generate_password_hash(password)
         hashed_pwd = hashed.decode("utf8")
         return hashed_pwd
-
 
 
 class Movie(db.Model):
@@ -98,24 +92,23 @@ class Movie(db.Model):
                         db.ForeignKey('users.id'),
                         primary_key=True)
     title = db.Column(db.Text,
-                        nullable=False)
+                      nullable=False)
     year = db.Column(db.String(4),
-                        nullable=False)
+                     nullable=False)
     actors = db.Column(db.Text,
-                        nullable=True)
+                       nullable=True)
     platform = db.Column(db.Text,
-                        nullable=True)
+                         nullable=True)
     imdb_img = db.Column(db.Text,
-                        nullable=False)
+                         nullable=False)
     favorite = db.Column(db.Boolean,
-                        default=False,
-                        nullable=False)
+                         default=False,
+                         nullable=False)
     date_viewed = db.Column(db.Date,
-                        nullable=True)
+                            nullable=True)
     date_added = db.Column(db.Date,
-                        default=datetime.now(),
-                        nullable=False)
-
+                           default=datetime.now(),
+                           nullable=False)
 
     # define our relationship for users to movies, and backref
     #
@@ -123,10 +116,9 @@ class Movie(db.Model):
     # of the model we want to reference with this relationship
     # user = db.relationship('User')
 
-
     def __repr__(self):
         """Show Info about movie"""
-       
+
         m = self
-       
+
         return f"<Movie imdb_id={m.imdb_id} user_id={m.user_id} title={m.title} year={m.year} favorite={m.favorite} platform={m.platform}>"
