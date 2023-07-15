@@ -12,7 +12,7 @@ class UserAddForm(FlaskForm):
     email = StringField('E-mail', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[
                              DataRequired(), Length(min=6)])
-    img_url = StringField('(Optional) Image URL')
+    # img_url = StringField('(Optional) Image URL')
 
 
 class LoginForm(FlaskForm):

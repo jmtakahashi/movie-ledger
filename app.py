@@ -45,13 +45,14 @@ for key, val in dict(app.config).items():
         # print(key, val, type(val))
         app_config_dict[key] = val
 
-print_app_config = json.dumps(app_config_dict, indent=4, sort_keys=True)
-print_os_environ = json.dumps(dict(os.environ), indent=4, sort_keys=True)
+app_config = json.dumps(app_config_dict, indent=4, sort_keys=True)
+os_environ = json.dumps(dict(os.environ), indent=4, sort_keys=True)
 
 print("\033[1m\033[96m=> app.config: \033[0m",
-      colored(print_app_config, "white"))
+      colored(app_config, "white"))
 print("\033[1m\033[96m=> os.environ: \033[0m",
-      colored(print_os_environ, "white"))
+      colored(os_environ, "white"))
+
 ###############################################################################
 
 
@@ -119,19 +120,27 @@ def signup():
                 username=form.username.data,
                 password=form.password.data,
                 email=form.email.data,
-                img_url=form.img_url.data  # or User.img_url.default.arg
+                # img_url=form.img_url.data or User.img_url.default.arg
             )
+
+            # if there's an error in the above method, the except will be thrown
 
             db.session.commit()
 
             # after db.session.commit() the user will contain the id from our db
             do_login(u)
 
-        except IntegrityError:
+        except IntegrityError as exc:
             #
             # need to find a way to figure out which error
             #
-            flash("Username already taken", 'danger')
+            flash("There was an error!", 'danger')
+
+            # for debugging
+            print("\n***************")
+            print("ERROR: ", exc)
+            print("***************\n")
+
             return render_template('/signup.html', form=form)
 
         return redirect('/movie-search')

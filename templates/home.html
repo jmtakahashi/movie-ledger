@@ -1,19 +1,15 @@
-{% extends 'base.html' %}
-
-{% block pagetitle %}Welcome to the Movie Ledger{% endblock %}
-
-{% block pagecontent %}
-<h1 class="ml__welcome-heading">Welcome to<br>The Movie Ledger</h1>
+{% extends 'base.html' %} {% block pagetitle %}My Movie Ledger{% endblock %} {%
+block pagecontent %}
+<h1 class="ml__welcome-heading">Welcome to<br />My Movie Ledger</h1>
 <div class="ml__welcome-note">
-    <p>Keep a list of all the movies you've watched, regardless of platform!</p>
-    <p>No more scrambling for "What was that movie again?"</p>
+  <p>Keep a list of all the movies you've watched, regardless of platform!</p>
+  <p>No more scrambling for "What was that movie again?"</p>
 </div>
 
 {% if g.user %}
-    <a class="button ml__home--btn" href="/movies">My List</a>
-    <a class="button ml__home--btn" href="/movie-search">Search</a>
+<a class="button ml__home--btn" href="/movies">My List</a>
+<a class="button ml__home--btn" href="/movie-search">Search</a>
 {% else %}
-    <a class="button ml__home--btn" href="/login">Login</a>
-    <a class="button ml__home--btn" href="/signup">Signup</a>
-{% endif %}
-{% endblock %}
+<a class="button ml__home--btn" href="/login">Login</a>
+<a class="button ml__home--btn" href="/signup">Signup</a>
+{% endif %} {% endblock %}

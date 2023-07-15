@@ -28,8 +28,9 @@ class User(db.Model):
                       nullable=False)
     password = db.Column(db.Text,
                          nullable=False)
+    # since we set nullable to false, we cannot add a "None" or "Null" value as the default
     img_url = db.Column(db.String(50),
-                        default=None,
+                        default="",
                         nullable=False)
 
     # define our relationship for users to movies, and backref

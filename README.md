@@ -83,3 +83,7 @@ user_id (ForeignKey (Users.id), PrimaryKey),
 year,
 poster
 )
+
+issue with signup on flask app!
+
+- can get errors in the console, but need to figure out how to print errors to the user correctly! - maybe we don't have to, since errors on the front end will be detected by the forms(?)
