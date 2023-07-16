@@ -134,7 +134,7 @@ def signup():
             #
             # need to find a way to figure out which error
             #
-            flash("There was an error!", 'danger')
+            flash("Username already exists!", 'danger')
 
             # for debugging
             print("\n***************")
