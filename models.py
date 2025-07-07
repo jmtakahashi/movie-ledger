@@ -35,7 +35,7 @@ class User(db.Model):
                          nullable=False)
     # since we set nullable to false, we cannot add a "None" or "Null" value as the default
     img_url = db.Column(db.String(50),
-                        default="",
+                        default="./static/images/generic-user-icon-600px.jpg",
                         nullable=False)
 
     # define our relationship for users to movies, and backref
