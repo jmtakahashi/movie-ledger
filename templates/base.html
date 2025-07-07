@@ -59,11 +59,18 @@
       </main>
 
       <footer>
-        <p class="copyright">© 2023 | My Movie Ledger</p>
+        <p class="copyright">
+          ©
+          <span id="year"></span>
+          | My Movie Ledger
+        </p>
         <p class="credit">
-          <a href="https://whoisjaytee.com">Who is Jaytee?</a>
+          <a href="https://whoisjaytee.com" target="_blank">Who is Jaytee?</a>
         </p>
       </footer>
     </div>
+    <script>
+      document.getElementById('year').innerHTML = new Date().getFullYear();
+    </script>
   </body>
 </html>
