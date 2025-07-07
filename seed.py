@@ -1,4 +1,6 @@
-# run using 
+### SEED file to make sample data for the database ###
+
+# run using
 #   $ python seed.py
 
 from models import db, User, Movie
