@@ -120,7 +120,7 @@ def signup():
                 username=form.username.data,
                 password=form.password.data,
                 email=form.email.data,
-                # img_url=form.img_url.data or User.img_url.default.arg
+                img_url=form.img_url.data or User.img_url.default.arg
             )
 
             # if there's an error in the above method, the except will be thrown
