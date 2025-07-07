@@ -15,7 +15,12 @@ def connect_db(app):
     db.init_app(app)
 
 
+###############################################################################
+# user model
+
 class User(db.Model):
+    """User model"""
+
     __tablename__ = "users"
 
     id = db.Column(db.Integer,
@@ -84,7 +89,12 @@ class User(db.Model):
         return hashed_pwd
 
 
+###############################################################################
+# movie model
+
 class Movie(db.Model):
+    """Movie model"""
+
     __tablename__ = "movies"
 
     imdb_id = db.Column(db.String(10),
