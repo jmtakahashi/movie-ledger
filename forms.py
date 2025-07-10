@@ -14,7 +14,7 @@ class UserAddForm(FlaskForm):
     email = StringField('E-mail', validators=[InputRequired(), Email()])
     password = PasswordField('Password', validators=[
                              InputRequired(), Length(min=6)])
-    # img_url = StringField('(Optional) Image URL')
+    img_url = StringField('(Optional) Image URL')
 
 
 class LoginForm(FlaskForm):
@@ -62,4 +62,4 @@ class MovieAddEditForm(FlaskForm):
                            ]
                            )
     date_viewed = DateField("Date Viewed", validators=[Optional()])
-    date_added = HiddenField("data_added")
+    date_added = HiddenField("date_added")

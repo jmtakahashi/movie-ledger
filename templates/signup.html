@@ -1,22 +1,19 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block pagetitle %}Movie Ledger | Signup{% endblock
+%} {% block pagecontent %}
+<div class="ml__content--small">
+  <h1>Movie Ledger Signup</h1>
+  <form id="ml__login-form" method="POST">
+    {{ form.hidden_tag() }} {% for field in form if field.widget.input_type !=
+    'hidden' %}
 
-{% block pagetitle %}Movie Ledger | Signup{% endblock %}
-
-{% block pagecontent %}
-<h1>Movie Ledger Signup</h1>
-<form id="ml__login-form" method="POST">
-    {{ form.hidden_tag() }}
-    {% for field in form if field.widget.input_type != 'hidden' %}
-
-        <div>
-            {{ field.label }}
-            {{ field }}
-            {% for error in field.errors %}
-                <span class="error">{{ error}}</span>
-            {% endfor %}
-        </div>
+    <div>
+      {{ field.label }} {{ field }} {% for error in field.errors %}
+      <span class="error">{{ error}}</span>
+      {% endfor %}
+    </div>
 
     {% endfor %}
     <button type="submit">Signup</button>
-</form>
+  </form>
+</div>
 {% endblock %}

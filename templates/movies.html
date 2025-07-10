@@ -3,6 +3,8 @@
 {% block pagetitle %}Movie Ledger | My Movie List{% endblock %}
 
 {% block pagecontent %}
+<div class='ml__content--wide'>
+
 <h1 class="ml__my-list--page-title">{{ user.username }}'s Ledger</h1>
 
 {% if movies or "favorites" in filters.filters %}
@@ -73,11 +75,11 @@
 
     {% for movie in movies %}
         <li class="ml__my-list--item">
-            <a href="/movie/{{ movie['imdb_id'] }}">
-                <img class="ml__my-list--image" src="{{ movie.imdb_img }}">
+            <a href="/movie/{{ movie.movie_id }}">
+                <img class="ml__my-list--image" src="{{ movie.movie_details.imdb_img }}">
                 <div class="ml__my-list--info-container">
-                    <h3 class="ml__my-list--title">{{ movie.title }}</h3>
-                    <p class="ml__my-list--year">({{ movie.year }})</p>
+                    <h3 class="ml__my-list--title">{{ movie.movie_details.title }}</h3>
+                    <p class="ml__my-list--year">({{ movie.movie_details.year }})</p>
                     <!-- <p class="ml__my-list--actors">{{ movie.actors }}</p> -->
                     <p class="ml__my-list--date-viewed">Date Viewed: {{ movie.date_viewed }}</p>
                     <p class="ml__my-list--date-added">Date Added: {{ movie.date_added }}</p>
@@ -90,15 +92,14 @@
                 {% else %}
                     <i class="far fa-star ml__my-list--fav" data-id="{{ movie['imdb_id'] }}"></i>
                 {% endif %}
-                <button class="ml__my-list--remove-button" data-id="{{ movie['imdb_id'] }}">X</button>
+                <span class="ml__my-list--remove-button" data-id="{{ movie['imdb_id'] }}">X</span>
             </div>
         </li>
     {% endfor %}
 </ul>
 {% endif %}
-
-{% if movies or "favorites" in filters.filters %}
+</div>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="/static/js/movies.js"></script>
-{% endif %}
+
 {% endblock %}

@@ -1,9 +1,9 @@
-### SEED file to make sample data for the database ###
+"""SEED file to make sample data for the database """
 
 # run using
 #   $ python seed.py
 
-from models import db, User, Movie
+from models import db, User, Movie, UserMovie
 from app import app
 
 db.drop_all()

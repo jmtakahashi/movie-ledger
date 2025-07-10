@@ -37,7 +37,9 @@
 
           <div class="nav-links">
             {% if g.user %}
-            <a href="/logout">Logout</a>
+            <form method="post" action="/logout">
+              <button class="link">Logout</button>
+            </form>
             {% else %}
             <a href="/login">Login</a>
             <a href="/signup">Signup</a>
@@ -50,11 +52,9 @@
       <p class="flash {{ category }}">{{ msg }}</p>
       {% endfor %}
 
-      <main>
+      <main id="mainContent">
         <section class="ml__content-container">
-          <div id="mainContent" class="ml__content">
-            {% block pagecontent %}{% endblock %}
-          </div>
+          {% block pagecontent %}{% endblock %}
         </section>
       </main>
 

@@ -1,10 +1,9 @@
-
 // const movieSearchForm = document.getElementById("movieSearchForm")
 // const csrfToken = document.getElementById("csrf_token")
 // const searchTerm = document.getElementById("search_term")
 // const submitButton = document.getElementById("submitButton")
 
-const searchResults = document.getElementById("searchResults")
+const searchResults = document.getElementById('searchResults');
 
 /**
  * Search functionality
@@ -18,7 +17,7 @@ const searchResults = document.getElementById("searchResults")
 //   const params = new URLSearchParams();
 //   params.append('csrf_token', csrfToken.value);
 //   params.append('search_term', searchTerm.value);
-  
+
 //   const config = {
 //     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
 //   }
@@ -36,7 +35,7 @@ const searchResults = document.getElementById("searchResults")
 //     searchResults.appendChild(newH2)
 
 //     let newUL = document.createElement("ul");
-//     newUL.classList.add("ml__search-results")       
+//     newUL.classList.add("ml__search-results")
 
 //     data.forEach(element => {
 //       let newLI = document.createElement("li");
@@ -44,8 +43,8 @@ const searchResults = document.getElementById("searchResults")
 
 //       let newA = document.createElement("a");
 //       newA.setAttribute("href", `/movie/${element['imdbID']}`)
-      
-//       let newIMG = document.createElement("img") 
+
+//       let newIMG = document.createElement("img")
 //       newIMG.classList.add("ml__search-result--image");
 //       if (element["Poster"] === "N/A" ) {
 //         newIMG.setAttribute("src", "");
@@ -63,7 +62,7 @@ const searchResults = document.getElementById("searchResults")
 //       newP.classList.add("ml__search-result--year");
 //       newP.innerText = "(" + element["Year"] + ")";
 //       newA.appendChild(newP);
-      
+
 //       newLI.appendChild(newA);
 
 //       // if the movie is already in our list, create a span with a note
@@ -102,15 +101,13 @@ const searchResults = document.getElementById("searchResults")
 //   })
 // })
 
-
 /**
  * Add movie functionality
  */
-searchResults.addEventListener('click', function(e) {
-
-  if (e.target.className === "ml__search-result--add-button") {
+searchResults.addEventListener('click', function (e) {
+  if (e.target.className === 'ml__search-result--add-button') {
     e.preventDefault();
-    
+
     /**
      * results of our api search do not contain actors
      * if we want the actors, we need to make another
@@ -118,31 +115,31 @@ searchResults.addEventListener('click', function(e) {
      * our post request to add our movie to our db
      */
 
+    let imdb_id = e.target.getAttribute('data-id');
+    let title = e.target.getAttribute('data-title');
+    let year = e.target.getAttribute('data-year');
+    let imdb_img = e.target.getAttribute('data-img');
 
-    let imdb_id = e.target.getAttribute("data-id")
-    let title = e.target.getAttribute("data-title")
-    let year = e.target.getAttribute("data-year")
-    let imdb_img = e.target.getAttribute("data-img")
-
-    const params = {imdb_id, title, year, imdb_img };
+    const params = { imdb_id, title, year, imdb_img };
     const config = {
-      headers: { 'Content-Type': 'application/json' }
-    }
-  
-    axios.post(`/movie/${imdb_id}`, JSON.stringify(params), config)
-    .then(resp => {
-      if (resp.status == 201 ){
-        const li = e.target.parentElement;
-        e.target.remove();
-        const newSpan = document.createElement("span")
-        newSpan.classList.add("ml__search-result--add-movie-success")
-        newSpan.innerHTML = 'Added to <a href="/movies">My List</a>';
-        li.appendChild(newSpan)
-      }
-    })
-    .catch((err) => {
-      if (err.response.status == 400)
-       alert("Movie is already in your list")
-    })
+      headers: { 'Content-Type': 'application/json' },
+    };
+
+    /* send a request to our internal api point to add a movie to our db */
+    axios
+      .post(`/movie/${imdb_id}`, JSON.stringify(params), config)
+      .then((resp) => {
+        if (resp.status == 201) {
+          const li = e.target.parentElement;
+          e.target.remove();
+          const newSpan = document.createElement('span');
+          newSpan.classList.add('ml__search-result--add-movie-success');
+          newSpan.innerHTML = 'Added to <a href="/movies">My List</a>';
+          li.appendChild(newSpan);
+        }
+      })
+      .catch((err) => {
+        if (err.response.status == 400) alert('Movie is already in your list');
+      });
   }
-})
+});

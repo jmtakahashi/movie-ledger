@@ -42,11 +42,18 @@ class User(db.Model):
     #
     # the first arg in the relationship method is the class name
     # of the model we want to reference with this relationship
-    movies = db.relationship('Movie', backref='user', cascade='all, delete')
+    # adding the backref allows us to access the user from the movie
+    # model so we dont' have to add a relationship in the movie model.
+    # secondary is the through table that we need to access
+    user_movie_detail = db.relationship("UserMovie", backref="user")
+
+    movies = db.relationship(
+        "Movie", secondary="user_movie", backref="users")
 
     def __repr__(self):
         """Show Info about pet"""
         u = self
+
         return f"<User id={u.id} username={u.username} img_url={u.img_url}>"
 
     @classmethod
@@ -58,17 +65,15 @@ class User(db.Model):
         hashed_pwd = hashed.decode("utf8")
 
         # create our user object with the newly hashed password and
-        # the data passed from app.py/signup
-        user = User(
+        # the data passed from app.py /signup route
+        u = User(
             username=username,
             password=hashed_pwd,
             email=email,
             img_url=img_url
         )
 
-        db.session.add(user)
-
-        return user
+        return u
 
     @classmethod
     def authenticate(cls, username, password):
@@ -88,9 +93,14 @@ class User(db.Model):
         hashed_pwd = hashed.decode("utf8")
         return hashed_pwd
 
+    # def get_favorites(self):
+    #     favs = self.favorites.query.filter_by(favorite=True).all()
+    #     return favs
+
 
 ###############################################################################
 # movie model
+
 
 class Movie(db.Model):
     """Movie model"""
@@ -99,37 +109,51 @@ class Movie(db.Model):
 
     imdb_id = db.Column(db.String(10),
                         primary_key=True)
-    user_id = db.Column(db.Integer,
-                        db.ForeignKey('users.id'),
-                        primary_key=True)
     title = db.Column(db.Text,
                       nullable=False)
     year = db.Column(db.String(4),
                      nullable=False)
     actors = db.Column(db.Text,
                        nullable=True)
-    platform = db.Column(db.Text,
-                         nullable=True)
     imdb_img = db.Column(db.Text,
                          nullable=False)
-    favorite = db.Column(db.Boolean,
-                         default=False,
-                         nullable=False)
-    date_viewed = db.Column(db.Date,
-                            nullable=True)
-    date_added = db.Column(db.Date,
-                           default=datetime.now(),
-                           nullable=False)
-
-    # define our relationship for users to movies, and backref
-    #
-    # the first arg in the relationship method is the class name
-    # of the model we want to reference with this relationship
-    # user = db.relationship('User')
 
     def __repr__(self):
         """Show Info about movie"""
 
         m = self
 
-        return f"<Movie imdb_id={m.imdb_id} user_id={m.user_id} title={m.title} year={m.year} favorite={m.favorite} platform={m.platform}>"
+        return f"<Movie imdb_id={m.imdb_id} title={m.title} year={m.year}>"
+
+
+###############################################################################
+# user_movie model
+
+class UserMovie(db.Model):
+    """User Movie model"""
+
+    __tablename__ = "user_movie"
+
+    user_id = db.Column(db.Integer, db.ForeignKey(
+        'users.id'), primary_key=True)
+
+    movie_id = db.Column(db.Text, db.ForeignKey(
+        'movies.imdb_id'), primary_key=True)
+
+    date_added = db.Column(db.Date, default=datetime.now(), nullable=-False)
+
+    platform = db.Column(db.Text, nullable=True)
+
+    date_viewed = db.Column(db.Date, nullable=True)
+
+    favorite = db.Column(db.Boolean, default=False, nullable=False)
+
+    # relationships
+    movie_details = db.relationship("Movie")
+
+    def __repr__(self):
+        """Show Info about the user movie relationship"""
+
+        um = self
+
+        return f"<UserMovie user_id={um.user_id} imdb_id={um.movie_id} favorite={um.favorite}>"
