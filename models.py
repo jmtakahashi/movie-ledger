@@ -113,8 +113,6 @@ class Movie(db.Model):
                       nullable=False)
     year = db.Column(db.String(4),
                      nullable=False)
-    actors = db.Column(db.Text,
-                       nullable=True)
     imdb_img = db.Column(db.Text,
                          nullable=False)
 

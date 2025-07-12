@@ -48,7 +48,6 @@ class MovieAddEditForm(FlaskForm):
 
     title = HiddenField("title")
     year = HiddenField("year")
-    actors = HiddenField("actors")
     imdb_img = HiddenField("imdb_img")
     favorite = BooleanField("Favorite")
     platform = SelectField("Platform (optional)",
@@ -61,5 +60,5 @@ class MovieAddEditForm(FlaskForm):
                                ("apple tv", "Apple TV")
                            ]
                            )
-    date_viewed = DateField("Date Viewed", validators=[Optional()])
+    date_viewed = DateField("Date Viewed (optional)", validators=[Optional()])
     date_added = HiddenField("date_added")

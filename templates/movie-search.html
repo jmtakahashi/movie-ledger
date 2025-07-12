@@ -3,31 +3,31 @@
 {% block pagecontent %}
 <div class="ml__content--wide">
   <h1>Movie Search</h1>
-  {% if request.referrer and "/signup" in request.referrer %}
-  <div class="ml__welcome-note ml__welcome-note--new-user">
-    <h2>Welcome, {{ user.username }}!</h2>
-    <p>
-      The Movie Ledger is place to save all your viewed movies and series,
-      regardless of platform.
-    </p>
-    <p>
-      Use the form below to search for a movie or series and add it to your
-      ledger! You can mark items in your ledger as a favorite, and sort items
-      based on year or title!
-    </p>
-    <p class="ml__welcome-note--note">
-      NOTE: This notice will only be shown once.
-    </p>
+  <div class="ml__search-form-container">
+    {% if request.referrer and "/signup" in request.referrer %}
+    <div class="ml__welcome-note ml__welcome-note--new-user">
+      <h2>Welcome, {{ user.username }}!</h2>
+      <p>
+        The Movie Ledger is place to save all your viewed movies and series,
+        regardless of platform.
+      </p>
+      <p>
+        Use the form below to search for a movie or series and add it to your
+        ledger! You can mark items in your ledger as a favorite, and sort items
+        based on year or title!
+      </p>
+      <p class="ml__welcome-note--note">
+        NOTE: This notice will only be shown once.
+      </p>
+    </div>
+    {% endif %}
+    <p>Enter a term below to find a movie or series by title!</p>
+    <form id="movieSearchForm" class="ml__search-form">
+      <input id="term" name="term" type="text" value="" required />
+      <button id="submitButton" type="submit">Search</button>
+    </form>
   </div>
-  {% endif %}
-  <p>Enter a term below to find a movie or series by title!</p>
-  <form id="movieSearchForm" class="ml__search-form">
-    <input id="term" name="term" type="text" value="" required />
-    <button id="submitButton" type="submit">Search</button>
-  </form>
-
   {% if results %}
-  <div id="searchResults">
     <!-- change our notice depending on whether the current request has results.
         if the current request has results, then include the page number, if no
         results, do not include the page number -->
@@ -37,7 +37,7 @@
     </h2>
 
     {% if results.Search %}
-    <ul class="ml__search-results">
+    <ul id="searchResults" class="ml__search-results">
       {% for movie in results.Search %}
       <li class="ml__search-result">
         <a href="/movie/{{ movie.imdbID}}">
@@ -90,7 +90,6 @@
     {% else %}
     <h3>{{ results.Error }}</h3>
     {% endif %} {% endif %}
-  </div>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="/static/js/movieSearch.js"></script>
   {% endif %}

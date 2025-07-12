@@ -1,48 +1,73 @@
 /**
  * ajax functions for adding a favorite and
- * deleting a movie from my list
+ * deleting a movie from users list
  */
 
-const removeButtons = document.getElementsByClassName(
-  'ml__my-list--remove-button'
-);
-const favButtons = document.getElementsByClassName('ml__my-list--fav');
-
+const functionsBtnContainers = document.getElementsByClassName('ml__my-list--functions-container')
 const movieList = document.getElementById('myMovieList');
-const mainContent = document.getElementById('mainContent');
+const sortFilterContainer = document.getElementById('sortFilterContainer')
+const pageContent = document.getElementById('pageContent');
+const backToMoviesLink = document.getElementById('backToMoviesLink')
+
+
+movieList && movieList.addEventListener('click', (e) => {
+  console.log(e.target.className)
+  if (e.target.classList.contains('ml__my-list--fav')) {
+    const movieID = e.target.getAttribute('data-id');
+    toggleFavorite(movieID, e)
+  }
+
+  if (e.target.classList.contains('ml__my-list--remove-button')) {
+    const movieID = e.target.getAttribute('data-id');
+    deleteMovie(movieID, e)
+  }
+  
+});
+
 
 /**
  * remove movies from list dynamically throug ajax
  */
-for (let el of removeButtons) {
-  el.addEventListener('click', deleteMovie);
-}
-
-function deleteMovie(e) {
-  e.preventDefault();
-
-  const movieID = e.target.getAttribute('data-id');
-
+function deleteMovie(movieID, e) {
   const config = {
     headers: { 'Content-Type': 'application/json' },
   };
 
   axios
-    .delete(`/movie/${movieID}`, config)
+    .delete(`/api/movie/${movieID}`, config)
     .then((resp) => {
       if (resp.status == 200) {
         e.target.parentElement.parentElement.remove();
         /**
          * check if there are an <li>'s left, if all are gone,
+         * reset the ui to "no movies found" condition:
+         * remove the filter & sort box, 
          * remove the ul and replace with the <h3>
          */
         if (movieList.children.length == 0) {
+          sortFilterContainer.remove();
           movieList.remove();
-          const h3 = document.createElement('h3');
-          h3.innerText = 'No movies found....';
 
-          // mainContent is defined at the top
-          mainContent.appendChild(h3);
+          const h3 = document.createElement('h3');
+          const link = document.createElement('a')
+
+          if (window.location.search.includes('filter=favorites')) {
+            backToMoviesLink.remove();
+
+            h3.innerText = 'No favorites found...';
+
+            link.innerText = 'Back to All Movies'
+            link.setAttribute('href', '/movies')            
+          } else {
+            h3.innerText = 'No movies found...';
+
+            link.innerText = 'Search Now'
+            link.setAttribute('href', '/movie-search')
+            link.classList.add('button')
+          }
+
+          pageContent.appendChild(h3);
+          pageContent.appendChild(link)
         }
       }
     })
@@ -55,26 +80,17 @@ function deleteMovie(e) {
  * if we are on the favorites filter view, dynamically
  * remove the movie from the list when unfavoriting
  */
-for (let el of favButtons) {
-  el.addEventListener('click', toggleFavorite);
-}
 
-function toggleFavorite(e) {
-  e.preventDefault();
-
-  const movieID = e.target.getAttribute('data-id');
-
-  /**
-   * favorite classes:
-   * far = false
-   * fas = true
-   */
-
+/**
+ * favorite classes:
+ * far = false
+ * fas = true
+ */
+function toggleFavorite(movieID, e) {
   axios
-    .post(`/movie/${movieID}/favorite`)
+    .patch(`/api/movie/${movieID}`)
     .then((resp) => {
       if (resp.status == 200) {
-        // console.log("Favorite: ", resp.data.favorite)
         /**
          * checking for resp.data.favorite ensures that our front
          * end correctly represents the data in our database
@@ -93,12 +109,19 @@ function toggleFavorite(e) {
              * remove the ul and replace with the <h3>
              */
             if (movieList.children.length == 0) {
+              sortFilterContainer.remove();
               movieList.remove();
-              const h3 = document.createElement('h3');
-              h3.innerText = 'No movies found....';
+              backToMoviesLink.remove();
 
-              // mainContent is defined at the top
-              mainContent.appendChild(h3);
+              const h3 = document.createElement('h3');
+              h3.innerText = 'No favorites found...';
+
+              const link = document.createElement('a')
+              link.innerText = 'Back to All Movies'
+              link.setAttribute('href', '/movies')
+              
+              pageContent.appendChild(h3);
+              pageContent.appendChild(link)
             }
           }
         }

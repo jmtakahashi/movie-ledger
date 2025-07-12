@@ -187,7 +187,7 @@ def edit_profile():
         u = User.authenticate(g.user.username, editForm.password.data)
 
         if u:
-            # update our user with the new data
+            # update the user with the new data
             u.username = editForm.username.data
             u.email = editForm.email.data
             u.img_url = editForm.img_url.data
@@ -229,9 +229,14 @@ def delete_profile():
         u = User.authenticate(g.user.username, deleteForm.password.data)
 
         if u:
-            # need to use db.session.delete(obj) if we want the delete cascade to work
             db.session.delete(u)
-            db.session.commit()
+
+            try:
+                db.session.commit()
+
+            except:
+                flash("There was an error, please refresh and try again!", "danger")
+                return redirect("/profile")
 
             do_logout()
 
@@ -249,7 +254,14 @@ def delete_profile():
 
 @app.route('/movies')
 def show_my_movies():
-    """Show all user's movies, adding filters or sort if selected."""
+    """Show all user's movies, including filters or sort if selected."""
+
+    # we can access movies from the user object, which already exists
+    # on the flask global "g", using the relationship we setup on the
+    # user model. we can also acccess details from UserMovie and Movie
+    #
+    # movie.favorite, movie.date_added, movie.platform, etc.
+    # movie.movie_details.title, movie.movie_details.imdb_img
 
     if not g.user:
         flash("Please login!", "danger")
@@ -258,84 +270,83 @@ def show_my_movies():
     ###########################################################################
     # initialize
 
-    # initialize our **kwargs for filter_by()
-    # kwargs = {"id": g.user.id}
-
-    # initalize our filter flags list to pass to our template
-    filters = {}
+    # initalize the display params to pass to our template
+    #   display_params={ "filters": [list of filters], "sort": { "sort_term": "sort_term, "sort_order": "sort_order"}}
+    display_params = {}
+    sort_str = None
+    movies = []
 
     ###########################################################################
     # filter check
 
-    # if there's a filter add to our filter flags list arg
-    # so we can pass this to our template
+    # if there's a filter add to the filter flags list arg
     if request.args.get('filter'):
 
-        filters["filters"] = ['favorites']
+        display_params["filters"] = ['favorites']
+
+        for m in g.user.user_movie_detail:
+            if m.favorite:
+                movies.append(m)
+    else:
+        movies = g.user.user_movie_detail
 
     ###########################################################################
     # sort check
 
-    # if there's a sort option, begin our sort_str
-    if request.args.get('sort'):
+    # if there's a sort option selected, add to the sort string
+    if request.args.get('sort') and request.args.get('order'):
+        display_params["sort"] = {}
+        sort_str = "Sorting by "
 
-        # initialize our sort_str
-        sort_str = ""
-
-        # append to our sort_str based on the query string arg
-        # and add to our filters flags list arg
+        # append to the sort_str based on the query string arg
+        # and add to the display_params
         if request.args['sort'] == "title":
-            sort_str = sort_str + "title"
-            filters["sort"] = 'title'
-        if request.args['sort'] == "year":
-            sort_str = sort_str + "year"
-            filters["sort"] = 'year'
-        if request.args['sort'] == "date_added":
-            sort_str = sort_str + "date_added"
-            filters["sort"] = 'date_added'
-        if request.args['sort'] == "date_viewed":
-            sort_str = sort_str + "date_viewed"
-            filters["sort"] = 'date_viewed'
+            sort_str = sort_str + "Title"
+            display_params["sort"]["sort_term"] = 'title'
 
-        # if there's an order, append the order to our sort_str
-        if request.args.get("order"):
+            def key(x): return x.movie_details.title
 
-            # ascending order
-            if request.args['order'] == "asc":
-                sort_str = sort_str + " asc"
-                filters["order"] = 'ascending'
+        elif request.args['sort'] == "year":
+            sort_str = sort_str + "Year"
+            display_params["sort"]["sort_term"] = 'year'
 
-            # descending order
-            if request.args['order'] == "desc":
-                sort_str = sort_str + " desc"
-                filters["order"] = 'descending'
+            def key(x): return x.movie_details.year
 
-        # WITH SORT TERM: make our final query using our built sort_str
-        u = User.query.get(g.user.id)
+        elif request.args['sort'] == "date_added":
+            sort_str = sort_str + "Date Added"
+            display_params["sort"]["sort_term"] = 'date_added'
 
-        # we can access movies from our user object using
-        # the relationship we setup on our user model
-        movies = u.user_movie_detail
+            def key(x): return x.date_added
 
-        # be sure to pass the necessary flags to the template
-        return render_template('movies.html', user=g.user, movies=movies, filters=filters)
+        elif request.args['sort'] == "date_viewed":
+            sort_str = sort_str + "Date Viewed"
+            display_params["sort"]["sort_term"] = 'date_viewed'
 
-    # NO SORT TERM: our final query with filter_by(**kwargs) only
-    u = User.query.get(g.user.id)
+            def key(x): return x.date_viewed
 
-    # we can access UserMovies from our user object using
-    # the relationship we setup on our user model.  each obj will also
-    # have our list details, and also have access to the movie detail
-    # movie.favorite, movie.date_added, movie.platform, etc.
-    # movie.movie_detail.title, movie.movie_details.imdb_img
-    movies = u.user_movie_detail
+        # ascending/descending order
+        if request.args['order'] == "asc":
+            sort_str = sort_str + " (ascending)"
+            display_params["sort"]["sort_order"] = 'ascending'
 
-    return render_template('movies.html', user=g.user, movies=movies, filters=filters)
+            reverse = False
+
+        elif request.args['order'] == "desc":
+            sort_str = sort_str + " (descending)"
+            display_params["sort"]["sort_order"] = 'descending'
+
+            reverse = True
+
+        # our final sort function based on the given vars
+        movies.sort(key=key, reverse=reverse)
+
+    return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str)
 
 
 @app.route("/movie/<movie_id>", methods=["GET", "POST"])
 def handle_movie(movie_id):
     """Get a single movie based on the id.
+
     Add the movie if a post request is coming in.
     """
 
@@ -349,7 +360,7 @@ def handle_movie(movie_id):
     # button and a note that the movie is already in our list.
     #
     # on submission of the form, we should check to see if the
-    # movie is in our db again
+    # movie is in the Movie table again, in case another user added it
 
     if not g.user:
         flash("Please login!", "danger")
@@ -367,9 +378,8 @@ def handle_movie(movie_id):
         # movie already exists in the Movies table.
         if form.date_added.data:
 
-            # query our movie object to get the in
-            um = UserMovie.query.filter_by(
-                user_id=g.user.id, movie_id=movie_id).first()
+            # query the existing UserMovie entry
+            um = UserMovie.query.get((g.user.id, movie_id))
 
             # update values.  there will only be 3 that we can modify
             um.favorite = form.favorite.data
@@ -385,7 +395,7 @@ def handle_movie(movie_id):
 
             flash("Movie updated!", "success")
 
-        # save a new movie to our user's list.  but we still need to
+        # save a new movie to the user's list.  but we still need to
         # check if the movie exists in the Movie table.  it may already
         # exist there from another user's addition.
         else:
@@ -410,9 +420,8 @@ def handle_movie(movie_id):
                                date_viewed=form.date_viewed.data,
                                )
 
-                db.session.add(um)
-
                 try:
+                    db.session.add(um)
                     db.session.commit()
 
                 except IntegrityError as exc:
@@ -426,28 +435,11 @@ def handle_movie(movie_id):
                 m = Movie(imdb_id=movie_id,
                           title=form.title.data,
                           year=form.year.data[0:4],
-                          actors=form.actors.data,
                           imdb_img=form.imdb_img.data)
 
-                db.session.add(m)
-
                 try:
-                    db.session.commit()
-
-                except IntegrityError as exc:
-                    flash("Movie is already in your list!", "danger")
-                    return redirect(f"/movie/{movie_id}")
-
-                um = UserMovie(movie_id=movie_id,
-                               user_id=g.user.id,
-                               favorite=form.favorite.data,
-                               platform=None if not form.platform.data else form.platform.data,
-                               date_viewed=form.date_viewed.data,
-                               )
-
-                db.session.add(um)
-
-                try:
+                    g.user.movies.append(m)
+                    db.session.add(g.user)
                     db.session.commit()
 
                 except IntegrityError as exc:
@@ -457,68 +449,6 @@ def handle_movie(movie_id):
                 flash("Movie added to your list!", "success")
 
         return redirect("/movies")
-
-    ###########################################################################
-    # add movie to user's list through ajax (from search page)
-    if request.headers.get('Content-Type') == "application/json":
-        # to get actors, we need to make an api call
-        # our movie_id comes from the route, which is
-        # created in our js code
-        movie = movie_search_by_id(movie_id)
-
-        # save a new movie to our user's list.  but we still need to
-        # check if the movie exists in the Movie table.  it may already
-        # exist there from another user's addition.
-        movie_in_movies_table = Movie.query.get(movie_id)
-
-        if movie_in_movies_table:
-            um = UserMovie(movie_id=movie_id,
-                           user_id=g.user.id,
-                           )
-
-            db.session.add(um)
-
-            try:
-                db.session.commit()
-
-            except IntegrityError as exc:
-                print("Error: ", exc)
-                resp = jsonify({"message": "There was an error"})
-                return (resp, 400)
-
-            # success response goes here
-            resp = jsonify({"message": "Movie added to list!"})
-            return (resp, 201)
-
-        else:
-            # favorite will take the default value from our model
-            # date_added will take the default from our model
-            # date_viewed is optional so None <class 'NoneType'> will
-            #   be our value and db field will be blank
-            # platform is optional so None <class 'NoneType'> will
-            #   be our value and db field will be blank
-            m = Movie(imdb_id=request.json["imdb_id"],
-                      title=request.json["title"],
-                      year=request.json["year"][0:4],
-                      actors=movie['Actors'],
-                      imdb_img=request.json["imdb_img"],
-                      )
-
-            g.user.movies.append(m)
-
-            try:
-                db.session.add(g.user)
-
-                db.session.commit()
-
-            except IntegrityError as exc:
-                print("Error: ", exc)
-                resp = jsonify({"message": "There was an error"})
-                return (resp, 400)
-
-            # success response goes here
-            resp = jsonify({"message": "Movie added to list!"})
-            return (resp, 201)
 
     ###########################################################################
     # GET request functionality below
@@ -543,7 +473,6 @@ def handle_movie(movie_id):
     # MovieAddEditForm our values will be correct
     form.title.data = movie['Title']
     form.year.data = movie['Year']
-    form.actors.data = movie['Actors']
     form.imdb_img.data = movie['Poster']
 
     # check if this movie is already in our current user's list
@@ -566,8 +495,64 @@ def handle_movie(movie_id):
     return render_template("movie-detail.html", form=form, movie=movie, movie_in_users_list=movie_in_users_list)
 
 
+# internal api route - add a movie to user's list ajax
+@app.route("/api/movie/<movie_id>", methods=["POST"])
+def add_movie(movie_id):
+    """Add a movie to the user's list."""
+    if request.headers.get('Content-Type') == "application/json":
+        # save a new movie to our user's list.  but we still need to
+        # check if the movie exists in the Movie table.  it may already
+        # exist there from another user's addition.
+        movie_in_movies_table = Movie.query.get(movie_id)
+
+        if movie_in_movies_table:
+            um = UserMovie(movie_id=movie_id,
+                           user_id=g.user.id,
+                           )
+
+            try:
+                db.session.add(um)
+                db.session.commit()
+
+            except IntegrityError as exc:
+                print("Error: ", exc)
+                resp = jsonify({"message": "There was an error"})
+                return (resp, 400)
+
+            # success response goes here
+            resp = jsonify({"message": "Movie added to list!"})
+            return (resp, 201)
+
+        else:
+            # favorite will take the default value from our model
+            # date_added will take the default from our model
+            # date_viewed is optional so None <class 'NoneType'> will
+            #   be our value and db field will be blank
+            # platform is optional so None <class 'NoneType'> will
+            #   be our value and db field will be blank
+            m = Movie(imdb_id=request.json["imdb_id"],
+                      title=request.json["title"],
+                      year=request.json["year"][0:4],
+                      imdb_img=request.json["imdb_img"],
+                      )
+
+            try:
+                g.user.movies.append(m)
+                db.session.add(g.user)
+                db.session.commit()
+
+            except IntegrityError as exc:
+                print("Error: ", exc)
+                resp = jsonify({"message": "There was an error"})
+                return (resp, 400)
+
+            # success response goes here
+            resp = jsonify({"message": "Movie added to list!"})
+            return (resp, 201)
+
+
 # internal api route - delete a movie ajax
-@app.route("/movie/<movie_id>", methods=["DELETE"])
+@app.route("/api/movie/<movie_id>", methods=["DELETE"])
 def delete_movie(movie_id):
     """Delete a movie from our db."""
 
@@ -581,8 +566,8 @@ def delete_movie(movie_id):
     return (resp, 200)
 
 
-# internal api route - favorite a movie ajax
-@app.route('/movie/<movie_id>/favorite', methods=["POST"])
+# internal api route - update favorite ajax
+@app.route('/api/movie/<movie_id>', methods=["PATCH"])
 def add_remove_favorite(movie_id):
     """Add or remove a movie as a favorite"""
 

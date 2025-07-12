@@ -211,13 +211,17 @@ main {
   margin-top: 2rem;
 }
 
+.ml__search-form-container {
+  width: 50%;
+}
+
 .ml__search-form {
   margin-bottom: 3rem;
 }
 
 .ml__search-form input {
   display: block;
-  width: min(600px, 100%);
+  width: 100%;
   margin-bottom: 1rem;
 }
 
@@ -289,12 +293,16 @@ main {
   display: inline;
 }
 
+.ml__movie-details--go-back {
+  display: block;
+  margin-bottom: 2rem;
+}
+
 .ml__movie-details-container {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
   gap: 2rem;
-  border-bottom: 1px dotted var(--border-color);
   padding-bottom: 2rem;
 }
 
@@ -303,6 +311,7 @@ main {
   padding: 0;
   padding-bottom: 1rem;
   list-style: none;
+  border-bottom: 1px dotted var(--border-color);
 }
 
 .ml__movie-details--title {
@@ -333,23 +342,34 @@ main {
   margin-bottom: 0;
 }
 
+.ml__movie-details--add-edit-form-platform select {
+  padding: .5rem;
+
+}
+
 /* my-list sort & filter form */
 .ml__my-list--sort-filter-container {
+  width: 50%;
   margin-bottom: 2rem;
 }
 .ml__my-list--sort-filter-form label {
   margin: 0;
 }
 .ml__my-list--filter,
-.ml__my-list--sort,
-.ml__my-list--sort-filter-buttons {
+.ml__my-list--sort {
   padding: 1rem 0;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
   gap: 1rem;
   margin: 0;
+}
+
+.ml__my-list--sort-filter-buttons {
+  display: flex;
+  flex-direction: row;
+  padding: 1rem 0;
+  gap: 1rem;
 }
 
 /* div in the filter form */
@@ -361,6 +381,9 @@ main {
 .ml__my-list--sort {
   border-bottom: 1px dotted var(--border-color);
 }
+.ml__my-list--sort select {
+  padding: .5rem;
+}
 .ml__my-list--filter > div,
 .ml__my-list--sort > div {
   display: flex;
@@ -371,11 +394,12 @@ main {
   margin: 0;
 }
 .ml__my-list--sort-filter-buttons {
-  justify-content: space-between;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 /* target "apply" and "reset" buttons */
 .ml__my-list--sort-filter-buttons > * {
-  flex-grow: 1;
+  flex-grow: 0;
 }
 .ml__my-list--sort-filter-apply-button.disabled {
   pointer-events: none;
