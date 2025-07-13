@@ -123,9 +123,8 @@ def signup():
             img_url=form.img_url.data or User.img_url.default.arg
         )
 
-        db.session.add(u)
-
         try:
+            db.session.add(u)
             db.session.commit()
 
         except IntegrityError as exc:
@@ -234,9 +233,8 @@ def delete_profile():
         u = User.authenticate(g.user.username, deleteForm.password.data)
 
         if u:
-            db.session.delete(u)
-
             try:
+                db.session.delete(u)
                 db.session.commit()
 
             except:
