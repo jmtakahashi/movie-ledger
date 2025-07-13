@@ -48,7 +48,7 @@ class User(db.Model):
     user_movie_detail = db.relationship("UserMovie", backref="user")
 
     movies = db.relationship(
-        "Movie", secondary="user_movie", backref="users")
+        "Movie", secondary="users_movies", backref="users")
 
     def __repr__(self):
         """Show Info about pet"""
@@ -130,7 +130,7 @@ class Movie(db.Model):
 class UserMovie(db.Model):
     """User Movie model"""
 
-    __tablename__ = "user_movie"
+    __tablename__ = "users_movies"
 
     user_id = db.Column(db.Integer, db.ForeignKey(
         'users.id'), primary_key=True)
