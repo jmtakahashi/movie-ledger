@@ -23,7 +23,9 @@ cors = CORS()
 
 # Get DB_URI from env variable (useful for production/testing) or,
 # if not set there, use development local db.
-print("flask env: " + os.environ.get("FLASK_ENV"))
+
+print(os.environ.get("FLASK_ENV"))
+print(os.environ.FLASK_ENV)
 
 if os.environ.get('FLASK_ENV') == "development":
     app.config['SQLALCHEMY_DATABASE_URI'] = (
