@@ -57,7 +57,7 @@ class User(db.Model):
         return f"<User id={u.id} username={u.username} img_url={u.img_url}>"
 
     @classmethod
-    def signup(cls, username, password, email, img_url=None):
+    def signup(cls, username, password, email, img_url):
         """Signup a user with a hashed password and return the user."""
 
         # hash our users password with bcrypt
