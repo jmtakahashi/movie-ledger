@@ -23,8 +23,12 @@ cors = CORS()
 
 # Get DB_URI from env variable (useful for production/testing) or,
 # if not set there, use development local db.
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    os.environ.get('DATABASE_URL', 'postgresql:///movie_ledger'))
+if os.environ.get('FLASK_ENV') == "development":
+    app.config['SQLALCHEMY_DATABASE_URI'] = (
+        os.environ.get('DATABASE_URL', 'postgresql:///movie_ledger'))
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = (
+        os.environ.get('SUPABASE_DATABASE_URL'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
