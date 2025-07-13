@@ -3,26 +3,27 @@
 --   psql [database_name]
 
 -- DROP DATABASE IF EXISTS movie_ledger;
-
 -- CREATE DATABASE movie_ledger;
 
--- \c movie_ledger
+-- for supabse
+-- \c postgres
 
-\c postgres
+-- for local or other
+\c movie_ledger
 
--- DROP TABLE user_movies;
--- DROP TABLE users;
--- DROP TABLE movies;
+DROP TABLE user_movies;
+DROP TABLE users;
+DROP TABLE movies;
 
 
--- CREATE TABLE users
--- (
---   id SERIAL PRIMARY KEY, 
---   username TEXT UNIQUE NOT NULL, 
---   email TEXT NOT NULL, 
---   password TEXT NOT NULL, 
---   img_url TEXT
--- );
+CREATE TABLE users
+(
+  id SERIAL PRIMARY KEY, 
+  username TEXT UNIQUE NOT NULL, 
+  email TEXT NOT NULL, 
+  password TEXT NOT NULL, 
+  img_url TEXT
+);
 
 CREATE TABLE movies
 (
@@ -34,7 +35,7 @@ CREATE TABLE movies
 
 CREATE TABLE users_movies
 (
-  user_id INT REFERENCES users (id), 
+  user_id INT REFERENCES users (id) ON DELETE CASCADE, 
   movie_id TEXT REFERENCES movies (imdb_id), 
   PRIMARY KEY (user_id, movie_id),
   date_added TIMESTAMP NOT NULL,
