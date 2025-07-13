@@ -10,8 +10,6 @@ const searchResults = document.getElementById('searchResults');
 searchResults && searchResults.addEventListener('click', function (e) {
   if (e.target.className === 'ml__search-result--add-button') {
     e.preventDefault();
-  
-    console.log("target clicked")
 
     /**
      * results of our api search do not contain actors

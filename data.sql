@@ -24,13 +24,13 @@
 --   img_url TEXT
 -- );
 
--- CREATE TABLE movies
--- (
---   imdb_id TEXT PRIMARY KEY, 
---   title TEXT NOT NULL, 
---   year DATE NOT NULL, 
---   imdb_img TEXT NOT NULL
--- );
+CREATE TABLE movies
+(
+  imdb_id TEXT PRIMARY KEY, 
+  title TEXT NOT NULL, 
+  year INT NOT NULL, 
+  imdb_img TEXT NOT NULL
+);
 
 CREATE TABLE users_movies
 (
