@@ -11,7 +11,6 @@ const backToMoviesLink = document.getElementById('backToMoviesLink')
 
 
 movieList && movieList.addEventListener('click', (e) => {
-  console.log(e.target.className)
   if (e.target.classList.contains('ml__my-list--fav')) {
     const movieID = e.target.getAttribute('data-id');
     toggleFavorite(movieID, e)
