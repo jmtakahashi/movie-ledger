@@ -5,7 +5,7 @@
 {% block pagecontent %}
 <div id="pageContent" class='ml__content--wide'>
 
-<h1 class="ml__my-list--page-title">{{ user.username }}'s Movies</h1>
+<h1 class="pageTitle">{{ user.username }}'s Movies</h1>
 
 {% if movies  %}
 <div id="sortFilterContainer" class="ml__my-list--sort-filter-container">
@@ -78,12 +78,10 @@
     <ul id="myMovieList" class="ml__my-list">
     {% for movie in movies %}
         <li class="ml__my-list--item">
-            <a href="/movie/{{ movie.movie_id }}">
-                <img class="ml__my-list--image" src="{{ movie.movie_details.imdb_img }}">
+            <a class="ml__my-list--image" href="/movie/{{ movie.movie_id }}" style="background-image: url({{ movie.movie_details.imdb_img }});">
                 <div class="ml__my-list--info-container">
                     <h3 class="ml__my-list--title">{{ movie.movie_details.title }}</h3>
                     <p class="ml__my-list--year">({{ movie.movie_details.year }})</p>
-                    <!-- <p class="ml__my-list--actors">{{ movie.actors }}</p> -->
                     <p class="ml__my-list--date-viewed">Date Viewed: {{ movie.date_viewed }}</p>
                     <p class="ml__my-list--date-added">Date Added: {{ movie.date_added }}</p>
                     <p class="ml__my-list--platform">Platform: {{ movie.platform }}</p>

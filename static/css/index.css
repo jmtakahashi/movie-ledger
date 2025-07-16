@@ -18,19 +18,26 @@
 }
 
 body {
-  /* background-image: url("/static/images/US-en-20230109-popsignuptwoweeks-perspective_alpha_website_large.jpg"); */
   background-color: #111;
   color: var(--body-text-color);
-  /* // <weight>: Use a value from 300 to 800 */
+  /* <weight>: Use a value from 300 to 800 */
   font-family: "Open Sans", sans-serif;
   font-weight: 400;
   line-height: 1.8;
   min-height: 100vh;
-  overscroll-behavior: none;
+  /* overscroll-behavior: none; */
 }
 
 a {
   color: var(--link-color);
+}
+
+p {
+  margin-top: 0;
+}
+
+.hidden {
+  display: none;
 }
 
 /* flash messages - across the page, under the header */
@@ -60,15 +67,21 @@ form div {
   display: flex;
   flex-direction: column;
   font-size: 1rem;
-  margin-bottom: 1rem;
 }
 
 form label {
   margin-bottom: 0.5rem;
 }
 
-form input {
-  padding: 0.5em;
+input, select {
+  padding: 0.7em;
+  display: block;
+  width: 100%;
+  border-radius: 5px;
+}
+
+input {
+  margin-bottom: 1rem;
 }
 
 .button {
@@ -184,6 +197,11 @@ footer a {
 }
 
 /*---------- main */
+
+.pageTitle {
+  margin-top: 0;
+}
+
 main {
   flex-grow: 1;
   background-image: url('../images/US-en-20230109-popsignuptwoweeks-perspective_alpha_website_large.jpg');
@@ -249,17 +267,27 @@ main {
 }
 
 .ml__search-form-container {
-  width: 50%;
+  width: min(500px, 100%);
 }
 
 .ml__search-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1rem;
   margin-bottom: 3rem;
 }
 
+@media screen and (min-width: 465px) {
+  .ml__search-form {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
 .ml__search-form input {
-  display: block;
-  width: 100%;
-  margin-bottom: 1rem;
+  margin: 0;
 }
 
 .ml__search-results {
@@ -289,12 +317,31 @@ main {
   margin-bottom: 1rem;
 }
 .ml__search-result--image {
-  width: 100%;
-  margin-bottom: 1rem;
+  display: block;
+  width: 200px;
+  aspect-ratio: 2/3;
+  background-position: center center;
+  background-size: cover;
+  margin-bottom: 12px;
 }
+.ml__search-result--info-container {
+  display: none;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  background-color: rgba(0,0,0,.7);
+  justify-content: center;
+  align-items: center;
+  gap: .5rem;
+  padding: 1rem;
+}
+
+.ml__search-result--image:hover .ml__search-result--info-container {
+  display: flex;
+}
+
 .ml__search-result--title {
   margin: 0;
-  font-weight: 600;
   font-weight: 600;
   font-size: 1rem;
   line-height: 1.15;
@@ -309,10 +356,9 @@ main {
 .ml__search-result--movie-in-list,
 .ml__search-result--add-movie-success {
   display: block;
-  margin-top: 1rem;
   margin-bottom: 0;
   text-transform: uppercase;
-  padding: 0.5rem 0;
+  padding: 0.7em;
   text-align: center;
   line-height: 1.15; /* set line height to match normalize line height */
 }
@@ -386,9 +432,20 @@ main {
 
 /* my-list sort & filter form */
 .ml__my-list--sort-filter-container {
-  width: 50%;
   margin-bottom: 2rem;
 }
+@media screen and (min-width: 767px) {
+.ml__my-list--sort-filter-form {
+  width: 100%;
+ display: flex;
+ justify-content: flex-start;
+ align-items: center;
+ border-top: 1px dotted var(--border-color);
+ border-bottom: 1px dotted var(--border-color);
+ gap: 2rem;
+}
+}
+
 .ml__my-list--sort-filter-form label {
   margin: 0;
 }
@@ -417,9 +474,6 @@ main {
 /* sort form */
 .ml__my-list--sort {
   border-bottom: 1px dotted var(--border-color);
-}
-.ml__my-list--sort select {
-  padding: .5rem;
 }
 .ml__my-list--filter > div,
 .ml__my-list--sort > div {
@@ -455,10 +509,6 @@ main {
   margin: 0;
 }
 
-.ml__my-list--page-title {
-  margin-bottom: 2rem;
-}
-
 .ml__my-list {
   list-style: none;
   padding: 0;
@@ -478,11 +528,31 @@ main {
 }
 
 .ml__my-list--image {
-  max-width: 200px;
+  display: block;
+  width: 200px;
+  aspect-ratio: 2/3;  
+  background-position: center center;
+  background-size: cover;
+  margin-bottom: 1rem;
 }
 
+
+
 .ml__my-list--info-container {
-  margin-bottom: .5rem;
+  display: none;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  background-color: rgba(0,0,0,.7);
+  justify-content: center;
+  align-items: center;
+  gap: .5rem;
+  padding: 1rem;
+
+}
+
+.ml__my-list--image:hover .ml__my-list--info-container {
+  display: flex; 
 }
 
 .ml__my-list--info-container > *:not(h3) {
@@ -499,12 +569,9 @@ main {
 
 .ml__my-list--functions-container {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 1rem;
-  background-color: rgba(255, 255, 255, 0.35);
-  padding: .65rem 1rem;
-  border-radius: 5px;;
 }
 
 /* favorite star */

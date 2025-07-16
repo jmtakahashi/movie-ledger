@@ -2,7 +2,7 @@
 endblock %} {% block pagecontent %}
 <div class="ml__content--small">
   <div class="ml__edit-profile--edit-container">
-    <h1>{{ user.username }}'s Profile</h1>
+    <h1 class="pageTitle">{{ user.username }}'s Profile</h1>
     <form id="ml__profile-edit-form" method="POST">
       {{ editForm.hidden_tag() }} {% for field in editForm if
       field.widget.input_type != 'hidden' %}

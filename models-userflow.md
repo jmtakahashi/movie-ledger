@@ -120,3 +120,11 @@ add environmental vars:
 DATABASE_URL: URL from ElephantSQL (change postgres: → postgresql:)
 SECRET_KEY: anything you want (to be secure: long and random)
 PYTHON_VERSION: 3.X.X - whichever version you are using
+
+
+
+
+
+
+https://freelancefootprints.substack.com/p/yet-another-password-reset-tutorial
+Cannot get mail to send

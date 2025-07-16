@@ -2,7 +2,7 @@
 
 {% block pagecontent %}
 <div class="ml__content--wide">
-  <h1>Movie Search</h1>
+  <h1 class="pageTitle">Movie Search</h1>
   <div class="ml__search-form-container">
     {% if request.referrer and "/signup" in request.referrer %}
     <div class="ml__welcome-note ml__welcome-note--new-user">
@@ -40,10 +40,12 @@
     <ul id="searchResults" class="ml__search-results">
       {% for movie in results.Search %}
       <li class="ml__search-result">
-        <a href="/movie/{{ movie.imdbID}}">
-          <img class="ml__search-result--image" src="{{ movie.Poster}}" />
-          <h3 class="ml__search-result--title">{{ movie.Title }}</h3>
-          <p class="ml__search-result--year">({{ movie.Year }})</p>
+        <a class="ml__search-result--image" href="/movie/{{ movie.imdbID}}" style="background-image: url({{ movie.Poster}});">
+          <div class="ml__search-result--info-container">
+            <h3 class="ml__search-result--title">{{ movie.Title }}</h3>
+            <p class="ml__search-result--year">({{ movie.Year }})</p>
+          </div>
+
         </a>
 
         {% if movie.ml_inList %}

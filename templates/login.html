@@ -1,7 +1,7 @@
 {% extends 'base.html' %} {% block pagetitle %}Movie Ledger | Login{% endblock
 %} {% block pagecontent %}
 <div class="ml__content--small">
-  <h1>Movie Ledger Login</h1>
+  <h1 class="pageTitle">Movie Ledger Login</h1>
   <form id="ml__login-form" method="POST">
     {{ form.hidden_tag() }} {% for field in form if field.widget.input_type !=
     'hidden' %}
