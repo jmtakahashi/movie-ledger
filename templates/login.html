@@ -1,25 +1,29 @@
-{% extends 'base.html' %} {% block pagetitle %}Movie Ledger | Login{% endblock
-%} {% block pagecontent %}
-<div class="ml__content--small">
-  <h1 class="pageTitle">Movie Ledger Login</h1>
-  <form id="ml__login-form" method="POST">
-    {{ form.hidden_tag() }} {% for field in form if field.widget.input_type !=
-    'hidden' %}
+{% extends 'base.html' %}
 
-    <div>
-      {{ field.label }} {{ field }} {% for error in field.errors %}
+{% block pagetitle %}Movie Ledger | Login{% endblock %}
+
+{% block pagecontent %}
+  <section class="ml__content--small">
+    <h1 class="pageTitle">Movie Ledger Login</h1>
+    <form id="ml__login-form" method="POST">
+      {{ form.hidden_tag() }} {% for field in form if field.widget.input_type !=
+      'hidden' %}
+
       <div>
-        <span class="error">{{ error}}</span>
+        {{ field.label }} {{ field }}
+        {% for error in field.errors %}
+        <div>
+          <span class="error">{{ error}}</span>
+        </div>
+        {% endfor %}
       </div>
-      {% endfor %}
-    </div>
 
-    {% endfor %}
-    <button type="submit">Login</button>
-  </form>
-  <p class="ml__login--signup-note">
-    If you don't have an account, please
-    <a href="/signup">create an account here!</a>!
-  </p>
-</div>
+      {% endfor %}
+      <button type="submit">Login</button>
+    </form>
+    <p class="ml__login--signup-note">
+      If you don't have an account, please
+      <a href="/signup">create an account here!</a>!
+    </p>
+  </section>
 {% endblock %}

@@ -3,104 +3,98 @@
 {% block pagetitle %}Movie Ledger | My Movie List{% endblock %}
 
 {% block pagecontent %}
-<div id="pageContent" class='ml__content--wide'>
+  <section id="pageContent" class='ml__content--wide'>
+    <h1 class="pageTitle">{{ user.username }}'s Movies</h1>
 
-<h1 class="pageTitle">{{ user.username }}'s Movies</h1>
-
-{% if movies  %}
-<div id="sortFilterContainer" class="ml__my-list--sort-filter-container">
-    <h3 class="ml__my-list--sort-filter-heading">Filter & Sort</h3>
-    <form class="ml__my-list--sort-filter-form">
-
-        <div class="ml__my-list--filter">
+    {% if movies  %}
+      <div id="sortFilterContainer" class="ml__my-list--sort-filter-container">
+        <h3 class="ml__my-list--sort-filter-heading">Filter & Sort</h3>
+        <form class="ml__my-list--sort-filter-form">
+          <div class="ml__my-list--filter">
             <span>Filter by: </span>
             <div>
-                <input type="checkbox" id="favorites" name="filter" value="favorites" {% if "favorites" in display_params.filters %} checked {% endif %}>
-                <label for="favorites">Favorites</label> 
+              <input type="checkbox" id="favorites" name="filter" value="favorites" {% if "favorites" in display_params.filters %} checked {% endif %}>
+              <label for="favorites">Favorites</label> 
             </div>
+          </div>
 
-        </div>
+          <div class="ml__my-list--sort">
+            <select id="sort" name="sort" class="ml__my-list--sort-term">
+              <option {% if not display_params.sort %} selected {% endif %}value="" disabled hidden>Sort by...</option>
+              <option {% if display_params.sort and "title" in display_params.sort.sort_term %} selected {% endif %}value="title">Title</option>
+              <option {% if display_params.sort and "year" in display_params.sort.sort_term %} selected {% endif %}value="year">Year</option>
+              <option {% if display_params.sort and "date_added" in display_params.sort.sort_term %} selected {% endif %}value="date_added">Date Added</option>
+              <option {% if display_params.sort and "date_viewed" in display_params.sort.sort_term %} selected {% endif %}value="date_viewed">Date Viewed</option>
+            </select>
 
-        <div class="ml__my-list--sort">
             <div>
-                <select id="sort" name="sort">
-                    <option {% if not display_params.sort %} selected {% endif %}value="" disabled hidden>Sort by...</option>
-                    <option {% if display_params.sort and "title" in display_params.sort.sort_term %} selected {% endif %}value="title">Title</option>
-                    <option {% if display_params.sort and "year" in display_params.sort.sort_term %} selected {% endif %}value="year">Year</option>
-                    <option {% if display_params.sort and "date_added" in display_params.sort.sort_term %} selected {% endif %}value="date_added">Date Added</option>
-                    <option {% if display_params.sort and "date_viewed" in display_params.sort.sort_term %} selected {% endif %}value="date_viewed">Date Viewed</option>
-                </select>
+              <input type="radio" id="order-asc" name="order" value="asc" {% if display_params.sort and "ascending" in display_params.sort.sort_order %} checked {% endif %}>
+              <label for="order-asc">Asc</label>
             </div>
             <div>
-                <input type="radio" id="order-asc" name="order" value="asc" {% if display_params.sort and "ascending" in display_params.sort.sort_order %} checked {% endif %}>
-                <label for="order-asc">Asc</label>
+              <input type="radio" id="order-desc" name="order" value="desc" {% if display_params.sort and "descending" in display_params.sort.sort_order %} checked {% endif %}>
+              <label for="order-desc">Desc</label>
             </div>
-            <div>
-                <input type="radio" id="order-desc" name="order" value="desc" {% if display_params.sort and "descending" in display_params.sort.sort_order %} checked {% endif %}>
-                <label for="order-desc">Desc</label>
-            </div>
-        </div>
-        <div class="ml__my-list--sort-filter-buttons">
+          </div>
+
+          <div class="ml__my-list--sort-filter-buttons">
             <button id="myListFilterButton" class="ml__my-list--sort-filter-apply-button" type="submit">Apply</button>
             <a id="myListSortButton" class="ml__my-list--sort-filter-reset-button button" href="/movies">Reset</a>
-        </div>
-    </form>
-</div>
-{% endif %}
-
-
-{% if "favorites" in display_params.filters %}
-<div class="ml__my-favorites--heading-container">
-    <h2>My Favorites</h2>
-    {% if movies %}
-        <a id="backToMoviesLink" href="/movies">Back to All Movies</a>
+          </div>
+        </form>
+      </div>
     {% endif %}
-</div>
-{% endif %}
 
-{% if not movies %}
-    {% if "favorites" in display_params.filters  %}
+    {% if "favorites" in display_params.filters %}
+      <div class="ml__my-favorites--heading-container">
+        <h2>My Favorites</h2>
+        {% if movies %}
+          <a id="backToMoviesLink" href="/movies">Back to All Movies</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if not movies %}
+      {% if "favorites" in display_params.filters  %}
         <h3>No favorites found...</h3>
         <a href="/movies">Back to All Movies</a>
-    {% else %}
+      {% else %}
         <h3>No movies found...</h3>
         <a class="button" href="/movie-search">Search Now</a>
+      {% endif %}
     {% endif %}
-{% endif %}
 
-{% if movies or ("favorites" in display_params.filters and movies) %}
-    {% if sort_str %}
-    <div class="ml__my-list--sort-note-container">
-        <p class="ml__my-list--sort-note">{{ sort_str }}</p>
-        <a href="/movies">Clear All</a>
-    </div>
-    {% endif %}
-    <ul id="myMovieList" class="ml__my-list">
-    {% for movie in movies %}
-        <li class="ml__my-list--item">
-            <a class="ml__my-list--image" href="/movie/{{ movie.movie_id }}" style="background-image: url({{ movie.movie_details.imdb_img }});">
-                <div class="ml__my-list--info-container">
-                    <h3 class="ml__my-list--title">{{ movie.movie_details.title }}</h3>
-                    <p class="ml__my-list--year">({{ movie.movie_details.year }})</p>
-                    <p class="ml__my-list--date-viewed">Date Viewed: {{ movie.date_viewed }}</p>
-                    <p class="ml__my-list--date-added">Date Added: {{ movie.date_added }}</p>
-                    <p class="ml__my-list--platform">Platform: {{ movie.platform }}</p>
-                </div>
+    {% if movies or ("favorites" in display_params.filters and movies) %}
+      {% if sort_str %}
+        <div class="ml__my-list--sort-note-container">
+          <p class="ml__my-list--sort-note">{{ sort_str }}</p>
+          <a href="/movies">Clear All</a>
+        </div>
+      {% endif %}
+
+      <ul id="myMovieList" class="ml__movie-list">
+        {% for movie in movies %}
+          <li class="ml__movie-list--item">
+            <a class="ml__movie-list--image" href="/movie/{{ movie.movie_id }}" style="background-image: url({{ movie.movie_details.imdb_img }});">
+              <div class="ml__movie-list--info-container">
+                <h3 class="ml__movie-list--title">{{ movie.movie_details.title }}</h3>
+                <p class="ml__movie-list--year">({{ movie.movie_details.year }})</p>
+                <p class="ml__movie-list--date-viewed">Date Viewed: {{ movie.date_viewed }}</p>
+                <p class="ml__movie-list--date-added">Date Added: {{ movie.date_added }}</p>
+                <p class="ml__movie-list--platform">Platform: {{ movie.platform }}</p>
+              </div>
             </a>
-            <div class="ml__my-list--functions-container">
-                {% if movie.favorite %}
-                    <i class="fa-star fas ml__my-list--fav" data-id="{{ movie.movie_id }}"></i>
-                {% else %}
-                    <i class="far fa-star ml__my-list--fav" data-id="{{ movie.movie_id }}"></i>
-                {% endif %}
-                <span class="ml__my-list--remove-button" data-id="{{ movie.movie_id }}">X</span>
+            
+            <div class="ml__movie-list--functions-container" data-id="{{ movie.movie_id }}" data-myList="true">
+              <i class="{% if movie.favorite %}fas{% else %}far{% endif %} fa-star ml__movie--fav"></i>
+              <i class="fas fa-check-circle ml__movie--add-remove-button"></i>
             </div>
-        </li>
-    {% endfor %}
-    </ul>
-{% endif %}
-</div>
+          </li>
+        {% endfor %}
+      </ul>
 
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script src="/static/js/movies.js"></script>
+      <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+      <script src="/static/js/movies.js"></script>
+    {% endif %}
+  </section>
 {% endblock %}

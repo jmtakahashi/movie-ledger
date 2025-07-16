@@ -12,12 +12,6 @@ API_BASE_URL = f"http://www.omdbapi.com/?apikey={API_KEY}&"
 def movie_search(search_term, page=1):
     """Make the search request to the omdb movie database"""
 
-    print("")
-    print("***************")
-    print(API_KEY)
-    print("***************")
-    print("")
-
     api_url = f"{API_BASE_URL}s={search_term}&page={page}"
 
     api_resp = requests.get(api_url)

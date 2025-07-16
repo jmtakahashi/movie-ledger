@@ -45,7 +45,7 @@ class User(db.Model):
     # adding the backref allows us to access the user from the movie
     # model so we dont' have to add a relationship in the movie model.
     # secondary is the through table that we need to access
-    user_movie_detail = db.relationship("UserMovie", backref="user")
+    user_movies_details = db.relationship("UserMovie", backref="user")
 
     movies = db.relationship(
         "Movie", secondary="users_movies", backref="users")

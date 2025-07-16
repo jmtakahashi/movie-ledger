@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <title>{% block pagetitle %}{% endblock %}</title>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,7 +15,6 @@
       integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
       crossorigin="anonymous"
     />
-    <title>{% block pagetitle %}{% endblock %}</title>
   </head>
   <body>
     <div class="ml__main">
@@ -54,26 +54,19 @@
       </header>
 
       {% for category,msg in get_flashed_messages(with_categories=true) %}
-      <p class="flash {{ category }}">{{ msg }}</p>
+        <div class="flash {{ category }}">{{ msg }}</div>
       {% endfor %}
 
-      <main id="mainContent">
-        <section class="ml__content-container">
-          {% block pagecontent %}{% endblock %}
-        </section>
+      <main id="mainContent" class="main">
+        {% block pagecontent %}{% endblock %}
       </main>
 
       <footer>
-        <p class="copyright">
-          ©
-          <span id="year"></span>
-          | My Movie Ledger
-        </p>
-        <p class="credit">
-          <a href="https://whoisjaytee.com" target="_blank">Who is Jaytee?</a>
-        </p>
+        <div class="copyright">© <span id="year"></span> | My Movie Ledger</div>
+        <a  class="credit" href="https://whoisjaytee.com" target="_blank">Who is Jaytee?</a>
       </footer>
     </div>
+
     <script>
       document.getElementById('year').innerHTML = new Date().getFullYear();
     </script>

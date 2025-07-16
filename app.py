@@ -263,8 +263,8 @@ def show_my_movies():
     # on the flask global "g", using the relationship we setup on the
     # user model. we can also acccess details from UserMovie and Movie
     #
-    # movie.favorite, movie.date_added, movie.platform, etc.
-    # movie.movie_details.title, movie.movie_details.imdb_img
+    # user_movie.favorite, user_movie.date_added, user_movie.platform, etc.
+    # user_movie.movie_details.title, user_movie.movie_details.imdb_img
 
     if not g.user:
         flash("Please login!", "danger")
@@ -287,11 +287,11 @@ def show_my_movies():
 
         display_params["filters"] = ['favorites']
 
-        for m in g.user.user_movie_detail:
+        for m in g.user.user_movies_details:
             if m.favorite:
                 movies.append(m)
     else:
-        movies = g.user.user_movie_detail
+        movies = g.user.user_movies_details
 
     ###########################################################################
     # sort check
@@ -628,16 +628,17 @@ def search_movies():
         # "Add to My List"  button or a note "Already in My List"
         if results_curr['Response'] == "True":
 
-            user_movies = [movie.imdb_id for movie in g.user.movies]
+            user_movie_ids = [
+                movie.movie_id for movie in g.user.user_movies_details]
 
             for movie in results_curr['Search']:
-                if movie['imdbID'] in user_movies:
+                if movie['imdbID'] in user_movie_ids:
                     movie["ml_inList"] = True
 
+                    movie["favorite"] = True
+
         # make the call to our external api for the NEXT page
-        #
-        # pass the "Response" returned to our template
-        #
+        # and pass the "Response" returned to our template.
         # based on the val of "Response" we can render a next_page link or not
         results_next = movie_search(search_term, page=page+1)
 

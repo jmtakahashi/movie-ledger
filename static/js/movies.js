@@ -3,74 +3,139 @@
  * deleting a movie from users list
  */
 
-const functionsBtnContainers = document.getElementsByClassName('ml__my-list--functions-container')
+const functionsBtnContainers = document.getElementsByClassName('ml__movie-list--functions-container')
+
+const searchResults = document.getElementById('searchResults')
 const movieList = document.getElementById('myMovieList');
+
 const sortFilterContainer = document.getElementById('sortFilterContainer')
 const pageContent = document.getElementById('pageContent');
 const backToMoviesLink = document.getElementById('backToMoviesLink')
 
+// add event listener
+for (let item of functionsBtnContainers) {
+  item.addEventListener("click", handleMovieFunctionsClick)
+}
 
-movieList && movieList.addEventListener('click', (e) => {
-  if (e.target.classList.contains('ml__my-list--fav')) {
-    const movieID = e.target.getAttribute('data-id');
-    toggleFavorite(movieID, e)
+// click handler
+async function handleMovieFunctionsClick(e) {
+  if (e.target.classList.contains('ml__movie--add-remove-button')) {
+    const imdb_id = e.target.parentElement.getAttribute('data-id');
+    toggleMyList(imdb_id, e)
   }
 
-  if (e.target.classList.contains('ml__my-list--remove-button')) {
-    const movieID = e.target.getAttribute('data-id');
-    deleteMovie(movieID, e)
+  if (e.target.classList.contains('ml__movie--fav')) {
+    const imdb_id = e.target.parentElement.getAttribute('data-id');
+    toggleFavorite(imdb_id, e)
   }
-  
-});
+}
 
+// toggle functions
 
 /**
- * remove movies from list dynamically throug ajax
+ * add or remove a movie from myList
+ *
+ * if we are on the "my movies" view, dynamically
+ * remove the movie from the list when deleting
+ * 
+ * if we are on the "movie search" view, toggle
+ * the icon classes and dynamically show/hide the
+ * favorite star icon
  */
-function deleteMovie(movieID, e) {
+
+/**
+ * favorite classes:
+ * far = false
+ * fas = true
+ */
+function toggleMyList(movieID, e) {
   const config = {
     headers: { 'Content-Type': 'application/json' },
   };
 
-  axios
-    .delete(`/api/movie/${movieID}`, config)
-    .then((resp) => {
-      if (resp.status == 200) {
-        e.target.parentElement.parentElement.remove();
-        /**
-         * check if there are an <li>'s left, if all are gone,
-         * reset the ui to "no movies found" condition:
-         * remove the filter & sort box, 
-         * remove the ul and replace with the <h3>
-         */
-        if (movieList.children.length == 0) {
-          sortFilterContainer.remove();
-          movieList.remove();
+  // add to my list
+  if (e.target.parentElement.getAttribute('data-myList') === "false") {
+    // only need the below atts if we are adding a movie
+    const title = e.target.parentElement.getAttribute('data-title');
+    const year = e.target.parentElement.getAttribute('data-year');
+    const imdb_img = e.target.parentElement.getAttribute('data-img');
+    
+    const params = { movieID, title, year, imdb_img };
 
-          const h3 = document.createElement('h3');
-          const link = document.createElement('a')
+    /* send a request to our internal api point to add a movie to our db */
+    axios
+      .post(`/api/movie/${movieID}`, JSON.stringify(params), config)
+      .then((resp) => {
+        if (resp.status == 201) {
+          // do this regardless of view
+          e.target.parentElement.setAttribute('data-myList', "true")
+          e.target.classList.add('fas');
+          e.target.classList.remove('far');
+          e.target.parentElement.children[0].classList.remove('hidden')
+        }
+      })
+      .catch((err) => {
+        if (err.response.status == 400) alert('Movie is already in your list');
+      });
+  }
+    
+  // remove from my list
+  if (e.target.parentElement.getAttribute('data-myList') === "true") {
+    axios
+      .delete(`/api/movie/${movieID}`, config)
+      .then((resp) => {
+        if (resp.status == 200) {
+          // if we are on the search page, change the icon, set the attribute hide the fav star
+          if (searchResults) {
+            e.target.parentElement.setAttribute('data-myList', "false")
+            e.target.classList.remove('fas');
+            e.target.classList.add('far');
 
-          if (window.location.search.includes('filter=favorites')) {
-            backToMoviesLink.remove();
-
-            h3.innerText = 'No favorites found...';
-
-            link.innerText = 'Back to All Movies'
-            link.setAttribute('href', '/movies')            
-          } else {
-            h3.innerText = 'No movies found...';
-
-            link.innerText = 'Search Now'
-            link.setAttribute('href', '/movie-search')
-            link.classList.add('button')
+            // also remove the fav star
+            e.target.parentElement.children[0].classList.add("hidden") 
           }
 
-          pageContent.appendChild(h3);
-          pageContent.appendChild(link)
+          // if we are on the my movies page, remove the movie from the page
+          if (movieList) {
+            console.log('clicked')
+            e.target.parentElement.parentElement.remove();
+
+            /**
+             * check if there are an <li>'s left, if all are gone,
+             * reset the ui to "no movies found" condition:
+             * remove the filter & sort box, 
+             * remove the ul and replace with the <h3>
+             */
+            if (movieList.children.length == 0) {
+              sortFilterContainer.remove();
+              movieList.remove();
+
+              const h3 = document.createElement('h3');
+              const link = document.createElement('a')
+
+              if (window.location.search.includes('filter=favorites')) {
+                backToMoviesLink.remove();
+
+                h3.innerText = 'No favorites found...';
+
+                link.innerText = 'Back to All Movies'
+                link.setAttribute('href', '/movies')
+              } else {
+                h3.innerText = 'No movies found...';
+
+                link.innerText = 'Search Now'
+                link.setAttribute('href', '/movie-search')
+                link.classList.add('button')
+              }
+
+              pageContent.appendChild(h3);
+              pageContent.appendChild(link)
+            }
+          }
         }
-      }
-    })
-    .catch((err) => console.log('err: ', err));
+      })
+      .catch((err) => console.log('err: ', err));
+  }
 }
 
 /**
@@ -78,6 +143,9 @@ function deleteMovie(movieID, e) {
  *
  * if we are on the favorites filter view, dynamically
  * remove the movie from the list when unfavoriting
+ * 
+ * if we are on the "my list" view, or the "movie search"
+ * view, toggle the icon classes
  */
 
 /**
@@ -95,9 +163,9 @@ function toggleFavorite(movieID, e) {
          * end correctly represents the data in our database
          */
         if (resp.data.favorite) { 
-          e.target.className = 'fas fa-star ml__my-list--fav';
+          e.target.className = 'fas fa-star ml__movie--fav';
         } else {
-          e.target.className = 'far fa-star ml__my-list--fav';
+          e.target.className = 'far fa-star ml__movie--fav';
 
           /* if we are on the favorites view, we should remove the movie */
           if (window.location.search.includes('filter=favorites')) {
@@ -128,3 +196,4 @@ function toggleFavorite(movieID, e) {
     })
     .catch((err) => console.log('err: ', err));
 }
+

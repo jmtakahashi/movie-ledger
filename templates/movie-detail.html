@@ -3,57 +3,57 @@
 {% block pagetitle %}Movie Ledger | {{ movie["Title"] }}{% endblock %}
 
 {% block pagecontent %}
-<div class='ml__content--wide'>
+  <section class='ml__content--wide'>
     {% if request.referrer %}
-        {% if "/movie-search" in request.referrer %}
-            <a class="ml__movie-details--go-back" href="#" onclick=window.history.back()>Go Back</a>
-        {% else %}
-            <a class="ml__movie-details--go-back" href="{{ request.referrer }}">Go Back</a>
-        {% endif %}
+      {% if "/movie-search" in request.referrer %}
+        <a class="ml__movie-details--go-back" href="#" onclick=window.history.back()>Go Back</a>
+      {% else %}
+        <a class="ml__movie-details--go-back" href="{{ request.referrer }}">Go Back</a>
+      {% endif %}
     {% endif %}
 
-   
+
     <div class='ml__movie-details-container'>
-        <img src="{{ movie['Poster'] }}" />
-        <div>
-            <ul class="ml__movie-details">
-                <li class="ml__movie-details--item"><h1 class='ml__movie-details--title'>{{ movie["Title"] }}</h1></li>
-                <li class="ml__movie-details--item">Year: {{ movie["Year"] }}</li>
-                <li class="ml__movie-details--item">Rated: {{ movie["Rated"] }} </li>
-                <li class="ml__movie-details--item">Released: {{ movie["Released"] }}</li>
-                <li class="ml__movie-details--item">Runtime: {{ movie["Runtime"] }}</li>
-                <li class="ml__movie-details--item">Genre: {{ movie["Genre"] }}</li>
-                <li class="ml__movie-details--item">Actors: {{ movie["Actors"] }}</li>
-                <li class="ml__movie-details--item">Plot: {{ movie["Plot"] }}</li>
-            </ul>
+      <img src="{{ movie['Poster'] }}" />
+      <div>
+        <ul class="ml__movie-details">
+          <li class="ml__movie-details--item"><h1 class='ml__movie-details--title'>{{ movie["Title"] }}</h1></li>
+          <li class="ml__movie-details--item">Year: {{ movie["Year"] }}</li>
+          <li class="ml__movie-details--item">Rated: {{ movie["Rated"] }} </li>
+          <li class="ml__movie-details--item">Released: {{ movie["Released"] }}</li>
+          <li class="ml__movie-details--item">Runtime: {{ movie["Runtime"] }}</li>
+          <li class="ml__movie-details--item">Genre: {{ movie["Genre"] }}</li>
+          <li class="ml__movie-details--item">Actors: {{ movie["Actors"] }}</li>
+          <li class="ml__movie-details--item">Plot: {{ movie["Plot"] }}</li>
+        </ul>
 
-            <div class="ml__movie-details--my-list-container">
-                {% if movie_in_users_list %}
-                    <h3 class="ml__movie-details--edit-title">This movie is in your list!</h3>
-                    <p class="ml__movie-details--edit-note">You can update details below.</p>
-                {% else %}
-                    <h3 class="ml__movie-details--edit-title">This movie is not in your list!</h3>
-                    <p class="ml__movie-details--edit-note">You can add details and add the movie to your list below.</p>
-                {% endif %}
+        <div class="ml__movie-details--my-list-container">
+          {% if movie_in_users_list %}
+            <h3 class="ml__movie-details--edit-title">This movie is in your list!</h3>
+            <p class="ml__movie-details--edit-note">You can update details below.</p>
+          {% else %}
+            <h3 class="ml__movie-details--edit-title">This movie is not in your list!</h3>
+            <p class="ml__movie-details--edit-note">You can add details and add the movie to your list below.</p>
+          {% endif %}
 
-                <form id="ml__add-edit-movie-form" action="/movie/{{ movie['imdbID'] }}" method="POST">
-                    {{ form.hidden_tag() }}
-                    {% for field in form if field.widget.input_type != 'hidden' %}
-                        <div class="ml__movie-details--add-edit-form-{{ field.name }}">
-                            {{ field.label }}
-                            {{ field }}    
-                        </div>
-                    {% endfor %}
-                    <button type="submit">
-                        {% if not movie_in_users_list %}
-                            Add to My List
-                        {% else %}
-                            Update Details
-                        {% endif %}
-                    </button>
-                </form>
-            </div>
+          <form id="ml__add-edit-movie-form" action="/movie/{{ movie['imdbID'] }}" method="POST">
+            {{ form.hidden_tag() }}
+            {% for field in form if field.widget.input_type != 'hidden' %}
+              <div class="ml__movie-details--add-edit-form-{{ field.name }}">
+                {{ field.label }}
+                {{ field }}    
+              </div>
+            {% endfor %}
+            <button type="submit">
+              {% if not movie_in_users_list %}
+                Add to My List
+              {% else %}
+                Update Details
+              {% endif %}
+            </button>
+          </form>
         </div>
+      </div>
     </div>
-</div>
+  </section>
 {% endblock %}

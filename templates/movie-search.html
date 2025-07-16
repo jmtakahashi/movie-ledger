@@ -1,99 +1,103 @@
-{% extends 'base.html' %} {% block pagetitle %}Movie Ledger | Find a Movie{%endblock %}
+{% extends 'base.html' %}
+
+{% block pagetitle %}Movie Ledger | Find a Movie{% endblock %}
 
 {% block pagecontent %}
-<div class="ml__content--wide">
-  <h1 class="pageTitle">Movie Search</h1>
-  <div class="ml__search-form-container">
-    {% if request.referrer and "/signup" in request.referrer %}
-    <div class="ml__welcome-note ml__welcome-note--new-user">
-      <h2>Welcome, {{ user.username }}!</h2>
-      <p>
-        The Movie Ledger is place to save all your viewed movies and series,
-        regardless of platform.
-      </p>
-      <p>
-        Use the form below to search for a movie or series and add it to your
-        ledger! You can mark items in your ledger as a favorite, and sort items
-        based on year or title!
-      </p>
-      <p class="ml__welcome-note--note">
-        NOTE: This notice will only be shown once.
-      </p>
+  <section class="ml__content--wide">
+    <h1 class="pageTitle">Movie Search</h1>
+    <div class="ml__search-form-container">
+      {% if request.referrer and "/signup" in request.referrer %}
+        <div class="ml__welcome-note ml__welcome-note--new-user">
+          <h2>Welcome, {{ user.username }}!</h2>
+          <p>
+            The Movie Ledger is place to save all your viewed movies and series,
+            regardless of platform.
+          </p>
+          <p>
+            Use the form below to search for a movie or series and add it to your
+            ledger! You can mark items in your ledger as a favorite, and sort items
+            based on year or title!
+          </p>
+          <p class="ml__welcome-note--note">
+            NOTE: This notice will only be shown once.
+          </p>
+        </div>
+      {% endif %}
+      <p>Enter a term below to find a movie or series by title!</p>
+      <form id="movieSearchForm" class="ml__search-form">
+        <input id="term" name="term" type="text" value="" required />
+        <button type="submit">Search</button>
+      </form>
     </div>
-    {% endif %}
-    <p>Enter a term below to find a movie or series by title!</p>
-    <form id="movieSearchForm" class="ml__search-form">
-      <input id="term" name="term" type="text" value="" required />
-      <button id="submitButton" type="submit">Search</button>
-    </form>
-  </div>
-  {% if results %}
-    <!-- change our notice depending on whether the current request has results.
-        if the current request has results, then include the page number, if no
-        results, do not include the page number -->
-    <h2>
-      Search results for "{{ search_term }}" {% if results.Search %}(page {{
-      page }}){% endif %}
-    </h2>
 
-    {% if results.Search %}
-    <ul id="searchResults" class="ml__search-results">
-      {% for movie in results.Search %}
-      <li class="ml__search-result">
-        <a class="ml__search-result--image" href="/movie/{{ movie.imdbID}}" style="background-image: url({{ movie.Poster}});">
-          <div class="ml__search-result--info-container">
-            <h3 class="ml__search-result--title">{{ movie.Title }}</h3>
-            <p class="ml__search-result--year">({{ movie.Year }})</p>
-          </div>
+    {% if results %}
+      <!-- change our notice depending on whether the current request has results.
+          if the current request has results, then include the page number, if no
+          results, do not include the page number -->
+      <h2>
+        Search results for "{{ search_term }}" {% if results.Search %}(page {{
+        page }}){% endif %}
+      </h2>
 
-        </a>
+      {% if results.Search %}
+        <ul id="searchResults" class="ml__movie-list">
+          {% for movie in results.Search %}
+            <li class="ml__movie-list--item">
+              <a class="ml__movie-list--image" href="/movie/{{ movie.imdbID }}" style="background-image: url({{ movie.Poster }});">
+                <div class="ml__movie-list--info-container">
+                  <h3 class="ml__movie-list--title">{{ movie.Title }}</h3>
+                  <p class="ml__movie-list--year">({{ movie.Year }})</p>
+                </div>
+              </a>
 
-        {% if movie.ml_inList %}
-        <span class="ml__search-result--movie-in-list">Already in <a href="/movies">My List</a></span>
+              <div class="ml__movie-list--functions-container"
+                    data-myList="{% if movie.ml_inList %}true{% else %}false{% endif %}"
+                    data-id="{{ movie.imdbID}}"
+                    data-title="{{ movie.Title}}"
+                    data-year="{{ movie.Year}}"
+                    data-img="{{ movie.Poster}}">
+                
+                <i class="{% if movie.favorite %}fas{% else %}far{% endif %} fa-star ml__movie--fav {% if not movie.ml_inList %}hidden{% endif %}"></i>
+
+                <i class="{% if movie.ml_inList %}fas{% else %}far{% endif %} fa-check-circle ml__movie--add-remove-button"></i>                                
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+        
+        <div class="ml__search-results--pagination-container">
+          {% if page > 1 %}
+          <a
+            class="ml__search-results--pagination-prev"
+            href="/movie-search?term={{ search_term }}&page={{ page - 1 }}"
+            >< Prev Page</a
+          >
+          {% endif %}
+
+          <span>Page {{ page }}</span>
+
+          {% if next_page == "True" %}
+          <a
+            class="ml__search-results--pagination-next"
+            href="/movie-search?term={{ search_term }}&page={{ page + 1 }}"
+            >Next Page ></a
+          >
+          {% endif %}
+        </div>
+
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="/static/js/movies.js"></script>
+      {% else %}
+        <!-- if the page is greater than 1, it means that a url was entered
+              directly in the url bar.  we need to let the user know that there
+              are no RESULTS on the current page. -->
+        {% if page > 1 %}
+          <h3>No results on page {{ page }}</h3>
         {% else %}
-        <button
-          class="ml__search-result--add-button"
-          data-id="{{ movie.imdbID}}"
-          data-title="{{ movie.Title}}"
-          data-year="{{ movie.Year}}"
-          data-img="{{ movie.Poster}}"
-        >
-          Add to My List
-        </button>
-        {% endif %}
-      </li>
-      {% endfor %}
-    </ul>
-    <div class="ml__search-results--pagination-container">
-      {% if page > 1 %}
-      <a
-        class="ml__search-results--pagination-prev"
-        href="/movie-search?term={{ search_term }}&page={{ page - 1 }}"
-        >< Prev Page</a
-      >
+          <h3>{{ results.Error }}</h3>
+        {% endif %} 
       {% endif %}
 
-      <p>Page {{ page }}</p>
-
-      {% if next_page == "True" %}
-      <a
-        class="ml__search-results--pagination-next"
-        href="/movie-search?term={{ search_term }}&page={{ page + 1 }}"
-        >Next Page ></a
-      >
-      {% endif %}
-    </div>
-    {% else %}
-    <!-- if the page is greater than 1, it means that a url was entered
-            directly in the url bar.  we need to let the user know that there
-            are no RESULTS on the current page. -->
-    {% if page > 1 %}
-    <h3>No results on page {{ page }}</h3>
-    {% else %}
-    <h3>{{ results.Error }}</h3>
-    {% endif %} {% endif %}
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script src="/static/js/movieSearch.js"></script>
-  {% endif %}
-</div>
+    {% endif %}
+  </section>
 {% endblock %}
