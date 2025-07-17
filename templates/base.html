@@ -8,8 +8,7 @@
     <link rel="stylesheet" href="/static/css/index.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-    <link
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=PT+Sans+Narrow:wght@700&display=swap" rel="stylesheet">    <link
       rel="stylesheet"
       href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
       integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
@@ -21,7 +20,7 @@
       <header>
         <nav>
           <div class="nav-brand">
-            <a href="/">MyMovieLedger</a>
+            <a href="{% if g.user %}/movies{% else %}/{% endif %}">MYFLIX</a>
           </div>
 
           {% if g.user %}
@@ -35,7 +34,7 @@
           <div class="nav-links">
             {% if g.user %}
             <form method="post" action="/logout">
-              <button class="link">Logout</button>
+              <i class="fas fa-sign-out-alt"></i>
             </form>
             {% else %}
             <a href="/login">Login</a>
