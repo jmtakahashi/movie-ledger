@@ -54,7 +54,7 @@ function toggleMyList(movieID, e) {
   };
 
   // add to my list
-  if (e.target.parentElement.getAttribute('data-myList') === "false") {
+  if (e.target.parentElement.getAttribute('data-my-list') === "false") {
     // only need the below atts if we are adding a movie
     const title = e.target.parentElement.getAttribute('data-title');
     const year = e.target.parentElement.getAttribute('data-year');
@@ -68,7 +68,7 @@ function toggleMyList(movieID, e) {
       .then((resp) => {
         if (resp.status == 201) {
           // do this regardless of view
-          e.target.parentElement.setAttribute('data-myList', "true")
+          e.target.parentElement.setAttribute('data-my-list', "true")
           e.target.classList.add('fas');
           e.target.classList.remove('far');
           e.target.parentElement.children[0].classList.remove('hidden')
@@ -80,14 +80,14 @@ function toggleMyList(movieID, e) {
   }
     
   // remove from my list
-  if (e.target.parentElement.getAttribute('data-myList') === "true") {
+  if (e.target.parentElement.getAttribute('data-my-list') === "true") {
     axios
       .delete(`/api/movie/${movieID}`, config)
       .then((resp) => {
         if (resp.status == 200) {
           // if we are on the search page, change the icon, set the attribute hide the fav star
           if (searchResults) {
-            e.target.parentElement.setAttribute('data-myList', "false")
+            e.target.parentElement.setAttribute('data-my-list', "false")
             e.target.classList.remove('fas');
             e.target.classList.add('far');
 
@@ -97,7 +97,6 @@ function toggleMyList(movieID, e) {
 
           // if we are on the my movies page, remove the movie from the page
           if (movieList) {
-            console.log('clicked')
             e.target.parentElement.parentElement.remove();
 
             /**

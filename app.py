@@ -298,6 +298,7 @@ def show_my_movies():
 
     # if there's a sort option selected, add to the sort string
     if request.args.get('sort') and request.args.get('order'):
+
         display_params["sort"] = {}
         sort_str = "Sorting by "
 
@@ -342,6 +343,12 @@ def show_my_movies():
 
         # our final sort function based on the given vars
         movies.sort(key=key, reverse=reverse)
+
+    print("")
+    print("***********************")
+    print(movies)
+    print("***********************")
+    print("")
 
     return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str)
 
@@ -533,7 +540,7 @@ def add_movie(movie_id):
             #   be our value and db field will be blank
             # platform is optional so None <class 'NoneType'> will
             #   be our value and db field will be blank
-            m = Movie(imdb_id=request.json["imdb_id"],
+            m = Movie(imdb_id=movie_id,
                       title=request.json["title"],
                       year=request.json["year"][0:4],
                       imdb_img=request.json["imdb_img"],
@@ -628,14 +635,15 @@ def search_movies():
         # "Add to My List"  button or a note "Already in My List"
         if results_curr['Response'] == "True":
 
-            user_movie_ids = [
-                movie.movie_id for movie in g.user.user_movies_details]
+            user_movies = {
+                movie.movie_id: movie.favorite for movie in g.user.user_movies_details}
 
             for movie in results_curr['Search']:
-                if movie['imdbID'] in user_movie_ids:
+                if movie['imdbID'] in list(user_movies.keys()):
                     movie["ml_inList"] = True
 
-                    movie["favorite"] = True
+                    # get the tuple from user_movies that matches our movie id, and check the favorite val
+                    movie["favorite"] = user_movies[movie['imdbID']]
 
         # make the call to our external api for the NEXT page
         # and pass the "Response" returned to our template.
