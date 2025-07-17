@@ -31,10 +31,10 @@
           </div>
           {% endif %}
 
-          <div class="nav-links">
+          <div class="auth-links">
             {% if g.user %}
             <form method="post" action="/logout">
-              <i class="fas fa-sign-out-alt"></i>
+              <button class='link'><i class="fas fa-sign-out-alt"></i></button>
             </form>
             {% else %}
             <a href="/login">Login</a>

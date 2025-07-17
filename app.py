@@ -63,7 +63,7 @@ print("\033[1m\033[96m=> os.environ: \033[0m",
 
 connect_db(app)
 
-toolbar = DebugToolbarExtension(app)
+# toolbar = DebugToolbarExtension(app)
 
 # this is the key we use to store the user id in the session
 CURR_USER_KEY = "curr_user"
