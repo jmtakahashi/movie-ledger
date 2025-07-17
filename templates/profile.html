@@ -24,10 +24,8 @@
 
     <div class="ml__edit-profile--delete-container">
       <h2>Delete Profile</h2>
-      <p class="warning ml__edit-profile--delete-warning">
-        WARNING: Deleting your profile is permanent! Please be be absolutely sure
-        you want to delete your profile before clicking the button below!
-      </p>
+      <p class="ml__edit-profile--delete-warning">WARNING: Deleting your profile is permanent! Please be be absolutely sure
+        you want to delete your profile before clicking the button below!</p>
       <form id="ml__profile-delete-form" action="/profile/delete" method="POST">
         {{ deleteForm.hidden_tag() }}
         {% for field in deleteForm if field.widget.input_type != 'hidden' %}

@@ -72,6 +72,7 @@ form div {
 }
 
 form label {
+  display: block;
   margin-bottom: 0.5rem;
 }
 
@@ -92,6 +93,7 @@ select {
 }
 
 button, .button {
+  font-weight: 600;
   padding: 0.7em 2em;
   background-color: #fff;
   line-height: 1.15; /* to match the normalize.css button line-height */
@@ -106,6 +108,7 @@ button, .button {
 }
 
 button.link {
+  font-weight: 400;
   padding: 0;
   background-color: transparent;
   text-transform: none;
@@ -587,6 +590,8 @@ footer {
 .ml__edit-profile--delete-warning {
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 5px;
-  border: 1px solid var(--warning-red);
+  border: 1px solid var(--warning);
+  color: var(--warning);
   padding: 1rem;
+  margin-bottom: 1rem;
 }
