@@ -81,12 +81,13 @@ input, select {
   border-radius: 5px;
   border-width: 1px;
   border-color: transparent;
-}
-
-input:not([type='checkbox']),
-input:not([type='radio']),{
   width: 100%;
   padding: 0.7em;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: auto;
 }
 
 select {
@@ -208,10 +209,6 @@ footer {
 
 /*---------- main */
 
-.pageTitle {
-  margin-top: 0;
-}
-
 .main {
   flex-grow: 1;
   background: linear-gradient(0deg, rgba(0, 0, 0, .75)), url('../images/US-en-20230109-popsignuptwoweeks-perspective_alpha_website_large.jpg');
@@ -282,10 +279,6 @@ footer {
   }
 }
 
-.ml__search-form input {
-  margin: 0;
-}
-
 .ml__movie-list {
   list-style: none;
   padding: 0;
@@ -294,23 +287,13 @@ footer {
   gap: 2rem;
   flex-wrap: wrap;
 }
-.ml__search-results--pagination-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-}
 .ml__movie-list--item {
-  display: flex;
-  flex-direction: column;
-  width: 200px;
+  width: 150px;
   margin-bottom: 2rem;
 }
 
 .ml__movie-list--image {
   display: block;
-  flex-grow: 1;
   margin-bottom: 1rem;
   display: block;
   width: 100%;
@@ -327,7 +310,7 @@ footer {
   background-color: rgba(0,0,0,.7);
   justify-content: center;
   align-items: center;
-  gap: .5rem;
+  gap: .25rem;
   padding: 1rem;
   text-decoration: none;
 }
@@ -343,9 +326,10 @@ footer {
   line-height: 1.15;
   text-align: center;
 }
+
 .ml__movie-list--info-container p {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   text-align: center;
 }
 
@@ -370,6 +354,14 @@ footer {
   color: #0f9;
 }
 
+.ml__search-results--pagination-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
 .ml__movie-details--go-back {
   display: block;
   margin-bottom: 2rem;
@@ -383,12 +375,12 @@ footer {
   gap: 2rem;
   padding-bottom: 2rem;
 }
+
 @media screen and (min-width: 768px) {
   .ml__movie-details-container {
     flex-direction: row;
   }
 }
-
 
 .ml__movie-details {
   margin: 0;
