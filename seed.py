@@ -6,8 +6,8 @@
 from models import db, User, Movie, UserMovie
 from app import app
 
-db.drop_all()
-db.create_all()
+# db.drop_all()
+# db.create_all()
 
 
 ##### USER #####

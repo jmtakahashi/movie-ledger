@@ -344,12 +344,6 @@ def show_my_movies():
         # our final sort function based on the given vars
         movies.sort(key=key, reverse=reverse)
 
-    print("")
-    print("***********************")
-    print(movies)
-    print("***********************")
-    print("")
-
     return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str)
 
 
