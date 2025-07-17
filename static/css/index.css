@@ -341,6 +341,7 @@ footer {
   font-weight: 600;
   font-size: 1rem;
   line-height: 1.15;
+  text-align: center;
 }
 .ml__movie-list--info-container p {
   margin: 0;
