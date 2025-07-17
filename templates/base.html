@@ -27,12 +27,13 @@
           <div class="nav-links desktop">
             <a href="/movies">My List</a>
             <a href="/movie-search">Movie Search</a>
-            <a href="/profile">Profile</a>
+            
           </div>
           {% endif %}
 
           <div class="auth-links">
             {% if g.user %}
+            <a href="/profile"><i class="fas fa-user"></i></a>
             <form method="post" action="/logout">
               <button class='link'><i class="fas fa-sign-out-alt"></i></button>
             </form>
@@ -47,7 +48,6 @@
         <div class="nav-links mobile">
           <a href="/movies">My List</a>
           <a href="/movie-search">Movie Search</a>
-          <a href="/profile">Profile</a>
         </div>
         {% endif %}
       </header>

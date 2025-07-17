@@ -145,6 +145,7 @@ nav {
 .nav-brand a {
   font-family: "PT Sans Narrow", sans-serif;
   font-weight: 700;
+  font-size: 18px;
   text-decoration: none;
 }
 
@@ -166,7 +167,7 @@ nav {
   border-top: 1px solid var(--body-border-color);
 }
 
-@media screen and (min-width: 450px) {
+@media screen and (min-width: 400px) {
   .nav-links.desktop {
     display: flex;
   }
@@ -176,7 +177,7 @@ nav {
 }
 
 .nav-links a {
-  padding: .35rem 1.5rem;
+  padding: .25rem 1.25rem;
   color: var(--nav-link-color);
   letter-spacing: normal;
   text-decoration: none;
@@ -187,13 +188,13 @@ nav {
 
 .auth-links {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .auth-links a {
   text-decoration: none;
 }
-.auth-links i {
+.auth-links .fa-sign-out-alt {
   font-size: 18px;
 }
 
