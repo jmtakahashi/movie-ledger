@@ -2,9 +2,14 @@
 
 {% block pagetitle %}Movie Ledger | Find a Movie{% endblock %}
 
+{% block pagetitleandfuncs %}
+  <div class="pageTitleContainer">
+    <h1 class="pageTitle">Movie Search</h1>
+  </div>
+{% endblock %}
+
 {% block pagecontent %}
   <section class="ml__content--wide">
-    <h1 class="pageTitle">Movie Search</h1>
     <div class="ml__search-form-container">
       {% if request.referrer and "/signup" in request.referrer %}
         <div class="ml__welcome-note">
@@ -34,7 +39,7 @@
       <!-- change our notice depending on whether the current request has results.
           if the current request has results, then include the page number, if no
           results, do not include the page number -->
-      <h2>
+      <h2 class="sectionTitle">
         Search results for "{{ search_term }}" {% if results.Search %}(page {{
         page }}){% endif %}
       </h2>

@@ -8,13 +8,39 @@ const functionsBtnContainers = document.getElementsByClassName('ml__movie-list--
 const searchResults = document.getElementById('searchResults')
 const movieList = document.getElementById('myMovieList');
 
-const sortFilterContainer = document.getElementById('sortFilterContainer')
+const sortIcon = document.getElementById('sortIcon')
+const sortContainer = document.getElementById('sortContainer')
+const sortForm = document.getElementById("sortForm")
+const sortBy = document.getElementById("sort")
+const sortOrderAsc = document.getElementById("order-asc")
+const sortOrderDesc = document.getElementById("order-desc")
+const sortButton = document.getElementById("myListSortButton")
+
 const pageContent = document.getElementById('pageContent');
 const backToMoviesLink = document.getElementById('backToMoviesLink')
+
+document.addEventListener("DOMContentLoaded", checkValuesSet);
+
+sortIcon && sortIcon.addEventListener("click", showHideSortBox)
+
+sortForm && sortForm.addEventListener("change", checkValuesSet)
 
 // add event listener
 for (let item of functionsBtnContainers) {
   item.addEventListener("click", handleMovieFunctionsClick)
+}
+
+function checkValuesSet(e) {
+  if (sortBy.value && (sortOrderAsc.checked || sortOrderDesc.checked)) {
+    sortButton.classList.remove("disabled")
+  }
+  else {
+    sortButton.classList.add("disabled")
+  }
+}
+
+function showHideSortBox(e) {
+  sortContainer.classList.toggle("hidden")
 }
 
 // click handler
@@ -29,6 +55,7 @@ async function handleMovieFunctionsClick(e) {
     toggleFavorite(imdb_id, e)
   }
 }
+
 
 // toggle functions
 
@@ -106,7 +133,7 @@ function toggleMyList(movieID, e) {
              * remove the ul and replace with the <h3>
              */
             if (movieList.children.length == 0) {
-              sortFilterContainer.remove();
+              sortContainer.remove();
               movieList.remove();
 
               const h3 = document.createElement('h3');
@@ -175,7 +202,7 @@ function toggleFavorite(movieID, e) {
              * remove the ul and replace with the <h3>
              */
             if (movieList.children.length == 0) {
-              sortFilterContainer.remove();
+              sortContainer.remove();
               movieList.remove();
               backToMoviesLink.remove();
 

@@ -2,10 +2,16 @@
 
 {% block pagetitle %}Movie Ledger | Edit Profile{% endblock %}
 
+{% block pagetitleandfuncs %}
+  <div class="pageTitleContainer">
+    <h1 class="pageTitle">Profile</h1>
+  </div>
+{% endblock %}
+
 {% block pagecontent %}
   <section class="ml__content--small">
     <div class="ml__edit-profile--edit-container">
-      <h1 class="pageTitle">{{ user.username }}'s Profile</h1>
+      <h2 class="sectionTitle">Edit Profile</h1>
       <form id="ml__profile-edit-form" method="POST">
         {{ editForm.hidden_tag() }}
         {% for field in editForm if field.widget.input_type != 'hidden' %}
@@ -23,7 +29,7 @@
     </div>
 
     <div class="ml__edit-profile--delete-container">
-      <h2>Delete Profile</h2>
+      <h2 class="sectionTitle">Delete Profile</h2>
       <p class="ml__edit-profile--delete-warning">WARNING: Deleting your profile is permanent! Please be be absolutely sure
         you want to delete your profile before clicking the button below!</p>
       <form id="ml__profile-delete-form" action="/profile/delete" method="POST">
