@@ -15,7 +15,10 @@
       {% endif %}
     </div>
 
-    <i id="sortIcon" class="fas fa-cog sortIcon"></i>
+    <div class="sortFilterWrapper nav-links">
+      <a href="/movies?filter=favorites"><i class="fas fa-heart favoritesIcon {% if "favorites" in display_params.filters %}active{% endif %}"></i></a>
+      <i id="sortIcon" class="fas fa-cog sortIcon"></i>
+    </div>  
 
     {% if movies %}
       <div id="sortContainer" class="ml__my-list--sort-container hidden">
@@ -87,7 +90,7 @@
             </a>
             
             <div class="ml__movie-list--functions-container" data-id="{{ movie.movie_id }}" data-my-list="true">
-              <i class="{% if movie.favorite %}fas{% else %}far{% endif %} fa-star ml__movie--fav"></i>
+              <i class="{% if movie.favorite %}fas{% else %}far{% endif %} fa-heart favoriteIcon ml__movie--fav"></i>
               <i class="fas fa-check-circle ml__movie--add-remove-button"></i>
             </div>
           </li>
