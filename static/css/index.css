@@ -183,7 +183,7 @@ nav {
   border-bottom: 1px solid var(--body-border-color);
 }
 
-@media screen and (min-width: 476px) {
+@media screen and (min-width: 401px) {
   .my-list-links.desktop {
     display: flex;
   }
@@ -240,16 +240,16 @@ footer {
   overflow: scroll;
 }
 .pageTitleContainer {
-  background-color: var(--body-bg-color);
-  padding: 1rem;
-  border-bottom: 1px solid var(--body-border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  line-height: 1em;
+  padding: 1rem;
+  background-color: var(--body-bg-color);
+  border-bottom: 1px solid var(--body-border-color);
+  position: relative;
 }
 
-.pageTitleWraper {
+.pageTitleWrapper {
   display: flex;
   align-items: center;
 }
@@ -289,7 +289,6 @@ footer {
   display: grid;
   justify-items: center;
   align-items: center;
-  position: relative;
 }
 
 .ml__content--small {
@@ -498,11 +497,10 @@ footer {
 /* my-list sort & filter form */
 .ml__my-list--sort-container {
   position: absolute;
-  top: 0;
+  top: calc(100% + 1px);
   left: 0;
   width: 100%;
   padding: 1rem;
-  margin-bottom: 2rem;
   background-color: var(--body-bg-color-transparent);
   border-bottom: 1px solid var(--body-border-color);
 }
