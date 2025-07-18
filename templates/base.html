@@ -51,11 +51,11 @@
           <a href="/movies?filter=favorites">Favorites</a>
         </div>
         {% endif %}
+
+        {% block pagetitleandfuncs %}{% endblock %}
       </header>
 
       <main id="main" class="main">
-        
-        {% block pagetitleandfuncs %}{% endblock %}
 
         {% for category,msg in get_flashed_messages(with_categories=true) %}
           <div class="flash {{ category }}">{{ msg }}</div>

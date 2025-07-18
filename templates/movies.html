@@ -4,7 +4,7 @@
 
 {% block pagetitleandfuncs %}
   <div class="pageTitleContainer">
-    <div class="pageTitleWraper">
+    <div class="pageTitleWrapper">
       {% if "favorites" in display_params.filters %}<a href="/movies">{% endif %}
         <h1 class="pageTitle">My List</h1>
       {% if "favorites" in display_params.filters %}</a>{% endif %}
@@ -16,12 +16,8 @@
     </div>
 
     <i id="sortIcon" class="fas fa-cog sortIcon"></i>
-  </div>
-{% endblock %}
 
-{% block pagecontent %}
-  <section id="pageContent" class='ml__content--wide'>
-    {% if movies  %}
+    {% if movies %}
       <div id="sortContainer" class="ml__my-list--sort-container hidden">
         <form id="sortForm" class="ml__my-list--sort-form">
           <div class="ml__my-list--sort">
@@ -49,10 +45,14 @@
           <button id="myListSortButton" class="ml__my-list--sort-apply-button" type="submit">Apply</button>
         </form>
       </div>
+    {% endif %}
+  </div>
+{% endblock %}
 
-      {% if movies and "favorites" in display_params.filters and "sort_term" not in display_params.sort %}
-        <a id="backToMoviesLink" href="/movies">Back to All Movies</a>
-      {% endif %}
+{% block pagecontent %}
+  <section id="pageContent" class='ml__content--wide'>
+    {% if movies and "favorites" in display_params.filters and "sort_term" not in display_params.sort %}
+      <a id="backToMoviesLink" href="/movies">Back to All Movies</a>
     {% endif %}
 
     {% if not movies %}
