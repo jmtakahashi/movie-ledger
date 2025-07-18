@@ -20,24 +20,23 @@
     <div class="ml__body--inner-container">
       <header>
         <nav>
-          <div class="nav-brand">
+          <div class="nav-brand logo">
             <a href="{% if g.user %}/movies{% else %}/{% endif %}">MYFLIX</a>
           </div>
 
           {% if g.user %}
-          <div class="nav-links desktop">
+          <div class="nav-links my-list-links desktop">
             <a href="/movies">My List</a>
-            <a href="/movies?filter=favorites">Favorites</a>
-            <a href="/movie-search">Movie Search</a>
-            
+            <a href="/movies?filter=favorites">Favorites</a>            
           </div>
           {% endif %}
 
-          <div class="auth-links">
+          <div class="nav-links">
             {% if g.user %}
-            <a href="/profile"><i class="fas fa-user"></i></a>
+            <a href="/movie-search"><i class="fas fa-search searchIcon"></i></a>
+            <a href="/profile"><i class="fas fa-user profileIcon"></i></a>
             <form method="post" action="/logout">
-              <button class='link'><i class="fas fa-sign-out-alt"></i></button>
+              <button class='link'><i class="fas fa-sign-out-alt logoutIcon"></i></button>
             </form>
             {% else %}
             <a href="/login">Login</a>
@@ -47,10 +46,9 @@
         </nav>
         
         {% if g.user %}
-        <div class="nav-links mobile">
+        <div class="nav-links my-list-links mobile">
           <a href="/movies">My List</a>
           <a href="/movies?filter=favorites">Favorites</a>
-          <a href="/movie-search">Movie Search</a>
         </div>
         {% endif %}
       </header>
