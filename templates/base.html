@@ -20,8 +20,8 @@
     <div class="ml__body--inner-container">
       <header>
         <nav>
-          <div class="nav-brand logo">
-            <a href="{% if g.user %}/movies{% else %}/{% endif %}">MYFLIX</a>
+          <div class="nav-brand">
+            <a class="logo" href="{% if g.user %}/movies{% else %}/{% endif %}">MYFLIX</a>
           </div>
 
           {% if g.user %}

@@ -67,7 +67,7 @@ async function handleMovieFunctionsClick(e) {
  * 
  * if we are on the "movie search" view, toggle
  * the icon classes and dynamically show/hide the
- * favorite star icon
+ * favorite icon
  */
 
 /**
@@ -112,13 +112,13 @@ function toggleMyList(movieID, e) {
       .delete(`/api/movie/${movieID}`, config)
       .then((resp) => {
         if (resp.status == 200) {
-          // if we are on the search page, change the icon, set the attribute hide the fav star
+          // if we are on the search page, change the icon, set the attribute hide the fav icon
           if (searchResults) {
             e.target.parentElement.setAttribute('data-my-list', "false")
             e.target.classList.remove('fas');
             e.target.classList.add('far');
 
-            // also remove the fav star
+            // also remove the fav icon
             e.target.parentElement.children[0].classList.add("hidden") 
           }
 
@@ -189,9 +189,9 @@ function toggleFavorite(movieID, e) {
          * end correctly represents the data in our database
          */
         if (resp.data.favorite) { 
-          e.target.className = 'fas fa-star ml__movie--fav';
+          e.target.className = 'fas fa-heart favoriteIcon ml__movie--fav';
         } else {
-          e.target.className = 'far fa-star ml__movie--fav';
+          e.target.className = 'far fa-heart favoriteIcon ml__movie--fav';
 
           /* if we are on the favorites view, we should remove the movie */
           if (window.location.search.includes('filter=favorites')) {
