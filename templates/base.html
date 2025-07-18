@@ -5,18 +5,19 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/static/css/index.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=PT+Sans+Narrow:wght@700&display=swap" rel="stylesheet">    <link
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans:wght@300..800&display=swap" rel="stylesheet">
+    <link
       rel="stylesheet"
       href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
       integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
       crossorigin="anonymous"
     />
+    <link rel="stylesheet" href="/static/css/index.css" />
   </head>
   <body>
-    <div class="ml__main">
+    <div class="ml__body--inner-container">
       <header>
         <nav>
           <div class="nav-brand">
@@ -26,6 +27,7 @@
           {% if g.user %}
           <div class="nav-links desktop">
             <a href="/movies">My List</a>
+            <a href="/movies?filter=favorites">Favorites</a>
             <a href="/movie-search">Movie Search</a>
             
           </div>
@@ -47,17 +49,24 @@
         {% if g.user %}
         <div class="nav-links mobile">
           <a href="/movies">My List</a>
+          <a href="/movies?filter=favorites">Favorites</a>
           <a href="/movie-search">Movie Search</a>
         </div>
         {% endif %}
       </header>
 
-      {% for category,msg in get_flashed_messages(with_categories=true) %}
-        <div class="flash {{ category }}">{{ msg }}</div>
-      {% endfor %}
+      <main id="main" class="main">
+        
+        {% block pagetitleandfuncs %}{% endblock %}
 
-      <main id="mainContent" class="main">
-        {% block pagecontent %}{% endblock %}
+        {% for category,msg in get_flashed_messages(with_categories=true) %}
+          <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+
+        <div class="mainContent">
+          {% block pagecontent %}{% endblock %}
+        </div>
+          
       </main>
 
       <footer>

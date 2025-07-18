@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 # import text so we can use fstrings in our filter/sort queries
 from sqlalchemy.sql import text
 
-from flask_debugtoolbar import DebugToolbarExtension
+# from flask_debugtoolbar import DebugToolbarExtension
 from flask_cors import CORS
 
 from forms import (UserAddForm, LoginForm, UserEditForm,
@@ -284,6 +284,12 @@ def show_my_movies():
 
     # if there's a filter add to the filter flags list arg
     if request.args.get('filter'):
+
+        print("")
+        print("*********************")
+        print("should be adding filters to display params here")
+        print("*********************")
+        print("")
 
         display_params["filters"] = ['favorites']
 

@@ -2,23 +2,32 @@
 
 {% block pagetitle %}Movie Ledger | My Movie List{% endblock %}
 
+{% block pagetitleandfuncs %}
+  <div class="pageTitleContainer">
+    <div class="pageTitleWraper">
+      {% if "favorites" in display_params.filters %}<a href="/movies">{% endif %}
+        <h1 class="pageTitle">My List</h1>
+      {% if "favorites" in display_params.filters %}</a>{% endif %}
+
+      {% if "favorites" in display_params.filters %}
+          <span class="pageTitle-separator">></span>
+          <h2 class="pageTitle">Favorites</h2>
+      {% endif %}
+    </div>
+
+    <i id="sortIcon" class="fas fa-cog sortIcon"></i>
+  </div>
+{% endblock %}
+
 {% block pagecontent %}
   <section id="pageContent" class='ml__content--wide'>
-    <h1 class="pageTitle">{{ user.username }}'s Movies</h1>
-
     {% if movies  %}
-      <div id="sortFilterContainer" class="ml__my-list--sort-filter-container">
-        <h3 class="ml__my-list--sort-filter-heading">Filter & Sort</h3>
-        <form class="ml__my-list--sort-filter-form">
-          <div class="ml__my-list--filter">
-            <span>Filter by: </span>
-            <div>
-              <input type="checkbox" id="favorites" name="filter" value="favorites" {% if "favorites" in display_params.filters %} checked {% endif %}>
-              <label for="favorites">Favorites</label> 
-            </div>
-          </div>
-
+      <div id="sortContainer" class="ml__my-list--sort-container hidden">
+        <form id="sortForm" class="ml__my-list--sort-form">
           <div class="ml__my-list--sort">
+            {% if "favorites" in display_params.filters %}
+              <input type="hidden" name="filter" value="favorites" />
+            {% endif %}
             <select id="sort" name="sort" class="ml__my-list--sort-term">
               <option {% if not display_params.sort %} selected {% endif %}value="" disabled hidden>Sort by...</option>
               <option {% if display_params.sort and "title" in display_params.sort.sort_term %} selected {% endif %}value="title">Title</option>
@@ -37,21 +46,13 @@
             </div>
           </div>
 
-          <div class="ml__my-list--sort-filter-buttons">
-            <button id="myListFilterButton" class="ml__my-list--sort-filter-apply-button" type="submit">Apply</button>
-            <a id="myListSortButton" class="ml__my-list--sort-filter-reset-button button" href="/movies">Reset</a>
-          </div>
+          <button id="myListSortButton" class="ml__my-list--sort-apply-button" type="submit">Apply</button>
         </form>
       </div>
-    {% endif %}
 
-    {% if "favorites" in display_params.filters %}
-      <div class="ml__my-favorites--heading-container">
-        <h2>My Favorites</h2>
-        {% if movies %}
-          <a id="backToMoviesLink" href="/movies">Back to All Movies</a>
-        {% endif %}
-      </div>
+      {% if movies and "favorites" in display_params.filters and "sort_term" not in display_params.sort %}
+        <a id="backToMoviesLink" href="/movies">Back to All Movies</a>
+      {% endif %}
     {% endif %}
 
     {% if not movies %}
