@@ -570,6 +570,7 @@ footer {
 .sortIcon {
   font-size: 18px;
   justify-self: end;
+  cursor: pointer;
 }
 
 /* favorite star */
