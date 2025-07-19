@@ -11,8 +11,8 @@
 -- for local or other
 \c movie_ledger
 
-DROP TABLE user_movies;
-DROP TABLE users;
+-- DROP TABLE user_movies;
+-- DROP TABLE users;
 DROP TABLE movies;
 
 
@@ -29,7 +29,7 @@ CREATE TABLE movies
 (
   imdb_id TEXT PRIMARY KEY, 
   title TEXT NOT NULL, 
-  year INT NOT NULL, 
+  release_year INT NOT NULL, 
   imdb_img TEXT NOT NULL
 );
 

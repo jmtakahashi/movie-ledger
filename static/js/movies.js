@@ -19,10 +19,11 @@ const sortButton = document.getElementById("myListSortButton")
 const pageContent = document.getElementById('pageContent');
 const backToMoviesLink = document.getElementById('backToMoviesLink')
 
-document.addEventListener("DOMContentLoaded", checkValuesSet);
+
 
 sortIcon && sortIcon.addEventListener("click", showHideSortBox)
 
+sortForm && document.addEventListener("DOMContentLoaded", checkValuesSet);
 sortForm && sortForm.addEventListener("change", checkValuesSet)
 
 // add event listener
@@ -30,7 +31,7 @@ for (let item of functionsBtnContainers) {
   item.addEventListener("click", handleMovieFunctionsClick)
 }
 
-function checkValuesSet(e) {
+function checkValuesSet(e) { 
   if (sortBy.value && (sortOrderAsc.checked || sortOrderDesc.checked)) {
     sortButton.classList.remove("disabled")
   }
@@ -84,10 +85,10 @@ function toggleMyList(movieID, e) {
   if (e.target.parentElement.getAttribute('data-my-list') === "false") {
     // only need the below atts if we are adding a movie
     const title = e.target.parentElement.getAttribute('data-title');
-    const year = e.target.parentElement.getAttribute('data-year');
+    const release_year = e.target.parentElement.getAttribute('data-release-year');
     const imdb_img = e.target.parentElement.getAttribute('data-img');
     
-    const params = { movieID, title, year, imdb_img };
+    const params = { movieID, title, release_year, imdb_img };
 
     /* send a request to our internal api point to add a movie to our db */
     axios

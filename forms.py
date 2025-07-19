@@ -47,7 +47,7 @@ class MovieAddEditForm(FlaskForm):
     """Movie add form on the movie detail page."""
 
     title = HiddenField("title")
-    year = HiddenField("year")
+    release_year = HiddenField("year")
     imdb_img = HiddenField("imdb_img")
     favorite = BooleanField("Favorite")
     platform = SelectField("Platform (optional)",

@@ -30,7 +30,7 @@
             <select id="sort" name="sort" class="ml__my-list--sort-term">
               <option {% if not display_params.sort %} selected {% endif %}value="" disabled hidden>Sort by...</option>
               <option {% if display_params.sort and "title" in display_params.sort.sort_term %} selected {% endif %}value="title">Title</option>
-              <option {% if display_params.sort and "year" in display_params.sort.sort_term %} selected {% endif %}value="year">Year</option>
+              <option {% if display_params.sort and "release_year" in display_params.sort.sort_term %} selected {% endif %}value="release+_year">Release Year</option>
               <option {% if display_params.sort and "date_added" in display_params.sort.sort_term %} selected {% endif %}value="date_added">Date Added</option>
               <option {% if display_params.sort and "date_viewed" in display_params.sort.sort_term %} selected {% endif %}value="date_viewed">Date Viewed</option>
             </select>
@@ -82,7 +82,7 @@
             <a class="ml__movie-list--image" href="/movie/{{ movie.movie_id }}" style="background-image: url({{ movie.movie_details.imdb_img }});">
               <div class="ml__movie-list--info-container">
                 <h3 class="ml__movie-list--title">{{ movie.movie_details.title }}</h3>
-                <p class="ml__movie-list--year">({{ movie.movie_details.year }})</p>
+                <p class="ml__movie-list--release-year">({{ movie.movie_details.release_year }})</p>
                 <p class="ml__movie-list--date-viewed">Date Viewed: {{ movie.date_viewed }}</p>
                 <p class="ml__movie-list--date-added">Date Added: {{ movie.date_added }}</p>
                 <p class="ml__movie-list--platform">Platform: {{ movie.platform }}</p>
