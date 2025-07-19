@@ -105,7 +105,7 @@ input[type="text"] {
 }
 
 select {
-  padding: .4em;
+  padding: 0.4em;
 }
 
 button, .button {
@@ -516,16 +516,6 @@ footer {
   border-bottom: 1px solid var(--body-border-color);
 }
 
-@media screen and (min-width: 767px) {
-.ml__my-list--sort-form {
-  width: 100%;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 3rem;
-}
-}
-
 .ml__my-list--sort-form label,
 .ml__my-list--sort-form input {
   margin: 0;
@@ -552,21 +542,38 @@ footer {
   margin: 0;
 }
 
-@media screen and (min-width: 768px) {
-  /* sort form */
-  .ml__my-list--sort {
-    border-bottom: none;
-  }
-}
-
 .ml__my-list--sort-apply-button {
   width: 100%;
 }
+
 
 .ml__my-list--sort-apply-button.disabled {
   opacity: 50%;
   pointer-events: none;
 }
+
+@media screen and (min-width: 501px) {
+  .ml__my-list--sort-container {
+    right: 0;
+    left: 0;
+  }
+  /* sort form wrapper*/
+  .ml__my-list--sort {
+    border-bottom: none;
+    padding: 0;
+  }
+  /* sort form */
+  .ml__my-list--sort-form {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 3rem;
+  }
+  .ml__my-list--sort-apply-button {
+    width: auto;
+  }
+}
+
 
 .ml__my-list--sort-note-container {
   display: flex;
