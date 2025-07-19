@@ -112,8 +112,8 @@ class Movie(db.Model):
                         primary_key=True)
     title = db.Column(db.Text,
                       nullable=False)
-    year = db.Column(db.String(4),
-                     nullable=False)
+    release_year = db.Column(db.String(4),
+                             nullable=False)
     imdb_img = db.Column(db.Text,
                          nullable=False)
 
@@ -122,7 +122,7 @@ class Movie(db.Model):
 
         m = self
 
-        return f"<Movie imdb_id={m.imdb_id} title={m.title} year={m.year}>"
+        return f"<Movie imdb_id={m.imdb_id} title={m.title} release_year={m.release_year}>"
 
 
 ###############################################################################

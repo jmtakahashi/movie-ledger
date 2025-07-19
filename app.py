@@ -316,11 +316,11 @@ def show_my_movies():
 
             def key(x): return x.movie_details.title
 
-        elif request.args['sort'] == "year":
-            sort_str = sort_str + "Year"
-            display_params["sort"]["sort_term"] = 'year'
+        elif request.args['sort'] == "releaseYear":
+            sort_str = sort_str + " Release Year"
+            display_params["sort"]["sort_term"] = 'release_year'
 
-            def key(x): return x.movie_details.year
+            def key(x): return x.movie_details.release_year
 
         elif request.args['sort'] == "date_added":
             sort_str = sort_str + "Date Added"
@@ -444,7 +444,7 @@ def handle_movie(movie_id):
                 # we need to add a new Movie entry and UserMovie entry
                 m = Movie(imdb_id=movie_id,
                           title=form.title.data,
-                          year=form.year.data[0:4],
+                          release_year=form.release_year.data[0:4],
                           imdb_img=form.imdb_img.data)
 
                 try:
@@ -482,7 +482,7 @@ def handle_movie(movie_id):
     # details of the movie we are viewing, so when we submit the
     # MovieAddEditForm our values will be correct
     form.title.data = movie['Title']
-    form.year.data = movie['Year']
+    form.release_year.data = movie['Year']
     form.imdb_img.data = movie['Poster']
 
     # check if this movie is already in our current user's list
@@ -542,7 +542,7 @@ def add_movie(movie_id):
             #   be our value and db field will be blank
             m = Movie(imdb_id=movie_id,
                       title=request.json["title"],
-                      year=request.json["year"][0:4],
+                      release_year=request.json["release_year"][0:4],
                       imdb_img=request.json["imdb_img"],
                       )
 

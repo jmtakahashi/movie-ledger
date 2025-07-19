@@ -51,7 +51,7 @@
               <a class="ml__movie-list--image" href="/movie/{{ movie.imdbID }}" style="background-image: url({{ movie.Poster }});">
                 <div class="ml__movie-list--info-container">
                   <h3 class="ml__movie-list--title">{{ movie.Title }}</h3>
-                  <p class="ml__movie-list--year">({{ movie.Year }})</p>
+                  <p class="ml__movie-list--release-year">({{ movie.Year }})</p>
                 </div>
               </a>
 
@@ -59,7 +59,7 @@
                     data-my-list="{% if movie.ml_inList %}true{% else %}false{% endif %}"
                     data-id="{{ movie.imdbID}}"
                     data-title="{{ movie.Title}}"
-                    data-year="{{ movie.Year}}"
+                    data-release-year="{{ movie.Year}}"
                     data-img="{{ movie.Poster}}">
                 
                 <i class="{% if movie.favorite %}fas{% else %}far{% endif %} fa-heart favoriteIcon ml__movie--fav {% if not movie.ml_inList %}hidden{% endif %}"></i>
