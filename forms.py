@@ -49,7 +49,7 @@ class MovieAddEditForm(FlaskForm):
     title = HiddenField("title")
     release_year = HiddenField("year")
     imdb_img = HiddenField("imdb_img")
-    favorite = BooleanField("Favorite")
+    favorite = BooleanField("Add/Remove to your favorites")
     platform = SelectField("Platform (optional)",
                            choices=[
                                ("", ""),

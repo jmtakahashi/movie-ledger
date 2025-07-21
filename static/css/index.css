@@ -122,6 +122,10 @@ button, .button {
   cursor: pointer;
 }
 
+.button {
+  -webkit-appearance: button;
+}
+
 button.link {
   font-weight: 400;
   padding: 0;
@@ -180,6 +184,19 @@ nav {
   gap: .75rem;
 }
 
+/* swap search link for search button */
+.searchIcon-wrapper {
+  display: none;
+}
+@media screen and (max-width: 500px) {
+  .searchIcon-wrapper {
+    display: block
+  }
+  .my-list-links__movie-search-link {
+    display: none;
+  }
+}
+
 .my-list-links.desktop {
   display: none;
 }
@@ -209,12 +226,16 @@ nav {
   border-radius: 20px;
 }
 
+/* all icons */
+.fas, .far {
+  cursor: pointer;
+}
+
 .logoutIcon,
 .sortIcon,
 .searchIcon,
 .favoritesIcon {
   font-size: 18px;
-  cursor: pointer;
 }
 
 .favoritesIcon.active {
@@ -396,6 +417,8 @@ footer {
   background-position: center center;
   background-size: cover;
   margin-bottom: 12px;
+  border-radius: 5px;
+  text-decoration: none;
 }
 .ml__movie-list--info-container {
   display: none;
@@ -407,25 +430,25 @@ footer {
   align-items: center;
   gap: .25rem;
   padding: 1rem;
-  text-decoration: none;
 }
 
 .ml__movie-list--image:hover .ml__movie-list--info-container {
   display: flex;
 }
 
-.ml__movie-list--title {
+.ml__movie-list--info-container > * {
   margin: 0;
-  font-weight: 600;
-  font-size: 1rem;
-  line-height: 1.15;
   text-align: center;
 }
 
+.ml__movie-list--title {
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
 .ml__movie-list--info-container p {
-  margin: 0;
   font-size: 0.75rem;
-  text-align: center;
 }
 
 .ml__search-results--pagination-container {
@@ -450,16 +473,21 @@ footer {
   padding-bottom: 2rem;
 }
 
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 651px) {
   .ml__movie-details-container {
     flex-direction: row;
   }
+}
+
+.ml__movie-details-image {
+  border-radius: 5px;;
 }
 
 .ml__movie-details {
   margin: 0;
   padding: 0;
   padding-bottom: 1rem;
+  margin-bottom: 1rem;
   list-style: none;
   border-bottom: 1px dotted var(--body-border-color);
 }
@@ -473,36 +501,107 @@ footer {
   margin-bottom: 0.5rem;
 }
 
-
 .ml__movie-details--my-list-container{
-  padding-top: 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px dotted var(--body-border-color);
+}
+
+.ml__movie-details--my-list-container .ml__movie--my-list {
+  display: inline;
+  margin-right: .5rem;
 }
 
 .ml__movie-details--edit-title {
+  display: inline;
   margin-bottom: 0;
 }
 
 .ml__movie-details--edit-note {
   margin-top: 0;
-  margin-bottom: 2rem;
+  font-size: 14px;
 }
 
+/* keeps the nested label container to its natural size */
+.ml__movie-details--add-edit-form-favorite-wrapper {
+  align-items: start;
+}
+
+/* the label/container for add/remove favorite */
 .ml__movie-details--add-edit-form-favorite {
-  flex-direction: row-reverse;
-  justify-content: flex-end;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
   align-items: center;
   gap: 0.75rem;
+  margin-bottom: 0;
+  cursor: pointer;
+  position: relative;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
-.ml__movie-details--add-edit-form-favorite label,
+/* Hide the browser's default checkbox */
 .ml__movie-details--add-edit-form-favorite input {
-  flex-grow: 0;
-  margin-bottom: 0;
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* toggle fav icons and text based on checked value of the input */
+
+.ml__movie-details--add-edit-form-favorite input ~ .far.ml__movie--fav {
+  display: block;
+}
+.ml__movie-details--add-edit-form-favorite input ~ .fas.ml__movie--fav {
+  display: none;
+}
+.ml__movie-details--add-edit-form-favorite input:checked ~ .far.ml__movie--fav {
+  display: none;
+}
+.ml__movie-details--add-edit-form-favorite input:checked ~ .fas.ml__movie--fav {
+  display: block;
+}
+.ml__movie-details--add-edit-form-favorite input ~ .ml__movie--fav-text .ml__movie--fav-addText {
+  display: inline;
+}
+.ml__movie-details--add-edit-form-favorite input ~ .ml__movie--fav-text .ml__movie--fav-removeText {
+  display: none;
+}
+.ml__movie-details--add-edit-form-favorite input:checked ~ .ml__movie--fav-text .ml__movie--fav-addText {
+  display: none;
+}
+.ml__movie-details--add-edit-form-favorite input:checked ~ .ml__movie--fav-text .ml__movie--fav-removeText {
+  display: inline;
+}
+
+@media screen and (min-width: 768px) {
+  .ml__add-edit-movie--input-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1.25rem;
+  }
+}
+
+.ml__add-edit-movie--button-wrapper {
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+@media screen and (min-width: 768px){
+  .ml__add-edit-movie--button-wrapper {
+    flex-direction: row;
+  }
 }
 
 .ml__movie-details--add-edit-form-platform select {
   padding: .5rem;
-
 }
 
 /* my-list sort & filter form */
@@ -552,6 +651,8 @@ footer {
   pointer-events: none;
 }
 
+
+
 @media screen and (min-width: 501px) {
   .ml__my-list--sort-container {
     right: 0;
@@ -594,27 +695,22 @@ footer {
   gap: .75rem;
 }
 
-/* favorite star */
-.favoriteIcon {
-  font-size: 1.55rem;
-  cursor: pointer;
+.ml__movie--fav,
+.ml__movie--my-list {
+  font-size: 18px;
 }
 
-/* .fas favorited */
-/* .far not favorited */
-.far.favoriteIcon {
+/* .fas - favorited */
+/* .far - not favorited */
+.far.ml__movie--fav {
   color: #fff;
 }
 
-.fas.favoriteIcon{
+.fas.ml__movie--fav{
   color: var(--logo-color);
 }
 
-/* added checkmark */
-.fa-check-circle {
-  font-size: 1.65rem;
-  cursor: pointer;
-}
+
 
 .ml__edit-profile--edit-container {
   border-bottom: 1px dotted var(--body-border-color);

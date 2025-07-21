@@ -350,6 +350,11 @@ def show_my_movies():
         # our final sort function based on the given vars
         movies.sort(key=key, reverse=reverse)
 
+    # format data (date added and ) to human readable
+    for m in movies:
+        formattedDate = m.date_added.date().strftime("%m.%d.%y")
+        m.date_added = formattedDate
+
     return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str)
 
 
@@ -503,6 +508,27 @@ def handle_movie(movie_id):
         form.date_added.data = movie_in_users_list.date_added
 
     return render_template("movie-detail.html", form=form, movie=movie, movie_in_users_list=movie_in_users_list)
+
+
+@app.route("/movie/<movie_id>/delete")
+def delete_movie_route(movie_id):
+    if not g.user:
+        flash("Please login!", "danger")
+        return redirect("/login")
+
+    try:
+        # below we delete the item in sqlalchemy, but we need db.session.commit()
+        UserMovie.query.filter_by(
+            user_id=g.user.id, movie_id=movie_id).delete()
+
+        db.session.commit()
+
+    except:
+        flash("Sorry, There was an error removing the movie.  Please try again.", "danger")
+        return redirect(f"/movie/{movie_id}")
+
+    flash("Movie removed from your list!", "success")
+    return redirect("/movies")
 
 
 # internal api route - add a movie to user's list ajax

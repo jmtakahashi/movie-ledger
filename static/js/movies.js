@@ -46,7 +46,7 @@ function showHideSortBox(e) {
 
 // click handler
 async function handleMovieFunctionsClick(e) {
-  if (e.target.classList.contains('ml__movie--add-remove-button')) {
+  if (e.target.classList.contains('ml__movie--my-list')) {
     const imdb_id = e.target.parentElement.getAttribute('data-id');
     toggleMyList(imdb_id, e)
   }
