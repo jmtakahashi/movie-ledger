@@ -419,6 +419,7 @@ footer {
   margin-bottom: 12px;
   border-radius: 5px;
   text-decoration: none;
+  transition: all 200ms;
 }
 .ml__movie-list--info-container {
   display: none;
@@ -430,6 +431,11 @@ footer {
   align-items: center;
   gap: .25rem;
   padding: 1rem;
+}
+
+.ml__movie-list--image:hover {
+  transform: scale(1.05);
+  transition: all 200ms;
 }
 
 .ml__movie-list--image:hover .ml__movie-list--info-container {
