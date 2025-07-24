@@ -18,6 +18,8 @@ from forms import (UserAddForm, LoginForm, UserEditForm,
 from models import db, connect_db, User, Movie, UserMovie
 from services import movie_search, movie_search_by_id
 
+from utils import DebugUtilities
+
 app = Flask(__name__)
 cors = CORS(app)
 
@@ -74,12 +76,24 @@ CURR_USER_KEY = "curr_user"
 
 @app.before_request
 def add_user_to_g():
-    """If we're logged in, add curr user to Flask global."""
+    """If we're logged in (session[CURR_USER_KEY] is sent from the client), 
+    add curr user to Flask global."""
 
     # g.user will contain movies as well
     # we set up the relationship in our model
     if CURR_USER_KEY in session:
-        g.user = User.query.get(session[CURR_USER_KEY])
+        # this check addresses an edge case where the user was deleted
+        # from the database but was still in a session in the browser.
+        #
+        # check that the user data actually exists in the db
+        u = User.query.get(session[CURR_USER_KEY])
+
+        if u:
+            g.user = u
+
+        else:
+            g.user = None
+            do_logout()
 
     else:
         g.user = None

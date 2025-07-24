@@ -33,6 +33,8 @@ class User(db.Model):
                       nullable=False)
     password = db.Column(db.Text,
                          nullable=False)
+    date_created = db.Column(
+        db.DateTime, default=datetime.now, nullable=False)
     # since we set nullable to false, we cannot add a "None" or "Null" value as the default
     img_url = db.Column(db.String(50),
                         default="./static/images/generic-user-icon-600px.jpg",
@@ -110,7 +112,7 @@ class Movie(db.Model):
                         primary_key=True)
     title = db.Column(db.Text,
                       nullable=False)
-    release_year = db.Column(db.String(4),
+    release_year = db.Column(db.Integer(),
                              nullable=False)
     imdb_img = db.Column(db.Text,
                          nullable=False)
@@ -138,7 +140,7 @@ class UserMovie(db.Model):
         'movies.imdb_id'), primary_key=True)
 
     date_added = db.Column(
-        db.DateTime, default=datetime.now(), nullable=False)
+        db.DateTime, default=datetime.now, nullable=False)
 
     platform = db.Column(db.Text, nullable=True)
 
