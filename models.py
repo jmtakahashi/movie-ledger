@@ -132,7 +132,7 @@ class UserMovie(db.Model):
     __tablename__ = "users_movies"
 
     user_id = db.Column(db.Integer, db.ForeignKey(
-        'users.id'), primary_key=True)
+        'users.id', ondelete="cascade"), primary_key=True)
 
     movie_id = db.Column(db.String(10), db.ForeignKey(
         'movies.imdb_id'), primary_key=True)
