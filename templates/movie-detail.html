@@ -38,7 +38,7 @@
           {% endif %}
         </div>
 
-        <form id="ml__add-edit-movie-form" class="ml__add-edit-movie-form" action="/movie/{{ movie['imdbID'] }}" method="POST">
+        <form id="ml__add-edit-movie-form" class="ml__add-edit-movie-form" method="POST">
           {{ form.hidden_tag() }}
 
           <div class="ml__movie-details--add-edit-form-favorite-wrapper">
@@ -56,11 +56,21 @@
           <div class='ml__add-edit-movie--input-wrapper'>            
             <div class="ml__movie-details--add-edit-form-platform">
               {{ form.platform.label }}
-              {{ form.platform }}    
+              {{ form.platform }}
+              {% for error in form.platform.errors %}
+                <div>
+                  <span class="error">{{ error}}</span>
+                </div>
+              {% endfor %}
             </div>
             <div class="ml__movie-details--add-edit-form-date-viewed">
               {{ form.date_viewed.label }}
               {{ form.date_viewed }}    
+              {% for error in form.platform.errors %}
+                <div>
+                  <span class="error">{{ error}}</span>
+                </div>
+              {% endfor %}
             </div>
           </div>
 
@@ -72,7 +82,9 @@
                 Update Details
               {% endif %}
             </button>
+            {% if movie_in_users_list %}
             <a class="button" href="/movie/{{ movie['imdbID'] }}/delete">Remove from My List</a>
+            {% endif %}
           </div>
 
         </form>

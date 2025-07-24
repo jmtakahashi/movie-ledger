@@ -2,27 +2,30 @@
 --   psql < data.sql
 --   psql [database_name]
 
--- DROP DATABASE IF EXISTS movie_ledger;
--- CREATE DATABASE movie_ledger;
+DROP DATABASE IF EXISTS movie_ledger;
+CREATE DATABASE movie_ledger;
 
--- for supabse
+DROP DATABASE IF EXISTS movie_ledger_test;
+CREATE DATABASE movie_ledger_test;
+
+-- for supabase
 -- \c postgres
 
 -- for local or other
 \c movie_ledger
 
--- DROP TABLE user_movies;
--- DROP TABLE users;
 DROP TABLE movies;
+DROP TABLE user_movies;
+DROP TABLE users;
 
 
 CREATE TABLE users
 (
   id SERIAL PRIMARY KEY, 
-  username TEXT UNIQUE NOT NULL, 
-  email TEXT NOT NULL, 
+  username TEXT NOT NULL, 
+  email TEXT UNIQUE NOT NULL, 
   password TEXT NOT NULL, 
-  img_url TEXT
+  img_url TEXT NOT NULL
 );
 
 CREATE TABLE movies

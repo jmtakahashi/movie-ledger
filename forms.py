@@ -20,7 +20,7 @@ class UserAddForm(FlaskForm):
 class LoginForm(FlaskForm):
     """Login form."""
 
-    username = StringField('Username', validators=[InputRequired()])
+    email = StringField('Email', validators=[InputRequired()])
     password = PasswordField('Password', validators=[InputRequired()])
 
 
@@ -46,10 +46,11 @@ class UserDeleteForm(FlaskForm):
 class MovieAddEditForm(FlaskForm):
     """Movie add form on the movie detail page."""
 
-    title = HiddenField("title")
-    release_year = HiddenField("year")
-    imdb_img = HiddenField("imdb_img")
-    favorite = BooleanField("Add/Remove to your favorites")
+    title = HiddenField("title", validators=[InputRequired()])
+    release_year = HiddenField("year", validators=[InputRequired()])
+    imdb_img = HiddenField("imdb_img", validators=[InputRequired()])
+    favorite = BooleanField(
+        "Add/Remove to your favorites")
     platform = SelectField("Platform (optional)",
                            choices=[
                                ("", ""),

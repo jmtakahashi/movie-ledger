@@ -3,29 +3,19 @@
 # run these tests like:
 #    python -m unittest test_movie_model.py
 
-import os
+from app import app
 from unittest import TestCase
 
-from models import db, Movie, User
-
-
-# BEFORE we import our app, let's set an environmental variable
-# to use a different database for tests (we need to do this
-# before we import our app, since that will have already
-# connected to the database
-
-os.environ['DATABASE_URL'] = "postgresql:///movie_ledger_test"
-
-
-# Now we can import app
-
-from app import app
+from models import db, Movie, User, UserMovie
 
 
 ################################################################################
 # testing config
-app.config['SQLALCHEMY_ECHO'] = False
 
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///movie_ledger_test"
+app.config['TESTING'] = True
+app.config['DEBUG_TB_HOSTS'] = ['dont-show-debug-toolbar']
+app.config['SQLALCHEMY_ECHO'] = False
 
 # Create our tables (we do this here, so we only create the tables
 # once for all tests --- in each test, we'll delete the data
@@ -40,130 +30,106 @@ db.create_all()
 class MovieModelTestCase(TestCase):
     """Test Movie model."""
 
+    ########################################################################
+    # this will run once before all tests run
+
+    # @classmethod
+    # def setUpClass(cls) -> None:
+    #     return super().setUpClass()
+
+    ########################################################################
+    # this will run once after all tests complete
+
+    @classmethod
+    def tearDownClass(cls):
+        UserMovie.query.delete()
+        Movie.query.delete()
+        User.query.delete()
+        db.session.commit()
+
+    ########################################################################
+    # this will run before every individual test
+
     def setUp(self):
         """Create test client, add sample data."""
 
-
         # start fresh with no db
+        UserMovie.query.delete()
         Movie.query.delete()
         User.query.delete()
 
+        # create 1 user in our Users model.
+        u = User(
+            username="testuser",
+            email="test@test.com",
+            password="HASHED_PASSWORD",
+            img_url=""
+        )
 
-        # create  2 users in our Users model.
-        u1 = User(
-                username="testuser",
-                email="test@test.com",
-                password="HASHED_PASSWORD",
-                img_url=""
-            )
-
-        u2 = User(
-                username="testuser2",
-                email="test@test.com",
-                password="HASHED_PASSWORD",
-                img_url=""
-            )
-
-        db.session.add(u1)
-        db.session.add(u2)
+        db.session.add(u)
         db.session.commit()
 
+        self.id = u.id
 
         self.client = app.test_client()
 
+    ########################################################################
+    # this will run after every individual test
 
     def tearDown(self):
         """Rollback on exit"""
 
         db.session.rollback()
 
+    ########################################################################
+    # testing
 
     def test_movie_model(self):
         """Does basic model work?"""
 
-        # get our testuser
-        u = User.query.filter_by(username="testuser").first()
+        # create a movie
+        m1 = Movie(
+            imdb_id="testID123",
+            title="Test Movie",
+            release_year="2023",
+            imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
+        )
 
-        # create a movie for our user
-        m = Movie(
-                imdb_id="testID123",
-                user_id=u.id,
-                title="Test Movie",
-                year="2023",
-                imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
-            )
-
-        db.session.add(m)
+        db.session.add(m1)
         db.session.commit()
 
         # User should have 1 movie
-        self.assertEqual(len(u.movies), 1)
+        self.assertEqual(len(Movie.query.all()), 1)
 
         # create another movie from the recently created user
         m2 = Movie(
-                imdb_id="testID456",
-                user_id=u.id,
-                title="Test Movie 2",
-                year="2023",
-                imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
-            )
+            imdb_id="testID456",
+            title="Test Movie 2",
+            release_year="2023",
+            imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
+        )
 
         db.session.add(m2)
         db.session.commit()
 
-        # User should have 2 messages
-        self.assertEqual(len(u.movies), 2)
-
-
-    def test_duplicate_movie_different_user(self):
-        """Can duplicate movies be added with different user id's?"""
-
-        # get our users
-        u1 = User.query.filter_by(username="testuser").first()
-        u2 = User.query.filter_by(username="testuser2").first()
-
-        # create a movie for user1
-        m1 = Movie(
-                imdb_id="testID456",
-                user_id=u1.id,
-                title="Test Movie 2",
-                year="2023",
-                imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
-            )
-
-        # create the same movie for user2
-        m2 = Movie(
-                imdb_id="testID456",
-                user_id=u2.id,
-                title="Test Movie 2",
-                year="2023",
-                imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
-            )
-
-        db.session.add(m1)
-        db.session.add(m2)
-        db.session.commit()
-
-        # movie db should have 2 movies
+        # should have 2 movies
         self.assertEqual(len(Movie.query.all()), 2)
 
+        self.assertEqual(
+            f"<Movie imdb_id={m1.imdb_id} title={m1.title} release_year={m1.release_year}>", str(m1))
+        self.assertEqual(
+            f"<Movie imdb_id={m2.imdb_id} title={m2.title} release_year={m2.release_year}>", str(m2))
 
-    def test_fail_on_duplicate_movie_same_user(self):
-        """Does movie fail on adding a duplicate movie with the same user_id?"""
-
-        # get our users
-        u = User.query.filter_by(username="testuser").first()
-
-        user_id = u.id
+    def test_fail_on_duplicate_movie(self):
+        """Does movie fail on adding a duplicate movie with the same imdb_id?"""
 
         # create a movie for the user
         m1 = Movie(
-                imdb_id="testID456",
-                user_id=user_id,
-                title="Test Movie 2",
-                year="2023",
-                imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
-            )
+            imdb_id="testID456",
+            title="Test Movie 2",
+            release_year="2023",
+            imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
+        )
 
         db.session.add(m1)
         db.session.commit()
@@ -173,12 +139,11 @@ class MovieModelTestCase(TestCase):
 
         # create the a movie for recently created user
         dupMovie = Movie(
-                imdb_id="testID456",
-                user_id=user_id,
-                title="Test Movie 2",
-                year="2023",
-                imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
-            )
+            imdb_id="testID456",
+            title="Test Movie 2",
+            release_year="2023",
+            imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
+        )
 
         db.session.add(dupMovie)
 
@@ -186,81 +151,65 @@ class MovieModelTestCase(TestCase):
         from sqlalchemy.exc import IntegrityError
         self.assertRaises(IntegrityError, db.session.commit)
 
-
-    def test_fail_on_nonexistent_user_id(self):
-        """Does movie fail if a user_id doesn't exist in the user's table?"""
-
-        # get the 2nd  user.  the id should be the highest id in our db.
-        u2 = User.query.filter_by(username="testuser2").first()
-
-        # create a movie from the recently created user with a user ID that doesn't exist
-        m = Movie(
-                imdb_id="testID456",
-                user_id=u2.id+1,
-                title="Test Movie 2",
-                year="2023",
-                imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
-            )
-
-        db.session.add(m)
-
-        from sqlalchemy.exc import IntegrityError
-        self.assertRaises(IntegrityError, db.session.commit)
-
-
     def test_movie_user_relationship(self):
         """Does the User relationship work properly on the movie model?"""
 
-        # get our test user 1
-        u = User.query.filter_by(username="testuser").first()
-
-        # add a movie with the recently created user
+        # add a UserMovie which should automatically add a movie
         m = Movie(
-                imdb_id="testID456",
-                user_id=u.id,
-                title="Test Movie 2",
-                year="2023",
-                imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
-            )
+            imdb_id="testID456",
+            title="Test Movie 2",
+            release_year="2023",
+            imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
+        )
 
         db.session.add(m)
         db.session.commit()
 
-        # we should be able access details of our user from the movie model
+        um = UserMovie(
+            user_id=self.id,
+            movie_id="testID456",
+        )
+
+        db.session.add(um)
+        db.session.commit()
+
+        # we should be able access details of our users from the movie model
         # username should be the same regardless of how we access it
-        self.assertEqual(m.user.username, u.username)
-        # we should find our movie id in our u.movies list
-        # note: since there is only one movie in our list, we can access
-        #   using the index of the list
-        self.assertEqual(m.imdb_id, u.movies[0].imdb_id)
+        self.assertEqual(len(m.users), 1)
+        self.assertEqual(m.users[0].email, 'test@test.com')
 
+    def test_movie_delete(self):
+        """Does the deleting a movie fail if there is an associate UserMovie?"""
 
-    def test_movie_user_delete(self):
-        """Does the deleting a user also delete the associated movies?"""
-
-        # get our user
-        u = User.query.filter_by(username="testuser").first()
-
-        user_id = u.id
-
-        # create a movie associated to our user
+        # add a UserMovie which should automatically add a movie
         m = Movie(
-                imdb_id="testID456",
-                user_id=u.id,
-                title="Test Movie 2",
-                year="2023",
-                imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
-            )
+            imdb_id="testID456",
+            title="Test Movie 2",
+            release_year="2023",
+            imdb_img='http://www.test-url.com/test-directory/static/images/test.jpg'
+        )
 
         db.session.add(m)
         db.session.commit()
 
-        # delete our test user
-        db.session.delete(u)
+        um = UserMovie(
+            user_id=self.id,
+            movie_id="testID456",
+        )
+
+        db.session.add(um)
         db.session.commit()
 
+        all_movie = Movie.query.all()
+        all_user_movie = UserMovie.query.all()
 
-        num_movies = Movie.query.filter_by(user_id=user_id).count()
+        print("")
+        print(all_movie)
+        print(all_user_movie)
+        print("")
 
-        # there should be no movies with our user_id in our db
-        self.assertEqual(num_movies, 0)
+        # attempt to delete our new movie
+        db.session.delete(m)
+
+        from sqlalchemy.exc import IntegrityError
+        self.assertRaises(IntegrityError, db.session.commit)

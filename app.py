@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 # import text so we can use fstrings in our filter/sort queries
 from sqlalchemy.sql import text
 
-# from flask_debugtoolbar import DebugToolbarExtension
+from flask_debugtoolbar import DebugToolbarExtension
 from flask_cors import CORS
 
 from forms import (UserAddForm, LoginForm, UserEditForm,
@@ -19,7 +19,7 @@ from models import db, connect_db, User, Movie, UserMovie
 from services import movie_search, movie_search_by_id
 
 app = Flask(__name__)
-cors = CORS()
+cors = CORS(app)
 
 # Get DB_URI from env variable (useful for production/testing) or,
 # if not set there, use development local db.
@@ -109,8 +109,11 @@ def signup():
 
     If form not valid, present form.
 
-    If username already exists, flash message and re-present form.
+    If email already exists, flash message and re-present form.
     """
+
+    if CURR_USER_KEY in session:
+        return redirect("/movies")
 
     form = UserAddForm()
 
@@ -129,12 +132,12 @@ def signup():
 
         except IntegrityError as exc:
             # need to find a way to figure out which error
-            flash("Username already exists!", 'danger')
-
-            return render_template('/signup.html', form=form)
+            flash("Email already exists.", 'danger')
+            return render_template('signup.html', form=form)
 
         do_login(u)
 
+        # on successfull signup, template will show a welcome message
         return redirect('/movie-search')
 
     return render_template('signup.html', form=form)
@@ -147,10 +150,13 @@ def login():
     Authenticate credentials and redirect to the movies page.
     """
 
+    if CURR_USER_KEY in session:
+        return redirect("/movies")
+
     form = LoginForm()
 
     if form.validate_on_submit():
-        u = User.authenticate(form.username.data, form.password.data)
+        u = User.authenticate(form.email.data, form.password.data)
 
         if u:
             do_login(u)
@@ -167,9 +173,12 @@ def login():
 def logout():
     """Handle logout of user."""
 
+    if CURR_USER_KEY not in session:
+        return redirect("/")
+
     do_logout()
 
-    flash("You have been logged out successfully!", "success")
+    flash("You have been logged out.", "success")
     return redirect('/')
 
 
@@ -180,15 +189,15 @@ def logout():
 def edit_profile():
     """Show/handle the user profile editing page.  Require auth!"""
 
-    if not g.user:
-        flash("Please login!", "danger")
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
         return redirect("/login")
 
     editForm = UserEditForm(obj=g.user)
     deleteForm = UserDeleteForm()
 
     if editForm.validate_on_submit():
-        u = User.authenticate(g.user.username, editForm.password.data)
+        u = User.authenticate(g.user.email, editForm.password.data)
 
         if u:
             # update the user with the new data
@@ -207,13 +216,13 @@ def edit_profile():
                 db.session.commit()
 
             except IntegrityError as exc:
-                flash("Username already exists!", "danger")
+                flash("Email already exists.", "danger")
                 return redirect("/profile")
 
-            flash("Your profile has been updated!", "success")
+            flash("Your profile has been updated.", "success")
             return redirect("/profile")
 
-        flash("Current password incorrect!", "danger")
+        flash("Current password incorrect.", "danger")
         return redirect("/profile")
 
     return render_template("profile.html", editForm=editForm, deleteForm=deleteForm, user=g.user)
@@ -223,14 +232,14 @@ def edit_profile():
 def delete_profile():
     """Delete the current user's information.  Require auth!"""
 
-    if not g.user:
-        flash("Please login!", "danger")
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
         return redirect("/login")
 
     deleteForm = UserDeleteForm()
 
     if deleteForm.validate_on_submit():
-        u = User.authenticate(g.user.username, deleteForm.password.data)
+        u = User.authenticate(g.user.email, deleteForm.password.data)
 
         if u:
             try:
@@ -238,15 +247,15 @@ def delete_profile():
                 db.session.commit()
 
             except:
-                flash("There was an error, please refresh and try again!", "danger")
+                flash("There was an error, please refresh and try again.", "danger")
                 return redirect("/profile")
 
             do_logout()
 
-            flash("Your profile has been deleted!", "danger")
+            flash("Your profile has been deleted.", "danger")
             return redirect("/")
 
-        flash("Incorrect password! Your profile has not been deleted!", "danger")
+        flash("Incorrect password. Your profile has not been deleted.", "danger")
         return redirect("/profile")
 
     return redirect("/profile")
@@ -266,8 +275,8 @@ def show_my_movies():
     # user_movie.favorite, user_movie.date_added, user_movie.platform, etc.
     # user_movie.movie_details.title, user_movie.movie_details.imdb_img
 
-    if not g.user:
-        flash("Please login!", "danger")
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
         return redirect("/login")
 
     ###########################################################################
@@ -284,12 +293,6 @@ def show_my_movies():
 
     # if there's a filter add to the filter flags list arg
     if request.args.get('filter'):
-
-        print("")
-        print("*********************")
-        print("should be adding filters to display params here")
-        print("*********************")
-        print("")
 
         display_params["filters"] = ['favorites']
 
@@ -377,15 +380,28 @@ def handle_movie(movie_id):
     # on submission of the form, we should check to see if the
     # movie is in the Movie table again, in case another user added it
 
-    if not g.user:
-        flash("Please login!", "danger")
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
         return redirect("/login")
 
     form = MovieAddEditForm()
 
+    print("")
+    print("***********************")
+    print("edit route hit")
+    print("***********************")
+    print("")
+
     ###########################################################################
     # add movie to user's list by form (from movie detail page)
     if form.validate_on_submit():
+
+        print("")
+        print("***********************")
+        print("form validated")
+        print(form)
+        print("***********************")
+        print("")
 
         # if date_added field contains data, this movie already exists
         # in the current user's list, so this form submission will be an
@@ -394,21 +410,28 @@ def handle_movie(movie_id):
         if form.date_added.data:
 
             # query the existing UserMovie entry
-            um = UserMovie.query.get((g.user.id, movie_id))
+            um = UserMovie.query.get((session[CURR_USER_KEY], movie_id))
 
             # update values.  there will only be 3 that we can modify
-            um.favorite = form.favorite.data
+            um.favorite = False if not form.favorite.data else form.favorite.data
             um.platform = None if not form.platform.data else form.platform.data
             um.date_viewed = form.date_viewed.data
+
+            print("")
+            print("***********************")
+            print("From app.py after form data is recieved: ")
+            print(um.favorite)
+            print("***********************")
+            print("")
 
             try:
                 db.session.commit()
 
             except:
-                flash("There was an error adding to your list!", "danger")
+                flash("There was an error adding the movie to your list.", "danger")
                 return redirect(f"/movie/{movie_id}")
 
-            flash("Movie updated!", "success")
+            flash("Movie details updated.", "success")
 
         # save a new movie to the user's list.  but we still need to
         # check if the movie exists in the Movie table.  it may already
@@ -430,7 +453,7 @@ def handle_movie(movie_id):
                 #   store that empty string in our db.
                 um = UserMovie(movie_id=movie_id,
                                user_id=g.user.id,
-                               favorite=form.favorite.data,
+                               favorite=False if not form.favorite.data else form.favorite.data,
                                platform=None if not form.platform.data else form.platform.data,
                                date_viewed=form.date_viewed.data,
                                )
@@ -440,10 +463,10 @@ def handle_movie(movie_id):
                     db.session.commit()
 
                 except IntegrityError as exc:
-                    flash("Movie is already in your list!", "danger")
+                    flash("Movie is already in your list.", "danger")
                     return redirect(f"/movie/{movie_id}")
 
-                flash("Movie added to your list!", "success")
+                flash("Movie added to your list.", "success")
 
             else:
                 # we need to add a new Movie entry and UserMovie entry
@@ -458,12 +481,12 @@ def handle_movie(movie_id):
                     db.session.commit()
 
                 except IntegrityError as exc:
-                    flash("Movie is already in your list!", "danger")
+                    flash("Movie is already in your list.", "danger")
                     return redirect(f"/movie/{movie_id}")
 
-                flash("Movie added to your list!", "success")
+                flash("Movie added to your list.", "success")
 
-        return redirect("/movies")
+        return redirect(f"/movies")
 
     ###########################################################################
     # GET request functionality below
@@ -475,7 +498,7 @@ def handle_movie(movie_id):
         movie = movie_search_by_id(movie_id)
 
     except:
-        flash("Sorry, There was an error processing your request", "danger")
+        flash("Sorry, There was an error processing your request.", "danger")
         return redirect("/movie-search")
 
     # if the movie id doesn't exist, redirect to search and flash a message
@@ -512,94 +535,89 @@ def handle_movie(movie_id):
 
 @app.route("/movie/<movie_id>/delete")
 def delete_movie_route(movie_id):
-    if not g.user:
-        flash("Please login!", "danger")
+
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
         return redirect("/login")
 
-    try:
-        # below we delete the item in sqlalchemy, but we need db.session.commit()
-        UserMovie.query.filter_by(
-            user_id=g.user.id, movie_id=movie_id).delete()
+    um = UserMovie.query.get((session[CURR_USER_KEY], movie_id))
 
-        db.session.commit()
+    if um:
+        try:
+            db.session.delete(um)
+            db.session.commit()
 
-    except:
-        flash("Sorry, There was an error removing the movie.  Please try again.", "danger")
+        except:
+            flash(
+                "Sorry, There was an error removing the movie from your list.  Please try again.", "danger")
+            return redirect(f"/movie/{movie_id}")
+
+        flash("Movie removed from your list.", "success")
         return redirect(f"/movie/{movie_id}")
 
-    flash("Movie removed from your list!", "success")
-    return redirect("/movies")
+    else:
+        flash('Movie not found.', 'error')
+        return redirect("/movies")
 
 
 # internal api route - add a movie to user's list ajax
 @app.route("/api/movie/<movie_id>", methods=["POST"])
 def add_movie(movie_id):
     """Add a movie to the user's list."""
-    if request.headers.get('Content-Type') == "application/json":
-        # save a new movie to our user's list.  but we still need to
-        # check if the movie exists in the Movie table.  it may already
-        # exist there from another user's addition.
-        movie_in_movies_table = Movie.query.get(movie_id)
 
-        if movie_in_movies_table:
-            um = UserMovie(movie_id=movie_id,
-                           user_id=g.user.id,
-                           )
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
+        return redirect("/login")
 
-            try:
-                db.session.add(um)
-                db.session.commit()
+    # save a new movie to our user's list.  but we still need to
+    # check if the movie exists in the Movie table.  it may already
+    # exist there from another user's addition.
+    movie_in_movies_table = Movie.query.get(movie_id)
 
-            except IntegrityError as exc:
-                print("Error: ", exc)
-                resp = jsonify({"message": "There was an error"})
-                return (resp, 400)
+    if movie_in_movies_table:
+        um = UserMovie(movie_id=movie_id,
+                       user_id=session[CURR_USER_KEY]
+                       )
 
-            # success response goes here
-            resp = jsonify({"message": "Movie added to list!"})
-            return (resp, 201)
+        try:
+            db.session.add(um)
+            db.session.commit()
 
-        else:
-            # favorite will take the default value from our model
-            # date_added will take the default from our model
-            # date_viewed is optional so None <class 'NoneType'> will
-            #   be our value and db field will be blank
-            # platform is optional so None <class 'NoneType'> will
-            #   be our value and db field will be blank
-            m = Movie(imdb_id=movie_id,
-                      title=request.json["title"],
-                      release_year=request.json["release_year"][0:4],
-                      imdb_img=request.json["imdb_img"],
-                      )
+        except IntegrityError as exc:
+            print("Error: ", exc)
+            resp = jsonify({"message": "There was an error"})
+            return (resp, 400)
 
-            try:
-                g.user.movies.append(m)
-                db.session.add(g.user)
-                db.session.commit()
+        # success response goes here
+        resp = jsonify({"message": "Movie added to list."})
+        return (resp, 201)
 
-            except IntegrityError as exc:
-                print("Error: ", exc)
-                resp = jsonify({"message": "There was an error"})
-                return (resp, 400)
+    else:
+        # favorite will take the default value from our model
+        # date_added will take the default from our model
+        # date_viewed is optional so None <class 'NoneType'> will
+        #   be our value and db field will be blank
+        # platform is optional so None <class 'NoneType'> will
+        #   be our value and db field will be blank
+        m = Movie(imdb_id=movie_id,
+                  title=request.json["title"],
+                  release_year=request.json["release_year"][0:4],
+                  imdb_img=request.json["imdb_img"],
+                  )
 
-            # success response goes here
-            resp = jsonify({"message": "Movie added to list!"})
-            return (resp, 201)
+        try:
+            g.user.movies.append(m)
+            db.session.add(g.user)
+            db.session.commit()
 
+        except IntegrityError as exc:
+            print("Error: ", exc)
+            resp = jsonify({"message": "There was an error"})
+            return (resp, 400)
 
-# internal api route - delete a movie ajax
-@app.route("/api/movie/<movie_id>", methods=["DELETE"])
-def delete_movie(movie_id):
-    """Delete a movie from our db."""
-
-    # below we delete the item in sqlalchemy, but we need db.session.commit()
-    UserMovie.query.filter_by(user_id=g.user.id, movie_id=movie_id).delete()
-
-    db.session.commit()
-
-    resp = jsonify({"message": "success"})
-
-    return (resp, 200)
+        # success response goes here
+        resp = jsonify({"message": "Movie added to list."})
+        return (resp, 201)
 
 
 # internal api route - update favorite ajax
@@ -607,17 +625,62 @@ def delete_movie(movie_id):
 def add_remove_favorite(movie_id):
     """Add or remove a movie as a favorite"""
 
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
+        return redirect("/login")
+
     m = UserMovie.query.filter_by(user_id=g.user.id, movie_id=movie_id).first()
 
-    m.favorite = not m.favorite
+    if m:
+        m.favorite = not m.favorite
 
-    db.session.commit()
+        try:
+            db.session.commit()
 
-    # send back our boolean value for "favorite" so we can
-    # keep the front end in sync with our database data
-    resp = jsonify({"message": "success", "favorite": m.favorite})
+        except:
+            resp = jsonify(
+                {"message": "There was an error.  Please try again."})
+            return (resp, 400)
 
-    return (resp, 200)
+        # send back our boolean value for "favorite" so we can
+        # keep the front end in sync with our database data
+        resp = jsonify({"message": "success", "favorite": m.favorite})
+        return (resp, 200)
+
+    else:
+        resp = jsonify({"message": "movie not found"})
+        return (resp, 404)
+
+
+# internal api route - delete a movie ajax
+@app.route("/api/movie/<movie_id>", methods=["DELETE"])
+def delete_movie(movie_id):
+    """Delete a movie from our db."""
+
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
+        return redirect("/login")
+
+    um = UserMovie.query.get((session[CURR_USER_KEY], movie_id))
+
+    if um:
+
+        # below we delete the item in sqlalchemy, but we need db.session.commit()
+        try:
+            db.session.delete(um)
+            db.session.commit()
+
+        except:
+            resp = jsonify(
+                {"message": "There was an error.  Please try again."})
+            return (resp, 400)
+
+        resp = jsonify({"message": "success"})
+        return (resp, 200)
+
+    else:
+        resp = jsonify({"message": "movie not found"})
+        return (resp, 404)
 
 
 ###############################################################################
@@ -628,8 +691,8 @@ def add_remove_favorite(movie_id):
 def search_movies():
     """Get all the movies based on a search term from form data"""
 
-    if not g.user:
-        flash("Please login!", "danger")
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
         return redirect("/login")
 
     # if a search term is provided, process the search

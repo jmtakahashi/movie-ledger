@@ -27,9 +27,9 @@ class User(db.Model):
                    primary_key=True,
                    autoincrement=True)
     username = db.Column(db.String(20),
-                         unique=True,
                          nullable=False)
     email = db.Column(db.Text,
+                      unique=True,
                       nullable=False)
     password = db.Column(db.Text,
                          nullable=False)
@@ -53,6 +53,7 @@ class User(db.Model):
 
     def __repr__(self):
         """Show Info about pet"""
+
         u = self
 
         return f"<User id={u.id} username={u.username} img_url={u.img_url}>"
@@ -77,11 +78,11 @@ class User(db.Model):
         return u
 
     @classmethod
-    def authenticate(cls, username, password):
+    def authenticate(cls, email, password):
         """Validate that user exists and password is correct."""
 
         # return user if valid, else return false
-        u = User.query.filter_by(username=username).first()
+        u = User.query.filter_by(email=email).first()
 
         if u and bcrypt.check_password_hash(u.password, password):
             return u
@@ -94,10 +95,6 @@ class User(db.Model):
         hashed_pwd = hashed.decode("utf8")
         return hashed_pwd
 
-    # def get_favorites(self):
-    #     favs = self.favorites.query.filter_by(favorite=True).all()
-    #     return favs
-
 
 ###############################################################################
 # movie model
@@ -109,6 +106,7 @@ class Movie(db.Model):
     __tablename__ = "movies"
 
     imdb_id = db.Column(db.String(10),
+                        unique=True,
                         primary_key=True)
     title = db.Column(db.Text,
                       nullable=False)
@@ -136,10 +134,11 @@ class UserMovie(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(
         'users.id'), primary_key=True)
 
-    movie_id = db.Column(db.Text, db.ForeignKey(
+    movie_id = db.Column(db.String(10), db.ForeignKey(
         'movies.imdb_id'), primary_key=True)
 
-    date_added = db.Column(db.Date, default=datetime.now(), nullable=-False)
+    date_added = db.Column(
+        db.DateTime, default=datetime.now(), nullable=False)
 
     platform = db.Column(db.Text, nullable=True)
 
@@ -155,4 +154,4 @@ class UserMovie(db.Model):
 
         um = self
 
-        return f"<UserMovie user_id={um.user_id} imdb_id={um.movie_id} favorite={um.favorite}>"
+        return f"<UserMovie user_id={um.user_id} movie_id={um.movie_id} favorite={um.favorite}>"

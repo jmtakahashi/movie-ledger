@@ -5,7 +5,7 @@
 {% block pagecontent %}
   <section class="ml__content--small">
     <h1 class="sectionTitle">Create an Account</h1>
-    <form id="ml__login-form" method="POST">
+    <form id="ml__signup-form" method="POST">
       {{ form.hidden_tag() }}
 
       {% for field in form if field.widget.input_type !='hidden' %}
