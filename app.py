@@ -400,22 +400,9 @@ def handle_movie(movie_id):
 
     form = MovieAddEditForm()
 
-    print("")
-    print("***********************")
-    print("edit route hit")
-    print("***********************")
-    print("")
-
     ###########################################################################
     # add movie to user's list by form (from movie detail page)
     if form.validate_on_submit():
-
-        print("")
-        print("***********************")
-        print("form validated")
-        print(form)
-        print("***********************")
-        print("")
 
         # if date_added field contains data, this movie already exists
         # in the current user's list, so this form submission will be an
@@ -430,13 +417,6 @@ def handle_movie(movie_id):
             um.favorite = False if not form.favorite.data else form.favorite.data
             um.platform = None if not form.platform.data else form.platform.data
             um.date_viewed = form.date_viewed.data
-
-            print("")
-            print("***********************")
-            print("From app.py after form data is recieved: ")
-            print(um.favorite)
-            print("***********************")
-            print("")
 
             try:
                 db.session.commit()
