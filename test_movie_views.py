@@ -43,12 +43,12 @@ class MovieViewTestCase(TestCase):
     ########################################################################
     # this will run once after all tests complete
 
-    # @classmethod
-    # def tearDownClass(cls):
-    #     UserMovie.query.delete()
-    #     Movie.query.delete()
-    #     User.query.delete()
-    #     db.session.commit()
+    @classmethod
+    def tearDownClass(cls):
+        UserMovie.query.delete()
+        Movie.query.delete()
+        User.query.delete()
+        db.session.commit()
 
     ########################################################################
     # this will run before every individual test

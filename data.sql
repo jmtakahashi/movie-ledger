@@ -14,8 +14,8 @@ CREATE DATABASE movie_ledger_test;
 -- for local or other
 \c movie_ledger
 
-DROP TABLE movies;
 DROP TABLE user_movies;
+DROP TABLE movies;
 DROP TABLE users;
 
 
