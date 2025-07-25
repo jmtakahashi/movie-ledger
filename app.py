@@ -369,7 +369,7 @@ def show_my_movies():
 
     # format data (date added and ) to human readable
     for m in movies:
-        formattedDate = m.date_added.date().strftime("%m.%d.%y")
+        formattedDate = m.date_added.strftime("%m.%d.%y")
         m.date_added = formattedDate
 
     return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str)
