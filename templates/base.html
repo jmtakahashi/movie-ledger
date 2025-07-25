@@ -69,13 +69,10 @@
       </main>
 
       <footer>
-        <div class="copyright">© <span id="year"></span></div>
+        <div class="copyright">© {{ g.year }}<span id="year"></span></div>
         <a class="credit" href="https://whoisjaytee.com" target="_blank">Who is Jaytee?</a>
       </footer>
     </div>
 
-    <script>
-      document.getElementById('year').innerHTML = new Date().getFullYear();
-    </script>
   </body>
 </html>

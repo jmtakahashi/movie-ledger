@@ -6,6 +6,7 @@ from termcolor import colored
 from flask import Flask, render_template, request, redirect, flash, jsonify
 from flask import session, g
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime
 
 # import text so we can use fstrings in our filter/sort queries
 from sqlalchemy.sql import text
@@ -97,6 +98,8 @@ def add_user_to_g():
 
     else:
         g.user = None
+
+    g.year = datetime.now().strftime("%Y")
 
 
 ###############################################################################
