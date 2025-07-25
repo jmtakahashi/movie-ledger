@@ -7,6 +7,8 @@ const functionsBtnContainers = document.getElementsByClassName('ml__movie-list--
 
 const searchResults = document.getElementById('searchResults')
 const movieList = document.getElementById('myMovieList');
+const movieDetailModal = document.getElementById("ml__movie-detail-modal")
+const movieDetailModalCloseBtn = document.getElementById("ml__movie-detail-modal-close-btn")
 
 const sortIcon = document.getElementById('sortIcon')
 const sortContainer = document.getElementById('sortContainer')
@@ -20,6 +22,7 @@ const pageContent = document.getElementById('pageContent');
 const backToMoviesLink = document.getElementById('backToMoviesLink')
 
 
+movieList && movieList.addEventListener("click", showMovieDetailModal)
 
 sortIcon && sortIcon.addEventListener("click", showHideSortBox)
 
@@ -224,3 +227,12 @@ function toggleFavorite(movieID, e) {
     .catch((err) => console.log('err: ', err));
 }
 
+function showMovieDetailModal(e) {
+  e.preventDefault()
+  movieDetailModal.classList.add("show")
+
+  movieDetailModalCloseBtn.addEventListener("click", function () {
+    movieDetailModal.classList.remove("show")
+  })
+  console.log(e.target)
+}

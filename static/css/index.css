@@ -322,6 +322,7 @@ footer {
   display: grid;
   justify-items: center;
   align-items: center;
+  position: relative; /* to hold our movie details modal */
 }
 
 .ml__content--small {
@@ -464,6 +465,25 @@ footer {
   justify-content: center;
   align-items: center;
   gap: 2rem;
+}
+
+.ml__movie-detail-modal {
+  display: none;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  min-height: 100%;
+  margin: auto;
+  background: rgba(0, 0, 0, .75);
+  z-index: 1;
+}
+
+.ml__movie-detail-modal.show {
+  display: block;
+}
+
+.ml__movie-detail-modal-close-btn {
+  cursor: pointer;
 }
 
 .ml__movie-details--go-back {

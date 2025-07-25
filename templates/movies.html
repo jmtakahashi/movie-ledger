@@ -96,9 +96,9 @@
           </li>
         {% endfor %}
       </ul>
-
-      <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-      <script src="/static/js/movies.js"></script>
     {% endif %}
   </section>
+  {% include 'movie-detail-modal.html' %}
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="/static/js/movies.js"></script>
 {% endblock %}

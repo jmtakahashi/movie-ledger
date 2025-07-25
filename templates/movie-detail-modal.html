@@ -1,0 +1,94 @@
+
+  <section id="ml__movie-detail-modal" class='ml__movie-detail-modal'>
+        <div id="ml__movie-detail-modal-close-btn" class="ml__movie-detail-modal-close-btn">
+      X
+    </div>
+    {% if movie %}
+    <!-- {% if request.referrer %}
+      {% if "/movie-search" in request.referrer %}
+        <a class="ml__movie-details--go-back" href="#" onclick=window.history.back()>Go Back</a>
+      {% else %}
+        <a class="ml__movie-details--go-back" href="{{ request.referrer }}">Go Back</a>
+      {% endif %}
+    {% endif %} -->
+
+
+    <div class='ml__movie-details-container'>
+      <img class='ml__movie-details-image' src="{{ movie['Poster'] }}" />
+      <div class="ml__movie-details-wrapper">
+        <ul class="ml__movie-details">
+          <li class="ml__movie-details--item"><h1 class='ml__movie-details--title'>{{ movie["Title"] }}</h1></li>
+          <li class="ml__movie-details--item">Release Year: {{ movie["Year"] }}</li>
+          <li class="ml__movie-details--item">Rated: {{ movie["Rated"] }} </li>
+          <li class="ml__movie-details--item">Released: {{ movie["Released"] }}</li>
+          <li class="ml__movie-details--item">Runtime: {{ movie["Runtime"] }}</li>
+          <li class="ml__movie-details--item">Genre: {{ movie["Genre"] }}</li>
+          <li class="ml__movie-details--item">Actors: {{ movie["Actors"] }}</li>
+          <li class="ml__movie-details--item">Plot: {{ movie["Plot"] }}</li>
+        </ul>
+
+        <div class="ml__movie-details--my-list-container">
+          {% if movie_in_users_list %}
+            <i class="fas fa-check-circle ml__movie--my-list"></i>                  
+            <h3 class="ml__movie-details--edit-title">This movie is in your list.</h3>
+            <div class="ml__movie-details--edit-note">Edit details below.</div>
+          {% else %}
+            <h3 class="ml__movie-details--edit-title">This movie is not in your list.</h3>
+            <div class="ml__movie-details--edit-note">Add to your list details below.</div>
+          {% endif %}
+        </div>
+
+        <form id="ml__add-edit-movie-form" class="ml__add-edit-movie-form" method="POST">
+          {{ form.hidden_tag() }}
+
+          <div class="ml__movie-details--add-edit-form-favorite-wrapper">
+            <label for="favorite" class="ml__movie-details--add-edit-form-favorite">
+              <input id="favorite" name="favorite" type="checkbox" {% if form.favorite.data %}checked{% endif %}>
+              <i class="far fa-heart ml__movie--fav"></i>
+              <i class="fas fa-heart ml__movie--fav"></i>
+              <span class="ml__movie--fav-text">
+                Click to <span class="ml__movie--fav-addText">add to</span><span class="ml__movie--fav-removeText">remove from</span> your favorites
+              </span>
+            </label>
+          </div>
+
+
+          <div class='ml__add-edit-movie--input-wrapper'>            
+            <div class="ml__movie-details--add-edit-form-platform">
+              {{ form.platform.label }}
+              {{ form.platform }}
+              {% for error in form.platform.errors %}
+                <div>
+                  <span class="error">{{ error}}</span>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="ml__movie-details--add-edit-form-date-viewed">
+              {{ form.date_viewed.label }}
+              {{ form.date_viewed }}    
+              {% for error in form.platform.errors %}
+                <div>
+                  <span class="error">{{ error}}</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="ml__add-edit-movie--button-wrapper">
+            <button type="submit">
+              {% if not movie_in_users_list %}
+                Add to My List
+              {% else %}
+                Update Details
+              {% endif %}
+            </button>
+            {% if movie_in_users_list %}
+            <a class="button" href="/movie/{{ movie['imdbID'] }}/delete">Remove from My List</a>
+            {% endif %}
+          </div>
+
+        </form>
+      </div>
+    </div>
+    {% endif%}
+  </section>
