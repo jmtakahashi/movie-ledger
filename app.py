@@ -76,7 +76,7 @@ CURR_USER_KEY = "curr_user"
 
 @app.before_request
 def add_user_to_g():
-    """If we're logged in (session[CURR_USER_KEY] is sent from the client), 
+    """If we're logged in (session[CURR_USER_KEY] is sent from the client),
     add curr user to Flask global."""
 
     # g.user will contain movies as well
@@ -408,13 +408,14 @@ def handle_movie(movie_id):
         # in the current user's list, so this form submission will be an
         # update to the UserMovie table row. This also means that the
         # movie already exists in the Movies table.
+
         if form.date_added.data:
 
             # query the existing UserMovie entry
             um = UserMovie.query.get((session[CURR_USER_KEY], movie_id))
 
             # update values.  there will only be 3 that we can modify
-            um.favorite = False if not form.favorite.data else form.favorite.data
+            um.favorite = True if form.favorite.data else False
             um.platform = None if not form.platform.data else form.platform.data
             um.date_viewed = form.date_viewed.data
 
