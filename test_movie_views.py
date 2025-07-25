@@ -259,7 +259,7 @@ class MovieViewTestCase(TestCase):
                 "title": m.title,
                 "release_year": m.release_year,
                 "imdb_img": m.imdb_img,
-                "favorite": False,
+                "favorite": "asdfasdfasdfasdfasdfsd",
                 "platform": "",
                 "date_viewed": "",
                 "date_added": um.date_added,
@@ -272,13 +272,6 @@ class MovieViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn('<h1 class="pageTitle">My List</h1>', html)
             self.assertIn('Movie details updated.', html)
-
-            # print("")
-            # print("*****************")
-            # print("From test function: ")
-            # print(html)
-            # print("*****************")
-            # print("")
 
             # check if movie was edited in db
             # self.assertEqual(um.favorite, False)
