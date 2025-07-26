@@ -375,7 +375,11 @@ def show_my_movies():
         formattedDate = m.date_added.strftime("%m.%d.%y")
         m.date_added = formattedDate
 
-    return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str)
+    # add the movie add edit form to our modal
+    # we will populate field values with javascript
+    movie_add_edit_form = MovieAddEditForm()
+
+    return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str, form=movie_add_edit_form)
 
 
 @app.route("/movie/<movie_id>", methods=["GET", "POST"])
@@ -616,6 +620,49 @@ def add_movie(movie_id):
         # success response goes here
         resp = jsonify({"message": "Movie added to list."})
         return (resp, 201)
+
+
+# internal api route - get movie details
+@app.route('/api/movie/<movie_id>', methods=["GET"])
+def get_movie_details(movie_id):
+    """Get movie details for a single movie"""
+
+    # get the movie data from the api.  data returned will be
+    # a dictionary containing a key title "Response".
+    # If "True", a movie was found.  if "False", no movie found.
+    try:
+        movie = movie_search_by_id(movie_id)
+
+    except:
+        resp = jsonify(
+            {"message": "There was an error.  Please try again."})
+        return (resp, 400)
+
+    # if the movie id doesn't exist, redirect to search and flash a message
+    if movie["Response"] == "False":
+        resp = jsonify(
+            {"message": "Sorry, we can't find the movie you are looking for."})
+        return (resp, 404)
+
+    # check if this movie is already in our current user's list
+    # by querying the UserMovies table
+    # .first() returns the movie, or no movies
+    movie_in_users_list = UserMovie.query.filter_by(
+        user_id=g.user.id, movie_id=movie['imdbID']).first()
+
+    # if the movie is already in the current user's list we can pre-populate
+    # the data that is exclusive to our db into our response as well.
+    # the date_added hidden field is included in wtforms as a flag
+    # to pass to our post route and used to determine if the post is a
+    # new save, or an update.
+    if movie_in_users_list:
+        movie["favorite"] = movie_in_users_list.favorite
+        movie["platform"] = movie_in_users_list.platform
+        movie["date_viewed"] = movie_in_users_list.date_viewed
+        movie["date_added"] = movie_in_users_list.date_added
+
+    resp = jsonify({"movie": movie})
+    return (resp, 200)
 
 
 # internal api route - update favorite ajax
