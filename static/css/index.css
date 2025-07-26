@@ -680,6 +680,10 @@ footer {
   }
 }
 
+.ml__add-edit-movie--button-wrapper i {
+  margin-right: .35rem;
+}
+
 .removeFromListBtn {
   display: none;
 }
@@ -697,6 +701,7 @@ footer {
   padding: 1rem;
   background-color: var(--body-bg-color-transparent);
   border-bottom: 1px solid var(--body-border-color);
+  z-index: 99;
 }
 
 .ml__my-list--sort-form label,
