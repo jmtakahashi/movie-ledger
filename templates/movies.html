@@ -30,7 +30,7 @@
             <select id="sort" name="sort" class="ml__my-list--sort-term">
               <option {% if not display_params.sort %} selected {% endif %}value="" disabled hidden>Sort by...</option>
               <option {% if display_params.sort and "title" in display_params.sort.sort_term %} selected {% endif %}value="title">Title</option>
-              <option {% if display_params.sort and "release_year" in display_params.sort.sort_term %} selected {% endif %}value="release+_year">Release Year</option>
+              <option {% if display_params.sort and "release_year" in display_params.sort.sort_term %} selected {% endif %}value="release_year">Release Year</option>
               <option {% if display_params.sort and "date_added" in display_params.sort.sort_term %} selected {% endif %}value="date_added">Date Added</option>
               <option {% if display_params.sort and "date_viewed" in display_params.sort.sort_term %} selected {% endif %}value="date_viewed">Date Viewed</option>
             </select>
@@ -54,25 +54,28 @@
 
 {% block pagecontent %}
   <section id="pageContent" class='ml__content--wide'>
-    {% if movies and "favorites" in display_params.filters and "sort_term" not in display_params.sort %}
-      <a id="backToMoviesLink" href="/movies">Back to All Movies</a>
-    {% endif %}
-
     {% if not movies %}
       {% if "favorites" in display_params.filters  %}
         <h3>No favorites found...</h3>
-        <a href="/movies">Back to All Movies</a>
+        <a class='backToMoviesLink' href="/movies">Back to All Movies</a>
       {% else %}
         <h3>No movies found...</h3>
         <a class="button" href="/movie-search">Search Now</a>
       {% endif %}
     {% endif %}
 
-    {% if movies or ("favorites" in display_params.filters and movies) %}
+    {% if movies %}
       {% if sort_str %}
         <div class="ml__my-list--sort-note-container">
           <p class="ml__my-list--sort-note">{{ sort_str }}</p>
-          <a href="/movies">Clear All</a>
+          
+          {% if "favorites" in display_params.filters and "sort" not in display_params %}
+            <a class="ml__my-list-filter--back-link" href="/movies">Back to All Movies</a>
+          {% endif %}
+          
+          {% if "sort" in display_params %}
+            <a class="ml__my-list-sort-filter--clear-link" href="/movies">Clear All</a>
+          {% endif %}
         </div>
       {% endif %}
 
@@ -91,7 +94,7 @@
             
             <div class="ml__movie-list--functions-container" data-id="{{ movie.movie_id }}" data-my-list="true">
               <i class="{% if movie.favorite %}fas{% else %}far{% endif %} fa-heart ml__movie--fav"></i>
-              <i class="fas fa-check-circle ml__movie--my-list"></i>
+              <i class="fas fa-check ml__movie--my-list"></i>
             </div>
           </li>
         {% endfor %}
