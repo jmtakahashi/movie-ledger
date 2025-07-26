@@ -200,6 +200,16 @@ def logout():
 
 
 ###############################################################################
+# homepage
+
+@app.route("/")
+def homepage():
+    """Show homepage."""
+
+    return render_template("home.html")
+
+
+###############################################################################
 # user routes
 
 @app.route("/profile", methods=["GET", "POST"])
@@ -382,6 +392,7 @@ def show_my_movies():
     return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str, form=movie_add_edit_form)
 
 
+@app.route("/movies")
 @app.route("/movie/<movie_id>", methods=["POST"])
 def handle_movie(movie_id):
     """Get a single movie based on the id.
@@ -562,6 +573,81 @@ def delete_movie_route(movie_id):
         return redirect("/movies")
 
 
+###############################################################################
+# movie search route
+
+# search movies from the omdb database.  must be logged in!
+@app.route("/movie-search")
+def search_movies():
+    """Get all the movies based on a search term from form data"""
+
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
+        return redirect("/login")
+
+    # add the movie add edit form to our modal
+    # we will populate field values with javascript
+    movie_add_edit_form = MovieAddEditForm()
+
+    # if a search term is provided, process the search
+    if request.args.get('term'):
+
+        search_term = request.args['term']
+
+        # get our requested page from the query string.
+        #
+        # if there is no page in the
+        # query string, default to page 1, and pass to our api req.
+        #
+        # page needs to contain an int so that we can check:
+        # if page > 1 then render our prev page when necessary.
+        page = int(request.args['page']) if request.args.get('page') else 1
+
+        # make the call to our external api
+        #
+        # results will be a python dictionary (from services.py)
+        results_curr = movie_search(search_term, page=page)
+
+        # if we get any search results in our CURRENT api call,
+        # run a check to see if any of the returned results
+        # are already in our list database
+        #
+        # if so, set a new attribute "ml_inList" on our movie
+        #
+        # we can use this attribute to determine if we show an
+        # "Add to My List"  button or a note "Already in My List"
+        if results_curr['Response'] == "True":
+
+            user_movies = {
+                movie.movie_id: movie.favorite for movie in g.user.user_movies_details}
+
+            for movie in results_curr['Search']:
+                if movie['imdbID'] in list(user_movies.keys()):
+                    movie["ml_inList"] = True
+
+                    # get the tuple from user_movies that matches our movie id, and check the favorite val
+                    movie["favorite"] = user_movies[movie['imdbID']]
+
+        # make the call to our external api for the NEXT page
+        # and pass the "Response" returned to our template.
+        # based on the val of "Response" we can render a next_page link or not
+        results_next = movie_search(search_term, page=page+1)
+
+        next_page = results_next['Response']
+
+        # render our template and pass the results of the api request
+        # along with the search term (so we can create our search note)
+        #
+        # we'll handle the rendering of our data in our template
+        return render_template("movie-search.html", results=results_curr, search_term=search_term, page=page, next_page=next_page, form=movie_add_edit_form)
+
+    # no search term submitted, so we just render our starting search page
+    return render_template("movie-search.html", user=g.user, form=movie_add_edit_form)
+
+
+###############################################################################
+# internal api routes for use with ajax functions
+
 # internal api route - add a movie to user's list ajax
 @app.route("/api/movie/<movie_id>", methods=["POST"])
 def add_movie(movie_id):
@@ -727,85 +813,3 @@ def delete_movie(movie_id):
     else:
         resp = jsonify({"message": "movie not found"})
         return (resp, 404)
-
-
-###############################################################################
-# movie search route
-
-# search movies from the omdb database.  must be logged in!
-@app.route("/movie-search")
-def search_movies():
-    """Get all the movies based on a search term from form data"""
-
-    if not CURR_USER_KEY in session:
-        flash("Please login.", "danger")
-        return redirect("/login")
-
-    # add the movie add edit form to our modal
-    # we will populate field values with javascript
-    movie_add_edit_form = MovieAddEditForm()
-
-    # if a search term is provided, process the search
-    if request.args.get('term'):
-
-        search_term = request.args['term']
-
-        # get our requested page from the query string.
-        #
-        # if there is no page in the
-        # query string, default to page 1, and pass to our api req.
-        #
-        # page needs to contain an int so that we can check:
-        # if page > 1 then render our prev page when necessary.
-        page = int(request.args['page']) if request.args.get('page') else 1
-
-        # make the call to our external api
-        #
-        # results will be a python dictionary (from services.py)
-        results_curr = movie_search(search_term, page=page)
-
-        # if we get any search results in our CURRENT api call,
-        # run a check to see if any of the returned results
-        # are already in our list database
-        #
-        # if so, set a new attribute "ml_inList" on our movie
-        #
-        # we can use this attribute to determine if we show an
-        # "Add to My List"  button or a note "Already in My List"
-        if results_curr['Response'] == "True":
-
-            user_movies = {
-                movie.movie_id: movie.favorite for movie in g.user.user_movies_details}
-
-            for movie in results_curr['Search']:
-                if movie['imdbID'] in list(user_movies.keys()):
-                    movie["ml_inList"] = True
-
-                    # get the tuple from user_movies that matches our movie id, and check the favorite val
-                    movie["favorite"] = user_movies[movie['imdbID']]
-
-        # make the call to our external api for the NEXT page
-        # and pass the "Response" returned to our template.
-        # based on the val of "Response" we can render a next_page link or not
-        results_next = movie_search(search_term, page=page+1)
-
-        next_page = results_next['Response']
-
-        # render our template and pass the results of the api request
-        # along with the search term (so we can create our search note)
-        #
-        # we'll handle the rendering of our data in our template
-        return render_template("movie-search.html", results=results_curr, search_term=search_term, page=page, next_page=next_page, form=movie_add_edit_form)
-
-    # no search term submitted, so we just render our starting search page
-    return render_template("movie-search.html", user=g.user, form=movie_add_edit_form)
-
-
-###############################################################################
-# homepage
-
-@app.route("/")
-def homepage():
-    """Show homepage."""
-
-    return render_template("home.html")
