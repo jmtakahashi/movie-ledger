@@ -656,6 +656,7 @@ def get_movie_details(movie_id):
     # to pass to our post route and used to determine if the post is a
     # new save, or an update.
     if movie_in_users_list:
+        movie["in_list"] = True
         movie["favorite"] = movie_in_users_list.favorite
         movie["platform"] = movie_in_users_list.platform
         movie["date_viewed"] = movie_in_users_list.date_viewed
@@ -740,6 +741,10 @@ def search_movies():
         flash("Please login.", "danger")
         return redirect("/login")
 
+    # add the movie add edit form to our modal
+    # we will populate field values with javascript
+    movie_add_edit_form = MovieAddEditForm()
+
     # if a search term is provided, process the search
     if request.args.get('term'):
 
@@ -790,10 +795,10 @@ def search_movies():
         # along with the search term (so we can create our search note)
         #
         # we'll handle the rendering of our data in our template
-        return render_template("movie-search.html", results=results_curr, search_term=search_term, page=page, next_page=next_page)
+        return render_template("movie-search.html", results=results_curr, search_term=search_term, page=page, next_page=next_page, form=movie_add_edit_form)
 
     # no search term submitted, so we just render our starting search page
-    return render_template("movie-search.html", user=g.user)
+    return render_template("movie-search.html", user=g.user, form=movie_add_edit_form)
 
 
 ###############################################################################

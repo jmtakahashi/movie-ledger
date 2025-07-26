@@ -479,7 +479,9 @@ footer {
 }
 
 .ml__movie-detail-modal.show {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .ml__movie-detail-modal-close-btn {
@@ -498,16 +500,18 @@ footer {
   align-items: flex-start;
   gap: 2rem;
   padding-bottom: 2rem;
-}
-
-@media screen and (min-width: 651px) {
-  .ml__movie-details-container {
-    flex-direction: row;
-  }
+  max-width: 400px;
 }
 
 .ml__movie-details-image {
-  border-radius: 5px;;
+  border-radius: 5px;
+  width: 100%;
+  margin-bottom: -30%;
+}
+
+.ml__movie-details-wrapper {
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 .ml__movie-details {
@@ -537,6 +541,10 @@ footer {
 .ml__movie-details--my-list-container .ml__movie--my-list {
   display: inline;
   margin-right: .5rem;
+}
+
+.in-list, .not-in-list {
+  display: none;
 }
 
 .ml__movie-details--edit-title {
@@ -625,6 +633,10 @@ footer {
   .ml__add-edit-movie--button-wrapper {
     flex-direction: row;
   }
+}
+
+.removeFromListBtn {
+  display: none;
 }
 
 .ml__movie-details--add-edit-form-platform select {
@@ -755,4 +767,8 @@ footer {
 
 .hidden {
   display: none;
+}
+
+.show {
+  display: block;
 }

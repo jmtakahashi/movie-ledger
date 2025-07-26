@@ -23,6 +23,7 @@ const backToMoviesLink = document.getElementById('backToMoviesLink')
 
 
 movieList && movieList.addEventListener("click", showMovieDetailModal)
+searchResults && searchResults.addEventListener("click", showMovieDetailModal)
 
 sortIcon && sortIcon.addEventListener("click", showHideSortBox)
 
@@ -245,30 +246,29 @@ async function showMovieDetailModal(e) {
             console.log("response successfull")
             console.log(resp.data)
 
-            // // apend below to my-list-container
-            //   {% if movie_in_users_list %}
-            //     <i class="fas fa-check-circle ml__movie--my-list"></i>                  
-            //     <h3 class="ml__movie-details--edit-title">This movie is in your list.</h3>
-            //     <div class="ml__movie-details--edit-note">Edit details below.</div>
-            //   {% else %}
-            //     <h3 class="ml__movie-details--edit-title">This movie is not in your list.</h3>
-            //     <div class="ml__movie-details--edit-note">Add to your list details below.</div>
-            //   {% endif %}
+            const movie = resp.data.movie
 
-            // // add csrf to hidden tag
+            if (movie.in_list) {
+              document.getElementById("in-list").classList.add("show")
+              document.getElementById("add-or-update-button").innerText = "Update Details"
+            } else if (!movie.in_list) {
+              document.getElementById("not-in-list").classList.add("show")
+              document.getElementById("add-or-update-button").innerText = "Add to My List"
+              const removeFromListBtn = document.getElementById("remove-from-list-button")
+              removeFromListBtn.classList.add("show")
+              removeFromListBtn.setAttribute("href", `/movie/${ movie['imdbID'] }/delete`)
+            }
 
-            // // ad to button wrapper
-            //             <button type="submit">
-            //       {% if not movie_in_users_list %}
-            //         Add to My List
-            //       {% else %}
-            //         Update Details
-            //       {% endif %}
-            //     </button>
-            //     {% if movie_in_users_list %}
-            //     <a class="button" href="/movie/{{ movie['imdbID'] }}/delete">Remove from My List</a>
-            //     {% endif %}
-            
+            document.getElementById("image").setAttribute("src", movie["Poster"])
+            document.getElementById("title").innerText = movie["Title"]
+            document.getElementById("release-year").innerText = movie["Year"]
+            document.getElementById("rated").innerText = movie["Rated"]
+            document.getElementById("released").innerText = movie["Released"]
+            document.getElementById("runtime").innerText = movie["Runtime"]
+            document.getElementById("genre").innerText = movie["Genre"]
+            document.getElementById("actors").innerText = movie["Actors"]
+            document.getElementById("plot").innerText = movie["Plot"]
+
           }
         })
         .catch((err) => console.log('err: ', err));

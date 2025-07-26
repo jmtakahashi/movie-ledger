@@ -18,7 +18,15 @@
         </ul>
 
         <div id="my-list-container" class="ml__movie-details--my-list-container">
-
+          <div id="in-list" class="in-list">
+            <i class="fas fa-check-circle ml__movie--my-list"></i>                  
+            <h3 class="ml__movie-details--edit-title">This movie is in your list.</h3>
+            <div class="ml__movie-details--edit-note">Edit details below.</div>
+          </div>
+          <div id="not-in-list" class="not-in-list">
+            <h3 class="ml__movie-details--edit-title">This movie is not in your list.</h3>
+            <div class="ml__movie-details--edit-note">Add to your list details below.</div>
+          </div>
         </div>
 
         <form id="ml__add-edit-movie-form" class="ml__add-edit-movie-form" method="POST">
@@ -58,7 +66,8 @@
           </div>
 
           <div class="ml__add-edit-movie--button-wrapper">
-
+            <button id="add-or-update-button" type="submit"></button>
+            <a id="remove-from-list-button" class="button removeFromListBtn" href="">Remove from My List</a>    
           </div>
 
         </form>
