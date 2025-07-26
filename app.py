@@ -382,7 +382,7 @@ def show_my_movies():
     return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str, form=movie_add_edit_form)
 
 
-@app.route("/movie/<movie_id>", methods=["GET", "POST"])
+@app.route("/movie/<movie_id>", methods=["POST"])
 def handle_movie(movie_id):
     """Get a single movie based on the id.
 
@@ -431,7 +431,7 @@ def handle_movie(movie_id):
 
             except:
                 flash("There was an error adding the movie to your list.", "danger")
-                return redirect(f"/movie/{movie_id}")
+                return redirect("/movies")
 
             flash("Movie details updated.", "success")
 
@@ -466,7 +466,7 @@ def handle_movie(movie_id):
 
                 except IntegrityError as exc:
                     flash("Movie is already in your list.", "danger")
-                    return redirect(f"/movie/{movie_id}")
+                    return redirect("/movies")
 
                 flash("Movie added to your list.", "success")
 
@@ -484,14 +484,14 @@ def handle_movie(movie_id):
 
                 except IntegrityError as exc:
                     flash("Movie is already in your list.", "danger")
-                    return redirect(f"/movie/{movie_id}")
+                    return redirect("/movies")
 
                 flash("Movie added to your list.", "success")
 
-        return redirect(f"/movies")
+        return redirect("/movies")
 
     ###########################################################################
-    # GET request functionality below
+    # GET request functionality below (removed for now)
 
     # get the movie data from the api.  data returned will be
     # a dictionary containing a key title "Response".
@@ -555,7 +555,7 @@ def delete_movie_route(movie_id):
             return redirect(f"/movie/{movie_id}")
 
         flash("Movie removed from your list.", "success")
-        return redirect(f"/movie/{movie_id}")
+        return redirect("/movies")
 
     else:
         flash('Movie not found.', 'error')
@@ -622,7 +622,7 @@ def add_movie(movie_id):
         return (resp, 201)
 
 
-# internal api route - get movie details
+# internal api route - get movie details (accessed when opening details modal)
 @app.route('/api/movie/<movie_id>', methods=["GET"])
 def get_movie_details(movie_id):
     """Get movie details for a single movie"""
@@ -666,7 +666,7 @@ def get_movie_details(movie_id):
     return (resp, 200)
 
 
-# internal api route - update favorite ajax
+# internal api route - update favorite ajax (favorite button)
 @app.route('/api/movie/<movie_id>', methods=["PATCH"])
 def add_remove_favorite(movie_id):
     """Add or remove a movie as a favorite"""
@@ -698,7 +698,7 @@ def add_remove_favorite(movie_id):
         return (resp, 404)
 
 
-# internal api route - delete a movie ajax
+# internal api route - delete movie from user list ajax (my list checkmark button)
 @app.route("/api/movie/<movie_id>", methods=["DELETE"])
 def delete_movie(movie_id):
     """Delete a movie from our db."""
