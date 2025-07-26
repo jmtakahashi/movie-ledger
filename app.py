@@ -322,12 +322,15 @@ def show_users_movies():
     if request.args.get('filter'):
 
         display_params["filters"] = ['favorites']
+        sort_str = "Showing favorites only.  "
 
         for m in g.user.user_movies_details:
             if m.favorite:
                 movies.append(m)
     else:
         movies = g.user.user_movies_details
+
+        sort_str = ""
 
     ###########################################################################
     # sort check
@@ -336,7 +339,7 @@ def show_users_movies():
     if request.args.get('sort') and request.args.get('order'):
 
         display_params["sort"] = {}
-        sort_str = "Sorting by "
+        sort_str = sort_str + "Sorting by "
 
         # append to the sort_str based on the query string arg
         # and add to the display_params
@@ -346,7 +349,7 @@ def show_users_movies():
 
             def key(x): return x.movie_details.title
 
-        elif request.args['sort'] == "releaseYear":
+        elif request.args['sort'] == "release_year":
             sort_str = sort_str + " Release Year"
             display_params["sort"]["sort_term"] = 'release_year'
 
@@ -362,7 +365,8 @@ def show_users_movies():
             sort_str = sort_str + "Date Viewed"
             display_params["sort"]["sort_term"] = 'date_viewed'
 
-            def key(x): return x.date_viewed
+            # we add the if/else statement since data might be null
+            def key(x): return x.date_viewed if x.date_viewed else ""
 
         # ascending/descending order
         if request.args['order'] == "asc":

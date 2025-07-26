@@ -104,10 +104,10 @@ function toggleMyList(movieID, e) {
       .post(`/api/movies`, JSON.stringify(params), config)
       .then((resp) => {
         if (resp.status == 201) {
-          // do this regardless of view
+          // do this regardless of view.  show check mark
           e.target.parentElement.setAttribute('data-my-list', "true")
-          e.target.classList.add('fas');
-          e.target.classList.remove('far');
+          e.target.classList.add('fa-check');
+          e.target.classList.remove('fa-plus');
           e.target.parentElement.children[0].classList.remove('hidden')
         }
       })
@@ -122,11 +122,11 @@ function toggleMyList(movieID, e) {
       .delete(`/api/movies/${movieID}`, config)
       .then((resp) => {
         if (resp.status == 200) {
-          // if we are on the search page, change the icon, set the attribute hide the fav icon
+          // if we are on the search page, change the mylist icon, set the attribute hide the fav icon
           if (searchResults) {
             e.target.parentElement.setAttribute('data-my-list', "false")
-            e.target.classList.remove('fas');
-            e.target.classList.add('far');
+            e.target.classList.remove('fa-check');
+            e.target.classList.add('fa-plus');
 
             // also remove the fav icon
             e.target.parentElement.children[0].classList.add("hidden") 
@@ -256,7 +256,7 @@ async function showMovieDetailModal(e) {
 
           if (!movie.in_list) {
             document.getElementById("not-in-list").classList.add("show")
-            document.getElementById("add-or-update-button").innerText = "Add to My List"
+            document.getElementById("add-or-update-button").innerHTML = '<i class="fas fa-plus"></i> My List'
             
             // populate form with create route
             document.getElementById("ml__add-edit-movie-form").setAttribute("action", `/movies`)

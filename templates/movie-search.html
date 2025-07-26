@@ -64,7 +64,7 @@
                 
                 <i class="{% if movie.favorite %}fas{% else %}far{% endif %} fa-heart ml__movie--fav {% if not movie.ml_inList %}hidden{% endif %}"></i>
 
-                <i class="{% if movie.ml_inList %}fas{% else %}far{% endif %} fa-check-circle ml__movie--my-list"></i>                                
+                <i class="fas fa-{% if movie.ml_inList %}check{% else %}plus{% endif %} ml__movie--my-list"></i>                                
               </div>
             </li>
           {% endfor %}
