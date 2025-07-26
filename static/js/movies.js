@@ -101,7 +101,7 @@ function toggleMyList(movieID, e) {
 
     /* send a request to our internal api point to add a movie to our db */
     axios
-      .post(`/api/movies/${movieID}`, JSON.stringify(params), config)
+      .post(`/api/movies`, JSON.stringify(params), config)
       .then((resp) => {
         if (resp.status == 201) {
           // do this regardless of view
@@ -236,29 +236,45 @@ function toggleFavorite(movieID, e) {
 async function showMovieDetailModal(e) {
   e.preventDefault()
 
-  console.log(e.target)
-
   const movieID = e.target.getAttribute("data-id")
 
     axios
       .get(`/api/movies/${movieID}`)
       .then((resp) => {
         if (resp.status == 200) {
+          console.log(resp.data.movie)
+          // {
+          //     "date_added": "Sat, 26 Jul 2025 01:23:16 GMT",
+          //     "date_viewed": null or "Wed, 01 Jan 2025 00:00:00 GMT",
+          //     "favorite": true,
+          //     "imdbID": "tt0208092",
+          //     "in_list": true,
+          //     "platform": null
+          // }
+
           const movie = resp.data.movie
 
-          if (movie.in_list) {
-            document.getElementById("in-list").classList.add("show")
-            document.getElementById("add-or-update-button").innerText = "Update Details"
-            const removeFromListBtn = document.getElementById("remove-from-list-button")
-            removeFromListBtn.setAttribute("href", `/movie/${ movie['imdbID'] }/delete`)
-            removeFromListBtn.classList.add("show")
-
-          } else if (!movie.in_list) {
+          if (!movie.in_list) {
             document.getElementById("not-in-list").classList.add("show")
             document.getElementById("add-or-update-button").innerText = "Add to My List"
+            
+            // populate form with create route
+            document.getElementById("ml__add-edit-movie-form").setAttribute("action", `/movies`)
+
+          }  else if (movie.in_list) {
+            document.getElementById("in-list").classList.add("show")
+            document.getElementById("add-or-update-button").innerText = "Update Details"
+            
+            const removeFromListBtn = document.getElementById("remove-from-list-button")
+            removeFromListBtn.setAttribute("href", `/movies/${ movie['imdbID'] }/delete`)
+            removeFromListBtn.classList.add("show")
+            
+            // populate form with update route
+            document.getElementById("ml__add-edit-movie-form").setAttribute("action", `/movies/${movie["imdbID"]}`)
+                  
           }
 
-          // populate movie data
+          // populate movie data.  does not rely on in-list
           document.getElementById("movie_details-image").setAttribute("style", `background-image: url(${ movie["Poster"] });`)
           document.getElementById("movie_details-title").innerText = movie["Title"]
           document.getElementById("movie_details-release-year").innerText = movie["Year"]
@@ -269,20 +285,33 @@ async function showMovieDetailModal(e) {
           document.getElementById("movie_details-actors").innerText = movie["Actors"]
           document.getElementById("movie_details-plot").innerText = movie["Plot"]
 
-          // populate form
-          document.getElementById("ml__add-edit-movie-form").setAttribute("action", `/movie/${movie["imdbID"]}`)
-          //hidden fields
+        
+          //hidden fields. does not rely on in-list
+          document.getElementById("imdb_id").value = movie["imdbID"]
           document.getElementById("title").value = movie["Title"]
           document.getElementById("release_year").value = movie["Year"]
           document.getElementById("imdb_img").value = movie["Poster"]
           document.getElementById("date_added").value = movie["date_added"]
 
-          //not hidden
+          // not hidden fields. relies on in-list or not.
           if (movie.favorite) {
             document.getElementById("favorite").checked = true;
           }
-          document.getElementById("platform").value = movie["platform"]
-          document.getElementById("date_viewed").value = movie["date_viewed"]
+
+          if (movie.in_list) {
+            // values coming back from our api request could be null
+            // if values are null, don't set the value attribute (will cause issues)
+            movie["platform"] && (document.getElementById("platform").value = movie["platform"])
+            // convert date to pre-populate date selector - https://stackoverflow.com/a/58880605/7207125
+            // if (movie["date_viewed"]) {
+            //   let d = new Date(movie["date_viewed"]);
+            //   console.log(d)
+            //   let datestring = d.getFullYear().toString().padStart(4, '0') + '-' + (d.getMonth()+1).toString().padStart(2, '0') + '-' + d.getDate().toString().padStart(2, '0');
+            //   console.log(datestring)
+            //   document.getElementById("platform").value = datestring
+            // } 
+            movie["date_viewed"] && (document.getElementById("date_viewed").value = movie["date_viewed"])
+          }
 
           // show our modal
           movieDetailModal.classList.add("show")
@@ -315,6 +344,7 @@ function closeMovieDetailModal(e) {
   document.getElementById("date_added").value = ""
 
   // reset not hidden fields
+  document.getElementById("favorite").checked = false;
   document.getElementById("platform").value = ""
   document.getElementById("date_viewed").value = ""
 }
