@@ -649,7 +649,7 @@ def search_movies():
 # internal api routes for use with ajax functions
 
 # internal api route - add a movie to user's list ajax
-@app.route("/api/movie/<movie_id>", methods=["POST"])
+@app.route("/api/movies/<movie_id>", methods=["POST"])
 def add_movie(movie_id):
     """Add a movie to the user's list."""
 
@@ -709,7 +709,7 @@ def add_movie(movie_id):
 
 
 # internal api route - get movie details (accessed when opening details modal)
-@app.route('/api/movie/<movie_id>', methods=["GET"])
+@app.route('/api/movies/<movie_id>', methods=["GET"])
 def get_movie_details(movie_id):
     """Get movie details for a single movie"""
 
@@ -753,7 +753,7 @@ def get_movie_details(movie_id):
 
 
 # internal api route - update favorite ajax (favorite button)
-@app.route('/api/movie/<movie_id>', methods=["PATCH"])
+@app.route('/api/movies/<movie_id>', methods=["PATCH"])
 def add_remove_favorite(movie_id):
     """Add or remove a movie as a favorite"""
 
@@ -785,7 +785,7 @@ def add_remove_favorite(movie_id):
 
 
 # internal api route - delete movie from user list ajax (my list checkmark button)
-@app.route("/api/movie/<movie_id>", methods=["DELETE"])
+@app.route("/api/movies/<movie_id>", methods=["DELETE"])
 def delete_movie(movie_id):
     """Delete a movie from our db."""
 

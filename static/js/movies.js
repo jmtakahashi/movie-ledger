@@ -7,6 +7,7 @@ const functionsBtnContainers = document.getElementsByClassName('ml__movie-list--
 
 const searchResults = document.getElementById('searchResults')
 const movieList = document.getElementById('myMovieList');
+const movieListInfoContainers = document.getElementsByClassName("ml__movie-list--info-container")
 const movieDetailModal = document.getElementById("ml__movie-detail-modal")
 const movieDetailModalCloseBtn = document.getElementById("ml__movie-detail-modal-close-btn")
 
@@ -22,8 +23,11 @@ const pageContent = document.getElementById('pageContent');
 const backToMoviesLink = document.getElementById('backToMoviesLink')
 
 
-movieList && movieList.addEventListener("click", showMovieDetailModal)
+for (let item of movieListInfoContainers) {
+  item.addEventListener("click", showMovieDetailModal)
+}
 searchResults && searchResults.addEventListener("click", showMovieDetailModal)
+// movieDetailModal && movieDetailModal.addEventListener("click", closeMovieDetailModal)
 movieDetailModalCloseBtn && movieDetailModalCloseBtn.addEventListener("click", closeMovieDetailModal)
 
 sortIcon && sortIcon.addEventListener("click", showHideSortBox)
@@ -97,7 +101,7 @@ function toggleMyList(movieID, e) {
 
     /* send a request to our internal api point to add a movie to our db */
     axios
-      .post(`/api/movie/${movieID}`, JSON.stringify(params), config)
+      .post(`/api/movies/${movieID}`, JSON.stringify(params), config)
       .then((resp) => {
         if (resp.status == 201) {
           // do this regardless of view
@@ -115,7 +119,7 @@ function toggleMyList(movieID, e) {
   // remove from my list
   if (e.target.parentElement.getAttribute('data-my-list') === "true") {
     axios
-      .delete(`/api/movie/${movieID}`, config)
+      .delete(`/api/movies/${movieID}`, config)
       .then((resp) => {
         if (resp.status == 200) {
           // if we are on the search page, change the icon, set the attribute hide the fav icon
@@ -187,7 +191,7 @@ function toggleMyList(movieID, e) {
  */
 function toggleFavorite(movieID, e) {
   axios
-    .patch(`/api/movie/${movieID}`)
+    .patch(`/api/movies/${movieID}`)
     .then((resp) => {
       if (resp.status == 200) {
         /**
@@ -232,69 +236,85 @@ function toggleFavorite(movieID, e) {
 async function showMovieDetailModal(e) {
   e.preventDefault()
 
-  if (e.target.classList.contains("ml__movie-list--info-container")) {
-    // show our modal
-    movieDetailModal.classList.add("show")
+  console.log(e.target)
 
-    const movieID = e.target.getAttribute("data-id")
+  const movieID = e.target.getAttribute("data-id")
 
-      axios
-        .get(`/api/movie/${movieID}`)
-        .then((resp) => {
-          if (resp.status == 200) {
-            const movie = resp.data.movie
+    axios
+      .get(`/api/movies/${movieID}`)
+      .then((resp) => {
+        if (resp.status == 200) {
+          const movie = resp.data.movie
 
-            console.log(movie)
+          if (movie.in_list) {
+            document.getElementById("in-list").classList.add("show")
+            document.getElementById("add-or-update-button").innerText = "Update Details"
+            const removeFromListBtn = document.getElementById("remove-from-list-button")
+            removeFromListBtn.setAttribute("href", `/movie/${ movie['imdbID'] }/delete`)
+            removeFromListBtn.classList.add("show")
 
-            document.getElementById("pageContent").setAttribute("style", "overflow: hidden;")
-
-            if (movie.in_list) {
-              document.getElementById("in-list").classList.add("show")
-              document.getElementById("add-or-update-button").innerText = "Update Details"
-              const removeFromListBtn = document.getElementById("remove-from-list-button")
-              removeFromListBtn.setAttribute("href", `/movie/${ movie['imdbID'] }/delete`)
-              removeFromListBtn.classList.add("show")
-
-            } else if (!movie.in_list) {
-              document.getElementById("not-in-list").classList.add("show")
-              document.getElementById("add-or-update-button").innerText = "Add to My List"
-            }
-
-            // populate movie data
-            document.getElementById("movie_details-image").setAttribute("style", `background-image: url(${ movie["Poster"] });`)
-            document.getElementById("movie_details-title").innerText = movie["Title"]
-            document.getElementById("movie_details-release-year").innerText = movie["Year"]
-            document.getElementById("movie_details-rated").innerText = movie["Rated"]
-            document.getElementById("movie_details-released").innerText = movie["Released"]
-            document.getElementById("movie_details-runtime").innerText = movie["Runtime"]
-            document.getElementById("movie_details-genre").innerText = movie["Genre"]
-            document.getElementById("movie_details-actors").innerText = movie["Actors"]
-            document.getElementById("movie_details-plot").innerText = movie["Plot"]
-
-            // populate form
-            document.getElementById("ml__add-edit-movie-form").setAttribute("action", `/movie/${movie["imdbID"]}`)
-            //hidden fields
-            document.getElementById("title").value = movie["Title"]
-            document.getElementById("release_year").value = movie["Year"]
-            document.getElementById("imdb_img").value = movie["Poster"]
-            document.getElementById("date_added").value = movie["date_added"]
-
-            //not hidden
-            if (movie.favorite) {
-              document.getElementById("favorite").checked = true;
-            }
-            document.getElementById("platform").value = movie["platform"]
-            document.getElementById("date_viewed").value = movie["date_viewed"]
-
+          } else if (!movie.in_list) {
+            document.getElementById("not-in-list").classList.add("show")
+            document.getElementById("add-or-update-button").innerText = "Add to My List"
           }
-        })
-        .catch((err) => console.log('err: ', err));
-  }
+
+          // populate movie data
+          document.getElementById("movie_details-image").setAttribute("style", `background-image: url(${ movie["Poster"] });`)
+          document.getElementById("movie_details-title").innerText = movie["Title"]
+          document.getElementById("movie_details-release-year").innerText = movie["Year"]
+          document.getElementById("movie_details-rated").innerText = movie["Rated"]
+          document.getElementById("movie_details-released").innerText = movie["Released"]
+          document.getElementById("movie_details-runtime").innerText = movie["Runtime"]
+          document.getElementById("movie_details-genre").innerText = movie["Genre"]
+          document.getElementById("movie_details-actors").innerText = movie["Actors"]
+          document.getElementById("movie_details-plot").innerText = movie["Plot"]
+
+          // populate form
+          document.getElementById("ml__add-edit-movie-form").setAttribute("action", `/movie/${movie["imdbID"]}`)
+          //hidden fields
+          document.getElementById("title").value = movie["Title"]
+          document.getElementById("release_year").value = movie["Year"]
+          document.getElementById("imdb_img").value = movie["Poster"]
+          document.getElementById("date_added").value = movie["date_added"]
+
+          //not hidden
+          if (movie.favorite) {
+            document.getElementById("favorite").checked = true;
+          }
+          document.getElementById("platform").value = movie["platform"]
+          document.getElementById("date_viewed").value = movie["date_viewed"]
+
+          // show our modal
+          movieDetailModal.classList.add("show")
+        }
+      })
+      .catch((err) => console.log('err: ', err));
 }
 
-function closeMovieDetailModal() {
-  console.log("clicked")
+function closeMovieDetailModal(e) {
   movieDetailModal.classList.remove("show")
 
   // clear all data
+  document.getElementById("movie_details-image").removeAttribute("style")
+  document.getElementById("movie_details-title").innerText = ""
+  document.getElementById("movie_details-release-year").innerText = ""
+  document.getElementById("movie_details-rated").innerText = ""
+  document.getElementById("movie_details-released").innerText = ""
+  document.getElementById("movie_details-runtime").innerText = ""
+  document.getElementById("movie_details-genre").innerText = ""
+  document.getElementById("movie_details-actors").innerText = ""
+  document.getElementById("movie_details-plot").innerText = ""
+
+  // reset form action
+  document.getElementById("ml__add-edit-movie-form").removeAttribute("action")
+
+  // reset hidden fields
+  document.getElementById("title").value = ""
+  document.getElementById("release_year").value = ""
+  document.getElementById("imdb_img").value = ""
+  document.getElementById("date_added").value = ""
+
+  // reset not hidden fields
+  document.getElementById("platform").value = ""
+  document.getElementById("date_viewed").value = ""
 }
