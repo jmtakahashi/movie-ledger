@@ -49,7 +49,7 @@
           {% for movie in results.Search %}
             <li class="ml__movie-list--item">
               <a class="ml__movie-list--image" href="/movie/{{ movie.imdbID }}" style="background-image: url({{ movie.Poster }});">
-                <div class="ml__movie-list--info-container">
+                <div class="ml__movie-list--info-container" data-id="{{ movie.imdbID }}">
                   <h3 class="ml__movie-list--title">{{ movie.Title }}</h3>
                   <p class="ml__movie-list--release-year">({{ movie.Year }})</p>
                 </div>
@@ -90,8 +90,7 @@
           {% endif %}
         </div>
 
-        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-        <script src="/static/js/movies.js"></script>
+
       {% else %}
         <!-- if the page is greater than 1, it means that a url was entered
               directly in the url bar.  we need to let the user know that there
@@ -105,4 +104,7 @@
 
     {% endif %}
   </section>
+  {% include 'movie-detail-modal.html' %}
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="/static/js/movies.js"></script>
 {% endblock %}

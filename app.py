@@ -200,6 +200,16 @@ def logout():
 
 
 ###############################################################################
+# homepage
+
+@app.route("/")
+def homepage():
+    """Show homepage."""
+
+    return render_template("home.html")
+
+
+###############################################################################
 # user routes
 
 @app.route("/profile", methods=["GET", "POST"])
@@ -281,8 +291,8 @@ def delete_profile():
 ###############################################################################
 # movie routes
 
-@app.route('/movies')
-def show_my_movies():
+@app.route('/movies', methods=["GET"])
+def show_users_movies():
     """Show all user's movies, including filters or sort if selected."""
 
     # we can access movies from the user object, which already exists
@@ -370,32 +380,22 @@ def show_my_movies():
         # our final sort function based on the given vars
         movies.sort(key=key, reverse=reverse)
 
-    # format data (date added and ) to human readable
+    # format date to human readable (date_added and date_viewed)
     for m in movies:
-        formattedDate = m.date_added.strftime("%m.%d.%y")
-        m.date_added = formattedDate
+        m.date_added = m.date_added.strftime("%m.%d.%y")
+        m.date_viewed = m.date_viewed.strftime(
+            "%m.%d.%y") if m.date_viewed else None
 
-    return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str)
+    # add the movie add edit form to our modal
+    # we will populate field values with javascript
+    movie_add_edit_form = MovieAddEditForm()
+
+    return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str, form=movie_add_edit_form)
 
 
-@app.route("/movie/<movie_id>", methods=["GET", "POST"])
-def handle_movie(movie_id):
-    """Get a single movie based on the id.
-
-    Add the movie if a post request is coming in.
-    """
-
-    # since this route will handle both our add function and
-    # edit function, we need to pre-populate the fields with
-    # both api information, as well as db information (if the
-    # movie exists in our db).
-    #
-    # if the movie already exists in our database, we should
-    # should replace the "add to ledger" button with an "update"
-    # button and a note that the movie is already in our list.
-    #
-    # on submission of the form, we should check to see if the
-    # movie is in the Movie table again, in case another user added it
+@app.route('/movies', methods=["POST"])
+def add_user_movie():
+    """Add a user movie through form data."""
 
     if not CURR_USER_KEY in session:
         flash("Please login.", "danger")
@@ -407,132 +407,143 @@ def handle_movie(movie_id):
     # add movie to user's list by form (from movie detail page)
     if form.validate_on_submit():
 
-        # if date_added field contains data, this movie already exists
-        # in the current user's list, so this form submission will be an
-        # update to the UserMovie table row. This also means that the
-        # movie already exists in the Movies table.
+        movie_id = form.imdb_id.data
 
-        if form.date_added.data:
+        movie_in_movies_table = Movie.query.get(movie_id)
 
-            # query the existing UserMovie entry
-            um = UserMovie.query.get((session[CURR_USER_KEY], movie_id))
+        if movie_in_movies_table:
+            # we only need to add a new UserMovie entry
 
-            # update values.  there will only be 3 that we can modify
-            um.favorite = True if form.favorite.data else False
-            um.platform = None if not form.platform.data else form.platform.data
-            um.date_viewed = form.date_viewed.data
+            # date_added will take the default value from our UserMovie model
+            # date_viewed will be set to None <class 'NoneType'> if user doesn't
+            #   add a date so our db entry will be empty
+            # platform needs to be explicitly set to None <class 'NoneType'>
+            #   if no data is sent because wtforms sends us an empty string
+            #   for value="" (different than date_viewed) and sqlalchemy will
+            #   store that empty string in our db.
+            um = UserMovie(movie_id=movie_id,
+                           user_id=g.user.id,
+                           favorite=False if not form.favorite.data else form.favorite.data,
+                           platform=None if not form.platform.data else form.platform.data,
+                           date_viewed=form.date_viewed.data,
+                           )
 
             try:
+                db.session.add(um)
                 db.session.commit()
 
-            except:
-                flash("There was an error adding the movie to your list.", "danger")
-                return redirect(f"/movie/{movie_id}")
+            except IntegrityError as exc:
+                flash("Movie is already in your list.", "danger")
+                return redirect("/movies")
 
-            flash("Movie details updated.", "success")
+            flash("Movie added to your list.", "success")
 
-        # save a new movie to the user's list.  but we still need to
-        # check if the movie exists in the Movie table.  it may already
-        # exist there from another user's addition.
         else:
-            movie_in_movies_table = Movie.query.get(movie_id)
+            # we need to add a new Movie entry and UserMovie entry
+            m = Movie(imdb_id=movie_id,
+                      title=form.title.data,
+                      release_year=form.release_year.data[0:4],
+                      imdb_img=form.imdb_img.data)
 
-            if movie_in_movies_table:
-                # we only need to add a new UserMovie entry
+            try:
+                g.user.movies.append(m)
+                db.session.add(g.user)
+                db.session.commit()
 
-                # date_added will take the default value from our UserMovie model
+            except IntegrityError as exc:
+                flash("Movie is already in your list.", "danger")
+                return redirect("/movies")
 
-                # date_viewed will be set to None <class 'NoneType'> if user doesn't
-                #   add a date so our db entry will be empty
+            flash("Movie added to your list.", "success")
 
-                # platform needs to be explicitly set to None <class 'NoneType'>
-                #   if no data is sent because wtforms sends us an empty string
-                #   for value="" (different than date_viewed) and sqlalchemy will
-                #   store that empty string in our db.
-                um = UserMovie(movie_id=movie_id,
-                               user_id=g.user.id,
-                               favorite=False if not form.favorite.data else form.favorite.data,
-                               platform=None if not form.platform.data else form.platform.data,
-                               date_viewed=form.date_viewed.data,
-                               )
+        return redirect("/movies")
 
-                try:
-                    db.session.add(um)
-                    db.session.commit()
+    flash("Movie not added to your list. Please try again", "danger")
+    return redirect(request.referrer)
 
-                except IntegrityError as exc:
-                    flash("Movie is already in your list.", "danger")
-                    return redirect(f"/movie/{movie_id}")
 
-                flash("Movie added to your list.", "success")
+@app.route("/movies/<movie_id>", methods=["POST"])
+def edit_user_movie(movie_id):
+    """Edit a user's movie."""
 
-            else:
-                # we need to add a new Movie entry and UserMovie entry
-                m = Movie(imdb_id=movie_id,
-                          title=form.title.data,
-                          release_year=form.release_year.data[0:4],
-                          imdb_img=form.imdb_img.data)
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
+        return redirect("/login")
 
-                try:
-                    g.user.movies.append(m)
-                    db.session.add(g.user)
-                    db.session.commit()
-
-                except IntegrityError as exc:
-                    flash("Movie is already in your list.", "danger")
-                    return redirect(f"/movie/{movie_id}")
-
-                flash("Movie added to your list.", "success")
-
-        return redirect(f"/movies")
+    form = MovieAddEditForm()
 
     ###########################################################################
-    # GET request functionality below
+    # add movie to user's list by form (from movie detail page)
+    if form.validate_on_submit():
 
-    # get the movie data from the api.  data returned will be
-    # a dictionary containing a key title "Response".
-    # If "True", a movie was found.  if "False", no movie found.
-    try:
-        movie = movie_search_by_id(movie_id)
+        # query the existing UserMovie entry
+        um = UserMovie.query.get((session[CURR_USER_KEY], movie_id))
 
-    except:
-        flash("Sorry, There was an error processing your request.", "danger")
-        return redirect("/movie-search")
+        # update values.  there will only be 3 that we can modify
+        um.favorite = True if form.favorite.data else False
+        um.platform = None if not form.platform.data else form.platform.data
+        um.date_viewed = form.date_viewed.data
 
-    # if the movie id doesn't exist, redirect to search and flash a message
-    if movie["Response"] == "False":
-        flash("Sorry, we can't find the movie you are looking for.", "danger")
-        return redirect("/movie-search")
+        try:
+            db.session.commit()
 
-    # update our wtform data on the front end to match the movie
-    # details of the movie we are viewing, so when we submit the
-    # MovieAddEditForm our values will be correct
-    form.title.data = movie['Title']
-    form.release_year.data = movie['Year']
-    form.imdb_img.data = movie['Poster']
+        except:
+            flash("There was an error adding the movie to your list.", "danger")
+            return redirect("/movies")
 
-    # check if this movie is already in our current user's list
-    # by querying the UserMovies table
-    # .first() returns the movie, or no movies
-    movie_in_users_list = UserMovie.query.filter_by(
-        user_id=g.user.id, movie_id=movie['imdbID']).first()
+        flash("Movie details updated.", "success")
+        return redirect("/movies")
 
-    # if the movie is already in the current user's list we can pre-populate
-    # the data that is exclusive to our db into our form as well.
-    # the date_added hidden field is included in wtforms as a flag
-    # to pass to our post route and used to determine if the post is a
-    # new save, or an update.
-    if movie_in_users_list:
-        form.favorite.data = movie_in_users_list.favorite
-        form.platform.data = movie_in_users_list.platform
-        form.date_viewed.data = movie_in_users_list.date_viewed
-        form.date_added.data = movie_in_users_list.date_added
+    flash("Movie details not updated. Please try again", "danger")
+    return redirect(request.referrer)
 
-    return render_template("movie-detail.html", form=form, movie=movie, movie_in_users_list=movie_in_users_list)
+    ###########################################################################
+    # GET request functionality below (removed for now)
+
+    # # get the movie data from the api.  data returned will be
+    # # a dictionary containing a key title "Response".
+    # # If "True", a movie was found.  if "False", no movie found.
+    # try:
+    #     movie = movie_search_by_id(movie_id)
+
+    # except:
+    #     flash("Sorry, There was an error processing your request.", "danger")
+    #     return redirect("/movie-search")
+
+    # # if the movie id doesn't exist, redirect to search and flash a message
+    # if movie["Response"] == "False":
+    #     flash("Sorry, we can't find the movie you are looking for.", "danger")
+    #     return redirect("/movie-search")
+
+    # # update our wtform data on the front end to match the movie
+    # # details of the movie we are viewing, so when we submit the
+    # # MovieAddEditForm our values will be correct
+    # form.title.data = movie['Title']
+    # form.release_year.data = movie['Year']
+    # form.imdb_img.data = movie['Poster']
+
+    # # check if this movie is already in our current user's list
+    # # by querying the UserMovies table
+    # # .first() returns the movie, or no movies
+    # movie_in_users_list = UserMovie.query.filter_by(
+    #     user_id=g.user.id, movie_id=movie['imdbID']).first()
+
+    # # if the movie is already in the current user's list we can pre-populate
+    # # the data that is exclusive to our db into our form as well.
+    # # the date_added hidden field is included in wtforms as a flag
+    # # to pass to our post route and used to determine if the post is a
+    # # new save, or an update.
+    # if movie_in_users_list:
+    #     form.favorite.data = movie_in_users_list.favorite
+    #     form.platform.data = movie_in_users_list.platform
+    #     form.date_viewed.data = movie_in_users_list.date_viewed
+    #     form.date_added.data = movie_in_users_list.date_added
+
+    # return render_template("movie-detail.html", form=form, movie=movie, movie_in_users_list=movie_in_users_list)
 
 
-@app.route("/movie/<movie_id>/delete")
-def delete_movie_route(movie_id):
+@app.route("/movies/<movie_id>/delete")
+def delete_user_movie(movie_id):
 
     if not CURR_USER_KEY in session:
         flash("Please login.", "danger")
@@ -551,21 +562,98 @@ def delete_movie_route(movie_id):
             return redirect(f"/movie/{movie_id}")
 
         flash("Movie removed from your list.", "success")
-        return redirect(f"/movie/{movie_id}")
+        return redirect("/movies")
 
     else:
         flash('Movie not found.', 'error')
         return redirect("/movies")
 
 
+###############################################################################
+# movie search route
+
+# search movies from the omdb database.  must be logged in!
+@app.route("/movie-search")
+def search_movies():
+    """Get all the movies based on a search term from form data"""
+
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
+        return redirect("/login")
+
+    # add the movie add edit form to our modal
+    # we will populate field values with javascript
+    movie_add_edit_form = MovieAddEditForm()
+
+    # if a search term is provided, process the search
+    if request.args.get('term'):
+
+        search_term = request.args['term']
+
+        # get our requested page from the query string.
+        #
+        # if there is no page in the
+        # query string, default to page 1, and pass to our api req.
+        #
+        # page needs to contain an int so that we can check:
+        # if page > 1 then render our prev page when necessary.
+        page = int(request.args['page']) if request.args.get('page') else 1
+
+        # make the call to our external api
+        #
+        # results will be a python dictionary (from services.py)
+        results_curr = movie_search(search_term, page=page)
+
+        # if we get any search results in our CURRENT api call,
+        # run a check to see if any of the returned results
+        # are already in our list database
+        #
+        # if so, set a new attribute "ml_inList" on our movie
+        #
+        # we can use this attribute to determine if we show an
+        # "Add to My List"  button or a note "Already in My List"
+        if results_curr['Response'] == "True":
+
+            user_movies = {
+                movie.movie_id: movie.favorite for movie in g.user.user_movies_details}
+
+            for movie in results_curr['Search']:
+                if movie['imdbID'] in list(user_movies.keys()):
+                    movie["ml_inList"] = True
+
+                    # get the tuple from user_movies that matches our movie id, and check the favorite val
+                    movie["favorite"] = user_movies[movie['imdbID']]
+
+        # make the call to our external api for the NEXT page
+        # and pass the "Response" returned to our template.
+        # based on the val of "Response" we can render a next_page link or not
+        results_next = movie_search(search_term, page=page+1)
+
+        next_page = results_next['Response']
+
+        # render our template and pass the results of the api request
+        # along with the search term (so we can create our search note)
+        #
+        # we'll handle the rendering of our data in our template
+        return render_template("movie-search.html", results=results_curr, search_term=search_term, page=page, next_page=next_page, form=movie_add_edit_form)
+
+    # no search term submitted, so we just render our starting search page
+    return render_template("movie-search.html", user=g.user, form=movie_add_edit_form)
+
+
+###############################################################################
+# internal api routes for use with ajax functions
+
 # internal api route - add a movie to user's list ajax
-@app.route("/api/movie/<movie_id>", methods=["POST"])
-def add_movie(movie_id):
+@app.route("/api/movies", methods=["POST"])
+def add_movie():
     """Add a movie to the user's list."""
 
     if not CURR_USER_KEY in session:
         flash("Please login.", "danger")
         return redirect("/login")
+
+    movie_id = request.json["movieID"]
 
     # save a new movie to our user's list.  but we still need to
     # check if the movie exists in the Movie table.  it may already
@@ -618,8 +706,49 @@ def add_movie(movie_id):
         return (resp, 201)
 
 
-# internal api route - update favorite ajax
-@app.route('/api/movie/<movie_id>', methods=["PATCH"])
+# internal api route - get movie details (accessed when opening details modal)
+@app.route('/api/movies/<movie_id>', methods=["GET"])
+def get_movie_details(movie_id):
+    """Get movie details for a single movie"""
+
+    # get the movie data from the api.  data returned will be
+    # a dictionary containing a key title "Response".
+    # If "True", a movie was found.  if "False", no movie found.
+    try:
+        movie = movie_search_by_id(movie_id)
+
+    except:
+        resp = jsonify(
+            {"message": "There was an error.  Please try again."})
+        return (resp, 400)
+
+    if movie["Response"] == "False":
+        resp = jsonify(
+            {"message": "Sorry, we can't find the movie you are looking for."})
+        return (resp, 404)
+
+    # .first() returns the movie, or no movies
+    movie_in_users_list = UserMovie.query.filter_by(
+        user_id=g.user.id, movie_id=movie['imdbID']).first()
+
+    # if the movie is already in the current user's list we can pre-populate
+    # the data that is exclusive to our db into our response as well.
+    # the date_added hidden field is included in wtforms as a flag
+    # to pass to our post route and used to determine if the post is a
+    # new save, or an update.
+    if movie_in_users_list:
+        movie["in_list"] = True
+        movie["favorite"] = movie_in_users_list.favorite
+        movie["platform"] = movie_in_users_list.platform
+        movie["date_viewed"] = movie_in_users_list.date_viewed
+        movie["date_added"] = movie_in_users_list.date_added
+
+    resp = jsonify({"movie": movie})
+    return (resp, 200)
+
+
+# internal api route - update favorite ajax (favorite button)
+@app.route('/api/movies/<movie_id>', methods=["PATCH"])
 def add_remove_favorite(movie_id):
     """Add or remove a movie as a favorite"""
 
@@ -650,8 +779,8 @@ def add_remove_favorite(movie_id):
         return (resp, 404)
 
 
-# internal api route - delete a movie ajax
-@app.route("/api/movie/<movie_id>", methods=["DELETE"])
+# internal api route - delete movie from user list ajax (my list checkmark button)
+@app.route("/api/movies/<movie_id>", methods=["DELETE"])
 def delete_movie(movie_id):
     """Delete a movie from our db."""
 
@@ -682,78 +811,7 @@ def delete_movie(movie_id):
 
 
 ###############################################################################
-# movie search route
-
-# search movies from the omdb database.  must be logged in!
-@app.route("/movie-search")
-def search_movies():
-    """Get all the movies based on a search term from form data"""
-
-    if not CURR_USER_KEY in session:
-        flash("Please login.", "danger")
-        return redirect("/login")
-
-    # if a search term is provided, process the search
-    if request.args.get('term'):
-
-        search_term = request.args['term']
-
-        # get our requested page from the query string.
-        #
-        # if there is no page in the
-        # query string, default to page 1, and pass to our api req.
-        #
-        # page needs to contain an int so that we can check:
-        # if page > 1 then render our prev page when necessary.
-        page = int(request.args['page']) if request.args.get('page') else 1
-
-        # make the call to our external api
-        #
-        # results will be a python dictionary (from services.py)
-        results_curr = movie_search(search_term, page=page)
-
-        # if we get any search results in our CURRENT api call,
-        # run a check to see if any of the returned results
-        # are already in our list database
-        #
-        # if so, set a new attribute "ml_inList" on our movie
-        #
-        # we can use this attribute to determine if we show an
-        # "Add to My List"  button or a note "Already in My List"
-        if results_curr['Response'] == "True":
-
-            user_movies = {
-                movie.movie_id: movie.favorite for movie in g.user.user_movies_details}
-
-            for movie in results_curr['Search']:
-                if movie['imdbID'] in list(user_movies.keys()):
-                    movie["ml_inList"] = True
-
-                    # get the tuple from user_movies that matches our movie id, and check the favorite val
-                    movie["favorite"] = user_movies[movie['imdbID']]
-
-        # make the call to our external api for the NEXT page
-        # and pass the "Response" returned to our template.
-        # based on the val of "Response" we can render a next_page link or not
-        results_next = movie_search(search_term, page=page+1)
-
-        next_page = results_next['Response']
-
-        # render our template and pass the results of the api request
-        # along with the search term (so we can create our search note)
-        #
-        # we'll handle the rendering of our data in our template
-        return render_template("movie-search.html", results=results_curr, search_term=search_term, page=page, next_page=next_page)
-
-    # no search term submitted, so we just render our starting search page
-    return render_template("movie-search.html", user=g.user)
-
-
-###############################################################################
-# homepage
-
-@app.route("/")
-def homepage():
-    """Show homepage."""
-
-    return render_template("home.html")
+# movie routes
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("404.html", e=e)
