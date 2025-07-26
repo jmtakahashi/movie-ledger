@@ -1,20 +1,19 @@
 
   <section id="ml__movie-detail-modal" class='ml__movie-detail-modal'>
-    <div id="ml__movie-detail-modal-close-btn" class="ml__movie-detail-modal-close-btn">
-      X
-    </div>
     <div class='ml__movie-details-container'>
-      <img id="image" class='ml__movie-details-image' src="" />
+      <div id="movie_details-image" class='ml__movie-details-image'>
+        <div id="ml__movie-detail-modal-close-btn" class="ml__movie-detail-modal-close-btn">x</div>
+      </div>
       <div class="ml__movie-details-wrapper">
         <ul class="ml__movie-details">
-          <li class="ml__movie-details--item"><h1 id="title" class='ml__movie-details--title'></h1></li>
-          <li class="ml__movie-details--item">Release Year: <span id="release-year"></span></li>
-          <li class="ml__movie-details--item">Rated: <span id="rated"></span> </li>
-          <li class="ml__movie-details--item">Released: <span id="released"></span></li>
-          <li class="ml__movie-details--item">Runtime: <span id="runtime"></span></li>
-          <li class="ml__movie-details--item">Genre: <span id="genre"></span></li>
-          <li class="ml__movie-details--item">Actors: <span id="actors"></span></li>
-          <li class="ml__movie-details--item">Plot: <span id="plot"></span></li>
+          <li class="ml__movie-details--item"><h1 id="movie_details-title" class='ml__movie-details--title'></h1></li>
+          <li class="ml__movie-details--item">Release Year: <span id="movie_details-release-year"></span></li>
+          <li class="ml__movie-details--item">Rated: <span id="movie_details-rated"></span> </li>
+          <li class="ml__movie-details--item">Released: <span id="movie_details-released"></span></li>
+          <li class="ml__movie-details--item">Runtime: <span id="movie_details-runtime"></span></li>
+          <li class="ml__movie-details--item">Genre: <span id="movie_details-genre"></span></li>
+          <li class="ml__movie-details--item">Actors: <span id="movie_details-actors"></span></li>
+          <li class="ml__movie-details--item">Plot: <span id="movie_details-plot"></span></li>
         </ul>
 
         <div id="my-list-container" class="ml__movie-details--my-list-container">
@@ -58,7 +57,7 @@
               {{ form.date_viewed.label }}
               {{ form.date_viewed }}    
               {% for error in form.platform.errors %}
-                <div>
+                <div>movie_details-
                   <span class="error">{{ error}}</span>
                 </div>
               {% endfor %}

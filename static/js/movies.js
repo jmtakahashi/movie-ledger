@@ -24,6 +24,7 @@ const backToMoviesLink = document.getElementById('backToMoviesLink')
 
 movieList && movieList.addEventListener("click", showMovieDetailModal)
 searchResults && searchResults.addEventListener("click", showMovieDetailModal)
+movieDetailModalCloseBtn && movieDetailModalCloseBtn.addEventListener("click", closeMovieDetailModal)
 
 sortIcon && sortIcon.addEventListener("click", showHideSortBox)
 
@@ -230,47 +231,70 @@ function toggleFavorite(movieID, e) {
 
 async function showMovieDetailModal(e) {
   e.preventDefault()
-  console.log(e.target)
+
   if (e.target.classList.contains("ml__movie-list--info-container")) {
+    // show our modal
     movieDetailModal.classList.add("show")
 
-    movieDetailModalCloseBtn.addEventListener("click", function () {
-      movieDetailModal.classList.remove("show")
-    })
     const movieID = e.target.getAttribute("data-id")
 
       axios
         .get(`/api/movie/${movieID}`)
         .then((resp) => {
           if (resp.status == 200) {
-            console.log("response successfull")
-            console.log(resp.data)
-
             const movie = resp.data.movie
+
+            console.log(movie)
+
+            document.getElementById("pageContent").setAttribute("style", "overflow: hidden;")
 
             if (movie.in_list) {
               document.getElementById("in-list").classList.add("show")
               document.getElementById("add-or-update-button").innerText = "Update Details"
+              const removeFromListBtn = document.getElementById("remove-from-list-button")
+              removeFromListBtn.setAttribute("href", `/movie/${ movie['imdbID'] }/delete`)
+              removeFromListBtn.classList.add("show")
+
             } else if (!movie.in_list) {
               document.getElementById("not-in-list").classList.add("show")
               document.getElementById("add-or-update-button").innerText = "Add to My List"
-              const removeFromListBtn = document.getElementById("remove-from-list-button")
-              removeFromListBtn.classList.add("show")
-              removeFromListBtn.setAttribute("href", `/movie/${ movie['imdbID'] }/delete`)
             }
 
-            document.getElementById("image").setAttribute("src", movie["Poster"])
-            document.getElementById("title").innerText = movie["Title"]
-            document.getElementById("release-year").innerText = movie["Year"]
-            document.getElementById("rated").innerText = movie["Rated"]
-            document.getElementById("released").innerText = movie["Released"]
-            document.getElementById("runtime").innerText = movie["Runtime"]
-            document.getElementById("genre").innerText = movie["Genre"]
-            document.getElementById("actors").innerText = movie["Actors"]
-            document.getElementById("plot").innerText = movie["Plot"]
+            // populate movie data
+            document.getElementById("movie_details-image").setAttribute("style", `background-image: url(${ movie["Poster"] });`)
+            document.getElementById("movie_details-title").innerText = movie["Title"]
+            document.getElementById("movie_details-release-year").innerText = movie["Year"]
+            document.getElementById("movie_details-rated").innerText = movie["Rated"]
+            document.getElementById("movie_details-released").innerText = movie["Released"]
+            document.getElementById("movie_details-runtime").innerText = movie["Runtime"]
+            document.getElementById("movie_details-genre").innerText = movie["Genre"]
+            document.getElementById("movie_details-actors").innerText = movie["Actors"]
+            document.getElementById("movie_details-plot").innerText = movie["Plot"]
+
+            // populate form
+            document.getElementById("ml__add-edit-movie-form").setAttribute("action", `/movie/${movie["imdbID"]}`)
+            //hidden fields
+            document.getElementById("title").value = movie["Title"]
+            document.getElementById("release_year").value = movie["Year"]
+            document.getElementById("imdb_img").value = movie["Poster"]
+            document.getElementById("date_added").value = movie["date_added"]
+
+            //not hidden
+            if (movie.favorite) {
+              document.getElementById("favorite").checked = true;
+            }
+            document.getElementById("platform").value = movie["platform"]
+            document.getElementById("date_viewed").value = movie["date_viewed"]
 
           }
         })
         .catch((err) => console.log('err: ', err));
   }
+}
+
+function closeMovieDetailModal() {
+  console.log("clicked")
+  movieDetailModal.classList.remove("show")
+
+  // clear all data
 }
