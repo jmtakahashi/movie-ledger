@@ -227,12 +227,50 @@ function toggleFavorite(movieID, e) {
     .catch((err) => console.log('err: ', err));
 }
 
-function showMovieDetailModal(e) {
+async function showMovieDetailModal(e) {
   e.preventDefault()
-  movieDetailModal.classList.add("show")
-
-  movieDetailModalCloseBtn.addEventListener("click", function () {
-    movieDetailModal.classList.remove("show")
-  })
   console.log(e.target)
+  if (e.target.classList.contains("ml__movie-list--info-container")) {
+    movieDetailModal.classList.add("show")
+
+    movieDetailModalCloseBtn.addEventListener("click", function () {
+      movieDetailModal.classList.remove("show")
+    })
+    const movieID = e.target.getAttribute("data-id")
+
+      axios
+        .get(`/api/movie/${movieID}`)
+        .then((resp) => {
+          if (resp.status == 200) {
+            console.log("response successfull")
+            console.log(resp.data)
+
+            // // apend below to my-list-container
+            //   {% if movie_in_users_list %}
+            //     <i class="fas fa-check-circle ml__movie--my-list"></i>                  
+            //     <h3 class="ml__movie-details--edit-title">This movie is in your list.</h3>
+            //     <div class="ml__movie-details--edit-note">Edit details below.</div>
+            //   {% else %}
+            //     <h3 class="ml__movie-details--edit-title">This movie is not in your list.</h3>
+            //     <div class="ml__movie-details--edit-note">Add to your list details below.</div>
+            //   {% endif %}
+
+            // // add csrf to hidden tag
+
+            // // ad to button wrapper
+            //             <button type="submit">
+            //       {% if not movie_in_users_list %}
+            //         Add to My List
+            //       {% else %}
+            //         Update Details
+            //       {% endif %}
+            //     </button>
+            //     {% if movie_in_users_list %}
+            //     <a class="button" href="/movie/{{ movie['imdbID'] }}/delete">Remove from My List</a>
+            //     {% endif %}
+            
+          }
+        })
+        .catch((err) => console.log('err: ', err));
+  }
 }
