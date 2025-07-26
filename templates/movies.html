@@ -80,7 +80,7 @@
         {% for movie in movies %}
           <li class="ml__movie-list--item">
             <a class="ml__movie-list--image" href="/movie/{{ movie.movie_id }}" style="background-image: url({{ movie.movie_details.imdb_img }});">
-              <div class="ml__movie-list--info-container">
+              <div class="ml__movie-list--info-container" data-id="{{ movie.movie_details.imdb_id }}">
                 <h3 class="ml__movie-list--title">{{ movie.movie_details.title }}</h3>
                 <p class="ml__movie-list--release-year">({{ movie.movie_details.release_year }})</p>
                 <p class="ml__movie-list--date-added">Date Added: {{ movie.date_added }}</p>
