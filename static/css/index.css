@@ -328,12 +328,12 @@ footer {
 
 .ml__content--small {
   width: min(400px, 100%);
-  padding: 2rem 1.25rem;
+  padding: 1.25rem;
 
 }
 .ml__content--wide {
   width: min(1140px, 100%);
-  padding: 2rem 1.25rem;
+  padding: 1.25rem;
 }
 
 /* on home page */
@@ -391,6 +391,7 @@ footer {
   justify-content: flex-start;
   gap: 1rem;
   flex-wrap: wrap;
+  margin: 0;
 }
 @media screen and (min-width: 550px){
   .ml__movie-list {
@@ -510,6 +511,7 @@ footer {
   gap: 2rem;
   padding-bottom: 2rem;
   max-width: 500px;
+  margin: auto;
 }
 
 .ml__movie-details-image {
