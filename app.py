@@ -78,7 +78,7 @@ CURR_USER_KEY = "curr_user"
 @app.before_request
 def add_user_to_g():
     """If we're logged in (session[CURR_USER_KEY] is sent from the client),
-    add curr user to Flask global."""
+    then add current user objetct to Flask global."""
 
     # g.user will contain movies as well
     # we set up the relationship in our model
@@ -121,12 +121,7 @@ def do_logout():
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
     """Handle user signup.
-
     Create new user and add to DB. Redirect to /movie-search.
-
-    If form not valid, present form.
-
-    If email already exists, flash message and re-present form.
     """
 
     if CURR_USER_KEY in session:
@@ -163,7 +158,6 @@ def signup():
 @app.route('/login', methods=["GET", "POST"])
 def login():
     """Handle login of user.
-
     Authenticate credentials and redirect to the movies page.
     """
 
@@ -399,7 +393,7 @@ def show_users_movies():
 
 @app.route('/movies', methods=["POST"])
 def add_user_movie():
-    """Add a user movie through form data."""
+    """Add a movie to user's list by form. (currently not being used)"""
 
     if not CURR_USER_KEY in session:
         flash("Please login.", "danger")
@@ -407,59 +401,22 @@ def add_user_movie():
 
     form = MovieEditForm()
 
-    ###########################################################################
-    # add movie to user's list by form (from movie detail page)
     if form.validate_on_submit():
 
-        movie_id = form.imdb_id.data
+        data = {}
 
-        movie_in_movies_table = Movie.query.get(movie_id)
+        data["movieID"] = form.imdb_id.data
+        data["title"] = form.title.data
+        data["release_year"] = form.release_year.data
+        data["imdb_img"] = form.imdb_img.data
+        data["user_id"] = session[CURR_USER_KEY]
+        data["favorite"] = form.favorite.data or False
+        data["source"] = "form-data"
 
-        if movie_in_movies_table:
-            # we only need to add a new UserMovie entry
+        new_movie = UserMovie.add_movie_to_list(data)
 
-            # date_added will take the default value from our UserMovie model
-            # date_viewed will be set to None <class 'NoneType'> if user doesn't
-            #   add a date so our db entry will be empty
-            # platform needs to be explicitly set to None <class 'NoneType'>
-            #   if no data is sent because wtforms sends us an empty string
-            #   for value="" (different than date_viewed) and sqlalchemy will
-            #   store that empty string in our db.
-            um = UserMovie(movie_id=movie_id,
-                           user_id=session[CURR_USER_KEY],
-                           favorite=False if not form.favorite.data else form.favorite.data,
-                           platform=None if not form.platform.data else form.platform.data,
-                           date_viewed=form.date_viewed.data,
-                           )
-
-            try:
-                db.session.add(um)
-                db.session.commit()
-
-            except IntegrityError as exc:
-                flash("Movie is already in your list.", "danger")
-                return redirect("/movies")
-
+        if (new_movie):
             flash("Movie added to your list.", "success")
-
-        else:
-            # we need to add a new Movie entry and UserMovie entry
-            m = Movie(imdb_id=movie_id,
-                      title=form.title.data,
-                      release_year=form.release_year.data[0:4],
-                      imdb_img=form.imdb_img.data)
-
-            try:
-                g.user.movies.append(m)
-                db.session.add(g.user)
-                db.session.commit()
-
-            except IntegrityError as exc:
-                flash("Movie is already in your list.", "danger")
-                return redirect("/movies")
-
-            flash("Movie added to your list.", "success")
-
         return redirect("/movies")
 
     flash("Movie not added to your list. Please try again", "danger")
@@ -468,7 +425,7 @@ def add_user_movie():
 
 @app.route("/movies/<movie_id>", methods=["POST"])
 def edit_user_movie(movie_id):
-    """Edit a user's movie."""
+    """Edit a movie in a user's list through a form (from movie detail modal)."""
 
     if not CURR_USER_KEY in session:
         flash("Please login.", "danger")
@@ -476,15 +433,12 @@ def edit_user_movie(movie_id):
 
     form = MovieEditForm()
 
-    ###########################################################################
-    # add movie to user's list by form (from movie detail page)
     if form.validate_on_submit():
 
         # query the existing UserMovie entry
         um = UserMovie.query.get((session[CURR_USER_KEY], movie_id))
 
         # update values.  there will only be 2 that we can modify
-        # favorites value is edited by ajax
         um.platform = None if not form.platform.data else form.platform.data
         um.date_viewed = form.date_viewed.data
 
@@ -500,50 +454,6 @@ def edit_user_movie(movie_id):
 
     flash("Movie details not updated. Please try again", "danger")
     return redirect(request.referrer)
-
-    ###########################################################################
-    # GET request functionality below (removed for now)
-
-    # # get the movie data from the api.  data returned will be
-    # # a dictionary containing a key title "Response".
-    # # If "True", a movie was found.  if "False", no movie found.
-    # try:
-    #     movie = movie_search_by_id(movie_id)
-
-    # except:
-    #     flash("Sorry, There was an error processing your request.", "danger")
-    #     return redirect("/movie-search")
-
-    # # if the movie id doesn't exist, redirect to search and flash a message
-    # if movie["Response"] == "False":
-    #     flash("Sorry, we can't find the movie you are looking for.", "danger")
-    #     return redirect("/movie-search")
-
-    # # update our wtform data on the front end to match the movie
-    # # details of the movie we are viewing, so when we submit the
-    # # MovieEditForm our values will be correct
-    # form.title.data = movie['Title']
-    # form.release_year.data = movie['Year']
-    # form.imdb_img.data = movie['Poster']
-
-    # # check if this movie is already in our current user's list
-    # # by querying the UserMovies table
-    # # .first() returns the movie, or no movies
-    # movie_in_users_list = UserMovie.query.filter_by(
-    #     user_id=g.user.id, movie_id=movie['imdbID']).first()
-
-    # # if the movie is already in the current user's list we can pre-populate
-    # # the data that is exclusive to our db into our form as well.
-    # # the date_added hidden field is included in wtforms as a flag
-    # # to pass to our post route and used to determine if the post is a
-    # # new save, or an update.
-    # if movie_in_users_list:
-    #     form.favorite.data = movie_in_users_list.favorite
-    #     form.platform.data = movie_in_users_list.platform
-    #     form.date_viewed.data = movie_in_users_list.date_viewed
-    #     form.date_added.data = movie_in_users_list.date_added
-
-    # return render_template("movie-detail.html", form=form, movie=movie, movie_in_users_list=movie_in_users_list)
 
 
 @app.route("/movies/<movie_id>/delete")
@@ -660,6 +570,7 @@ def add_movie():
     data = request.json
     data["user_id"] = session[CURR_USER_KEY]
     data["favorite"] = request.json.get("favorite") or False
+    data["source"] = "ajax"
 
     return UserMovie.add_movie_to_list(data=data)
 
@@ -721,30 +632,39 @@ def add_remove_favorite(movie_id):
     um = UserMovie.query.filter_by(
         user_id=session[CURR_USER_KEY], movie_id=movie_id).first()
 
-    if um:
-        um.favorite = not um.favorite
+    # if no movie exists in the user list, add the movie then continue toggling fav
+    if not um:
+        data = request.json
+        data["user_id"] = session[CURR_USER_KEY]
+        data["favorite"] = True
+        data["source"] = "ajax"
 
-        try:
-            db.session.commit()
+        resp = UserMovie.add_movie_to_list(data=data)
 
-        except:
+        if resp[1] != 201:
             resp = jsonify(
                 {"message": "There was an error.  Please try again."})
             return (resp, 400)
 
-        # send back our boolean value for "favorite" so we can
-        # keep the front end in sync with our database data
+        um = UserMovie.query.filter_by(
+            user_id=session[CURR_USER_KEY], movie_id=movie_id).first()
+
+    # below will happen regardless of above block
+    um.favorite = not um.favorite
+
+    try:
+        db.session.commit()
+
+    except:
         resp = jsonify(
-            {"message": "success", "movieDetails": UserMovie.serialize(um)})
-        return (resp, 200)
+            {"message": "There was an error.  Please try again."})
+        return (resp, 400)
 
-    # if no movie exists in the user list, add the movie as a favorite
-    else:
-        data = request.json
-        data["user_id"] = session[CURR_USER_KEY]
-        data["favorite"] = True
-
-        return UserMovie.add_movie_to_list(data=data)
+    # send back our boolean value for "favorite" so we can
+    # keep the front end in sync with our database data
+    resp = jsonify(
+        {"message": "success", "movieDetails": UserMovie.serialize(um)})
+    return (resp, 200)
 
 
 # internal api route - delete movie from user list ajax (my list checkmark button)

@@ -171,27 +171,42 @@ class UserMovie(db.Model):
         movie_in_movies_table = Movie.query.get(movie_id)
 
         if movie_in_movies_table:
+            # we only need to add a new UserMovie entry
+
+            # date_added will take the default value from our UserMovie model
+            # date_viewed will be set to None <class 'NoneType'> if user doesn't
+            #   add a date so our db entry will be empty
+            # platform needs to be explicitly set to None <class 'NoneType'>
+            #   if no data is sent because wtforms sends us an empty string
+            #   for value="" (different than date_viewed) and sqlalchemy will
+            #   store that empty string in our db.
             um = UserMovie(movie_id=movie_id,
                            user_id=data["user_id"],
                            favorite=data["favorite"]
                            )
+
+            # um = UserMovie(movie_id=movie_id,
+            #                user_id=session[CURR_USER_KEY],
+            #                favorite=False if not form.favorite.data else form.favorite.data,
+            #                platform=None if not form.platform.data else form.platform.data,
+            #                date_viewed=form.date_viewed.data,
+            #                )
 
             try:
                 db.session.add(um)
                 db.session.commit()
 
             except IntegrityError as exc:
-                print("Error: ", exc)
-                resp = jsonify({"message": "There was an error"})
-                return (resp, 400)
+                if (data["source"] == "form-data"):
+                    return None
 
-            # success response goes here
-            resp = jsonify({"message": "Movie added to list.",
-                           "movieDetails": UserMovie.serialize(um)})
-            return (resp, 201)
+                else:
+                    print("Error: ", exc)
+                    resp = jsonify({"message": "There was an error"})
+                    return (resp, 400)
 
         else:
-            # favorite will take the default value from our model
+            # favorite will take the value coming from the ajax req
             # date_added will take the default from our model
             # date_viewed is optional so None <class 'NoneType'> will
             #   be our value and db field will be blank
@@ -202,7 +217,6 @@ class UserMovie(db.Model):
                       title=data["title"],
                       release_year=data["release_year"][0:4],
                       imdb_img=data["imdb_img"],
-                      favorite=data["favorite"]
                       )
 
             try:
@@ -211,15 +225,22 @@ class UserMovie(db.Model):
                 db.session.commit()
 
             except IntegrityError as exc:
-                print("Error: ", exc)
-                resp = jsonify({"message": "There was an error"})
-                return (resp, 400)
+                if (data["source"] == "form-data"):
+                    return None
+
+                else:
+                    print("Error: ", exc)
+                    resp = jsonify({"message": "There was an error"})
+                    return (resp, 400)
 
             um = UserMovie.query.get((data["user_id"], movie_id))
 
-            # success response goes here
+        # success response goes here
+        if (data["source"] == "form-data"):
+            return um
+        else:
             resp = jsonify({"message": "Movie added to list.",
-                           "movieDetails": UserMovie.serialize(um)})
+                            "movieDetails": UserMovie.serialize(um)})
             return (resp, 201)
 
     def serialize(self):
