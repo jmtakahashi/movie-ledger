@@ -15,7 +15,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_cors import CORS
 
 from forms import (UserAddForm, LoginForm, UserEditForm,
-                   UserDeleteForm, MovieAddEditForm)
+                   UserDeleteForm, MovieEditForm)
 from models import db, connect_db, User, Movie, UserMovie
 from services import movie_search, movie_search_by_id
 
@@ -392,7 +392,7 @@ def show_users_movies():
 
     # add the movie add edit form to our modal
     # we will populate field values with javascript
-    movie_add_edit_form = MovieAddEditForm()
+    movie_add_edit_form = MovieEditForm()
 
     return render_template('movies.html', user=g.user, movies=movies, display_params=display_params, sort_str=sort_str, form=movie_add_edit_form)
 
@@ -405,7 +405,7 @@ def add_user_movie():
         flash("Please login.", "danger")
         return redirect("/login")
 
-    form = MovieAddEditForm()
+    form = MovieEditForm()
 
     ###########################################################################
     # add movie to user's list by form (from movie detail page)
@@ -474,7 +474,7 @@ def edit_user_movie(movie_id):
         flash("Please login.", "danger")
         return redirect("/login")
 
-    form = MovieAddEditForm()
+    form = MovieEditForm()
 
     ###########################################################################
     # add movie to user's list by form (from movie detail page)
@@ -483,8 +483,8 @@ def edit_user_movie(movie_id):
         # query the existing UserMovie entry
         um = UserMovie.query.get((session[CURR_USER_KEY], movie_id))
 
-        # update values.  there will only be 3 that we can modify
-        um.favorite = True if form.favorite.data else False
+        # update values.  there will only be 2 that we can modify
+        # favorites value is edited by ajax
         um.platform = None if not form.platform.data else form.platform.data
         um.date_viewed = form.date_viewed.data
 
@@ -521,7 +521,7 @@ def edit_user_movie(movie_id):
 
     # # update our wtform data on the front end to match the movie
     # # details of the movie we are viewing, so when we submit the
-    # # MovieAddEditForm our values will be correct
+    # # MovieEditForm our values will be correct
     # form.title.data = movie['Title']
     # form.release_year.data = movie['Year']
     # form.imdb_img.data = movie['Poster']
@@ -587,7 +587,7 @@ def search_movies():
 
     # add the movie add edit form to our modal
     # we will populate field values with javascript
-    movie_add_edit_form = MovieAddEditForm()
+    movie_add_edit_form = MovieEditForm()
 
     # if a search term is provided, process the search
     if request.args.get('term'):
@@ -657,57 +657,11 @@ def add_movie():
         flash("Please login.", "danger")
         return redirect("/login")
 
-    movie_id = request.json["movieID"]
+    data = request.json
+    data["user_id"] = session[CURR_USER_KEY]
+    data["favorite"] = request.json.get("favorite") or False
 
-    # save a new movie to our user's list.  but we still need to
-    # check if the movie exists in the Movie table.  it may already
-    # exist there from another user's addition.
-    movie_in_movies_table = Movie.query.get(movie_id)
-
-    if movie_in_movies_table:
-        um = UserMovie(movie_id=movie_id,
-                       user_id=session[CURR_USER_KEY]
-                       )
-
-        try:
-            db.session.add(um)
-            db.session.commit()
-
-        except IntegrityError as exc:
-            print("Error: ", exc)
-            resp = jsonify({"message": "There was an error"})
-            return (resp, 400)
-
-        # success response goes here
-        resp = jsonify({"message": "Movie added to list."})
-        return (resp, 201)
-
-    else:
-        # favorite will take the default value from our model
-        # date_added will take the default from our model
-        # date_viewed is optional so None <class 'NoneType'> will
-        #   be our value and db field will be blank
-        # platform is optional so None <class 'NoneType'> will
-        #   be our value and db field will be blank
-        m = Movie(imdb_id=movie_id,
-                  title=request.json["title"],
-                  release_year=request.json["release_year"][0:4],
-                  imdb_img=request.json["imdb_img"],
-                  )
-
-        try:
-            g.user.movies.append(m)
-            db.session.add(g.user)
-            db.session.commit()
-
-        except IntegrityError as exc:
-            print("Error: ", exc)
-            resp = jsonify({"message": "There was an error"})
-            return (resp, 400)
-
-        # success response goes here
-        resp = jsonify({"message": "Movie added to list."})
-        return (resp, 201)
+    return UserMovie.add_movie_to_list(data=data)
 
 
 # internal api route - get movie details (accessed when opening details modal)
@@ -754,16 +708,17 @@ def get_movie_details(movie_id):
 # internal api route - update favorite ajax (favorite button)
 @app.route('/api/movies/<movie_id>', methods=["PATCH"])
 def add_remove_favorite(movie_id):
-    """Add or remove a movie as a favorite"""
+    """Add or remove a movie as a favorite.  If not in UserMovie list yet, add it."""
 
     if not CURR_USER_KEY in session:
         flash("Please login.", "danger")
         return redirect("/login")
 
-    m = UserMovie.query.filter_by(user_id=g.user.id, movie_id=movie_id).first()
+    um = UserMovie.query.filter_by(
+        user_id=session[CURR_USER_KEY], movie_id=movie_id).first()
 
-    if m:
-        m.favorite = not m.favorite
+    if um:
+        um.favorite = not um.favorite
 
         try:
             db.session.commit()
@@ -775,12 +730,17 @@ def add_remove_favorite(movie_id):
 
         # send back our boolean value for "favorite" so we can
         # keep the front end in sync with our database data
-        resp = jsonify({"message": "success", "favorite": m.favorite})
+        resp = jsonify(
+            {"message": "success", "movieDetails": UserMovie.serialize(um)})
         return (resp, 200)
 
+    # if no movie exists in the user list, add the movie as a favorite
     else:
-        resp = jsonify({"message": "movie not found"})
-        return (resp, 404)
+        data = request.json
+        data["user_id"] = session[CURR_USER_KEY]
+        data["favorite"] = True
+
+        return UserMovie.add_movie_to_list(data=data)
 
 
 # internal api route - delete movie from user list ajax (my list checkmark button)

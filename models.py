@@ -1,6 +1,8 @@
 """Models for Movie Ledger."""
 
+from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 from flask_bcrypt import Bcrypt
 
 from datetime import datetime
@@ -157,3 +159,77 @@ class UserMovie(db.Model):
         um = self
 
         return f"<UserMovie user_id={um.user_id} movie_id={um.movie_id} favorite={um.favorite}>"
+
+    @classmethod
+    def add_movie_to_list(cls, data):
+        """Add a movie to the users list.  Should handle ajax or form data."""
+        movie_id = data["movieID"]
+
+        # save a new movie to our user's list.  but we still need to
+        # check if the movie exists in the Movie table.  it may already
+        # exist there from another user's addition.
+        movie_in_movies_table = Movie.query.get(movie_id)
+
+        if movie_in_movies_table:
+            um = UserMovie(movie_id=movie_id,
+                           user_id=data["user_id"],
+                           favorite=data["favorite"]
+                           )
+
+            try:
+                db.session.add(um)
+                db.session.commit()
+
+            except IntegrityError as exc:
+                print("Error: ", exc)
+                resp = jsonify({"message": "There was an error"})
+                return (resp, 400)
+
+            # success response goes here
+            resp = jsonify({"message": "Movie added to list.",
+                           "movieDetails": UserMovie.serialize(um)})
+            return (resp, 201)
+
+        else:
+            # favorite will take the default value from our model
+            # date_added will take the default from our model
+            # date_viewed is optional so None <class 'NoneType'> will
+            #   be our value and db field will be blank
+            # platform is optional so None <class 'NoneType'> will
+            #   be our value and db field will be blank
+            u = User.query.get(data["user_id"])
+            m = Movie(imdb_id=movie_id,
+                      title=data["title"],
+                      release_year=data["release_year"][0:4],
+                      imdb_img=data["imdb_img"],
+                      favorite=data["favorite"]
+                      )
+
+            try:
+                u.movies.append(m)
+                db.session.add(u)
+                db.session.commit()
+
+            except IntegrityError as exc:
+                print("Error: ", exc)
+                resp = jsonify({"message": "There was an error"})
+                return (resp, 400)
+
+            um = UserMovie.query.get((data["user_id"], movie_id))
+
+            # success response goes here
+            resp = jsonify({"message": "Movie added to list.",
+                           "movieDetails": UserMovie.serialize(um)})
+            return (resp, 201)
+
+    def serialize(self):
+        """Serialze a userMovie SQLAlchemy obj to dict."""
+
+        return {
+            "user_id": self.user_id,
+            "movie_id": self.movie_id,
+            "date_added": self.date_added,
+            "platform": self.platform,
+            "date_viewed": self.date_viewed,
+            "favorite": self.favorite
+        }

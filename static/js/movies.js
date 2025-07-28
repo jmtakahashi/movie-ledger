@@ -1,43 +1,51 @@
 /**
- * ajax functions for adding a favorite and
- * deleting a movie from users list
+ * ajax functions for adding, deleting and favorite movie
  */
-
-const functionsBtnContainers = document.getElementsByClassName('ml__movie-list--functions-container')
-
-const searchResults = document.getElementById('searchResults')
-const movieList = document.getElementById('myMovieList');
 const movieListInfoContainers = document.getElementsByClassName("ml__movie-list--info-container")
-const movieDetailModal = document.getElementById("ml__movie-detail-modal")
+const functionsBtnContainers = document.getElementsByClassName('ml__movie--functions-container')
+const modalFunctionsBtnContainer = document.getElementById('ml__movie-modal--functions-container')
+const searchResults = document.getElementById('searchResults')
 const movieDetailModalCloseBtn = document.getElementById("ml__movie-detail-modal-close-btn")
-
 const sortIcon = document.getElementById('sortIcon')
-const sortContainer = document.getElementById('sortContainer')
 const sortForm = document.getElementById("sortForm")
+
+// ony used in checkValuesSet
 const sortBy = document.getElementById("sort")
 const sortOrderAsc = document.getElementById("order-asc")
 const sortOrderDesc = document.getElementById("order-desc")
 const sortButton = document.getElementById("myListSortButton")
 
+const movieDetailModal = document.getElementById("ml__movie-detail-modal")
+const sortContainer = document.getElementById('sortContainer')
+
+const movieList = document.getElementById('myMovieList');
 const pageContent = document.getElementById('pageContent');
-const backToMoviesLink = document.getElementById('backToMoviesLink')
+const sortNoteContainer = document.getElementById('ml__my-list--sort-note-container')
 
+/* --------------------------------------------------------------------------- */
+// event listeners
 
+// movie detail modal
 for (let item of movieListInfoContainers) {
   item.addEventListener("click", showMovieDetailModal)
 }
-searchResults && searchResults.addEventListener("click", showMovieDetailModal)
-// movieDetailModal && movieDetailModal.addEventListener("click", closeMovieDetailModal)
 movieDetailModalCloseBtn && movieDetailModalCloseBtn.addEventListener("click", closeMovieDetailModal)
 
+/* sort dropdown box */
 sortIcon && sortIcon.addEventListener("click", showHideSortBox)
-
 sortForm && document.addEventListener("DOMContentLoaded", checkValuesSet);
 sortForm && sortForm.addEventListener("change", checkValuesSet)
 
-// add event listener
+/* add/remove/favorite buttons - movie list and search results */
 for (let item of functionsBtnContainers) {
   item.addEventListener("click", handleMovieFunctionsClick)
+}
+
+/* --------------------------------------------------------------------------- */
+// functions
+
+function showHideSortBox(e) {
+  sortContainer.classList.toggle("hidden")
 }
 
 function checkValuesSet(e) { 
@@ -49,11 +57,7 @@ function checkValuesSet(e) {
   }
 }
 
-function showHideSortBox(e) {
-  sortContainer.classList.toggle("hidden")
-}
-
-// click handler
+// click handler - run func based on button clicked
 async function handleMovieFunctionsClick(e) {
   if (e.target.classList.contains('ml__movie--my-list')) {
     const imdb_id = e.target.parentElement.getAttribute('data-id');
@@ -65,9 +69,6 @@ async function handleMovieFunctionsClick(e) {
     toggleFavorite(imdb_id, e)
   }
 }
-
-
-// toggle functions
 
 /**
  * add or remove a movie from myList
@@ -105,10 +106,19 @@ function toggleMyList(movieID, e) {
       .then((resp) => {
         if (resp.status == 201) {
           // do this regardless of view.  show check mark
-          e.target.parentElement.setAttribute('data-my-list', "true")
+          e.target.parentElement.setAttribute('data-my-list', true)
           e.target.classList.add('fa-check');
           e.target.classList.remove('fa-plus');
-          e.target.parentElement.children[0].classList.remove('hidden')
+
+          // sync the modal and main page UI
+          if (e.target.parentElement.getAttribute("data-click-source") == "modal") {
+            document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.add('fa-check');
+            document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.remove('fa-plus');
+            document.getElementById(`ml__movie--functions-container--${movieID}`).setAttribute('data-my-list', true)
+
+            // show the form
+            document.getElementById("ml__edit-movie-form").classList.add("show")
+          }
         }
       })
       .catch((err) => {
@@ -122,19 +132,35 @@ function toggleMyList(movieID, e) {
       .delete(`/api/movies/${movieID}`, config)
       .then((resp) => {
         if (resp.status == 200) {
-          // if we are on the search page, change the mylist icon, set the attribute hide the fav icon
+          // if we are on the search page, change the mylist icon, set the attribute
           if (searchResults) {
-            e.target.parentElement.setAttribute('data-my-list', "false")
+            e.target.parentElement.setAttribute('data-my-list', false)
             e.target.classList.remove('fa-check');
             e.target.classList.add('fa-plus');
 
-            // also remove the fav icon
-            e.target.parentElement.children[0].classList.add("hidden") 
+            // if the item was a favorite, remove the favorite icon status
+            e.target.parentElement.children[1].classList.remove("fas")
+            e.target.parentElement.children[1].classList.add("far")
+
+            // sync the modal and main page UI
+            if (e.target.parentElement.getAttribute("data-click-source") == "modal") {
+              document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.remove('fa-check');
+              document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.add('fa-plus');
+              document.getElementById(`ml__movie--functions-container--${movieID}`).setAttribute('data-my-list', false)
+
+
+              // hide the form
+              document.getElementById("ml__edit-movie-form").classList.remove("show")
+            }
           }
 
-          // if we are on the my movies page, remove the movie from the page
+          // if we are on the my movies page, remove the movie from the page, close the modal
           if (movieList) {
-            e.target.parentElement.parentElement.remove();
+            document.getElementById(`ml__movie-list-item-${movieID}`).remove()
+
+            if (e.target.parentElement.getAttribute("data-click-source") == "modal") {
+              closeMovieDetailModal()
+            }
 
             /**
              * check if there are an <li>'s left, if all are gone,
@@ -143,14 +169,14 @@ function toggleMyList(movieID, e) {
              * remove the ul and replace with the <h3>
              */
             if (movieList.children.length == 0) {
-              sortContainer.remove();
               movieList.remove();
 
               const h3 = document.createElement('h3');
               const link = document.createElement('a')
 
+              // if we are filtering and there are no more elements
               if (window.location.search.includes('filter=favorites')) {
-                backToMoviesLink.remove();
+                sortNoteContainer.remove();
 
                 h3.innerText = 'No favorites found...';
 
@@ -190,31 +216,85 @@ function toggleMyList(movieID, e) {
  * fas = true
  */
 function toggleFavorite(movieID, e) {
+  // if the movie is not in users list when toggling the favorite
+  // we need to add it, so we need to send all the movie data with the request
+
+  const inList = e.target.parentElement.getAttribute("data-my-list")
+
+  data = {}
+  
+  if (inList == "false") {
+    data["movieID"] = movieID
+    data["title"] = e.target.parentElement.getAttribute("data-title")
+    data["release_year"] = e.target.parentElement.getAttribute("data-release-year")
+    data["imdb_img"] = e.target.parentElement.getAttribute("data-img")
+  }
+
+  const config = {
+    headers: { 'Content-Type': 'application/json' },
+  };
+
   axios
-    .patch(`/api/movies/${movieID}`)
+    .patch(`/api/movies/${movieID}`, JSON.stringify(data), config)
     .then((resp) => {
-      if (resp.status == 200) {
+      if (resp.status == 200 || 201) {
         /**
-         * checking for resp.data.favorite ensures that our front
+         * checking for resp.data.movieDetails.favorite ensures that our front
          * end correctly represents the data in our database
          */
-        if (resp.data.favorite) { 
-          e.target.className = 'fas fa-heart favoriteIcon ml__movie--fav';
+        if (resp.data.movieDetails.favorite) { 
+          e.target.classList.add('fas');
+          e.target.classList.remove('far');
+
+          // if movie not already in list, we should toggle the check mark. and show the edit form
+          if (inList == "false") {
+            e.target.parentElement.children[0].classList.remove("fa-plus")
+            e.target.parentElement.children[0].classList.add("fa-check")
+            e.target.parentElement.setAttribute("data-my-list", true)
+
+            // show form
+            document.getElementById("ml__edit-movie-form").classList.add("show")
+          }
+
+          // if we are doing this from the modal, sync the modal and main page UI
+          if (e.target.parentElement.getAttribute("data-click-source") == "modal") {
+            document.getElementById(`ml__movie-fav-icon--${movieID}`).classList.add('fas');
+            document.getElementById(`ml__movie-fav-icon--${movieID}`).classList.remove('far');
+
+            if (inList == "false") {
+              document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.remove("fa-plus")
+              document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.add("fa-check")
+              document.getElementById(`ml__movie--functions-container--${movieID}`).setAttribute("data-my-list", true)
+            } 
+          }
+
         } else {
-          e.target.className = 'far fa-heart favoriteIcon ml__movie--fav';
+          e.target.classList.add("far")
+          e.target.classList.remove("fas")
+
+          // do below only if we are in the movie modal sync ui with main page
+          if (e.target.parentElement.getAttribute("data-click-source") == "modal") {
+            document.getElementById(`ml__movie-fav-icon--${movieID}`).classList.remove('fas');
+            document.getElementById(`ml__movie-fav-icon--${movieID}`).classList.add('far');
+          }
+          
 
           /* if we are on the favorites view, we should remove the movie */
           if (window.location.search.includes('filter=favorites')) {
-            e.target.parentElement.parentElement.remove();
+            // remove the element from the favorites page ui
+            document.getElementById(`ml__movie-list-item-${movieID}`).remove()
+
+            if (e.target.parentElement.getAttribute("data-click-source") == "modal") {
+              closeMovieDetailModal()
+            }
 
             /**
              * check if there are an <li>'s left, if all are gone,
              * remove the ul and replace with the <h3>
              */
             if (movieList.children.length == 0) {
-              sortContainer.remove();
               movieList.remove();
-              backToMoviesLink.remove();
+              sortNoteContainer.remove();
 
               const h3 = document.createElement('h3');
               h3.innerText = 'No favorites found...';
@@ -235,93 +315,116 @@ function toggleFavorite(movieID, e) {
 
 async function showMovieDetailModal(e) {
   e.preventDefault()
-
+  
+  modalFunctionsBtnContainer.addEventListener("click", handleMovieFunctionsClick)
+  
   const movieID = e.target.getAttribute("data-id")
 
-    axios
-      .get(`/api/movies/${movieID}`)
-      .then((resp) => {
-        if (resp.status == 200) {
-          console.log(resp.data.movie)
-          // {
-          //     "date_added": "Sat, 26 Jul 2025 01:23:16 GMT",
-          //     "date_viewed": null or "Wed, 01 Jan 2025 00:00:00 GMT",
-          //     "favorite": true,
-          //     "imdbID": "tt0208092",
-          //     "in_list": true,
-          //     "platform": null
-          // }
+  movieDetailModalCloseBtn.setAttribute("data-id", movieID)
+  
+  axios
+    .get(`/api/movies/${movieID}`)
+    .then((resp) => {
+      if (resp.status == 200) {
+        // console.log(resp.data.movie)
+        // {
+        //     "date_added": "Sat, 26 Jul 2025 01:23:16 GMT",
+        //     "date_viewed": null or "Wed, 01 Jan 2025 00:00:00 GMT",
+        //     "favorite": true,
+        //     "imdbID": "tt0208092",
+        //     "in_list": true,
+        //     "platform": null
+        // }
 
-          const movie = resp.data.movie
+        const movie = resp.data.movie
 
-          if (!movie.in_list) {
-            document.getElementById("not-in-list").classList.add("show")
-            document.getElementById("add-or-update-button").innerHTML = '<i class="fas fa-plus"></i> My List'
-            
-            // populate form with create route
-            document.getElementById("ml__add-edit-movie-form").setAttribute("action", `/movies`)
+        // populate button functions container atts          
+        modalFunctionsBtnContainer.setAttribute("data-id", movie["imdbID"])
+        modalFunctionsBtnContainer.setAttribute("data-title", movie["Title"])
+        modalFunctionsBtnContainer.setAttribute("data-release-year", movie["Year"])
+        modalFunctionsBtnContainer.setAttribute("data-img", movie["Poster"])
 
-          }  else if (movie.in_list) {
-            document.getElementById("in-list").classList.add("show")
-            document.getElementById("add-or-update-button").innerText = "Update Details"
-            
-            const removeFromListBtn = document.getElementById("remove-from-list-button")
-            removeFromListBtn.setAttribute("href", `/movies/${ movie['imdbID'] }/delete`)
-            removeFromListBtn.classList.add("show")
-            
-            // populate form with update route
-            document.getElementById("ml__add-edit-movie-form").setAttribute("action", `/movies/${movie["imdbID"]}`)
-                  
-          }
-
-          // populate movie data.  does not rely on in-list
-          document.getElementById("movie_details-image").setAttribute("style", `background-image: url(${ movie["Poster"] });`)
-          document.getElementById("movie_details-title").innerText = movie["Title"]
-          document.getElementById("movie_details-release-year").innerText = movie["Year"]
-          document.getElementById("movie_details-rated").innerText = movie["Rated"]
-          document.getElementById("movie_details-released").innerText = movie["Released"]
-          document.getElementById("movie_details-runtime").innerText = movie["Runtime"]
-          document.getElementById("movie_details-genre").innerText = movie["Genre"]
-          document.getElementById("movie_details-actors").innerText = movie["Actors"]
-          document.getElementById("movie_details-plot").innerText = movie["Plot"]
-
-        
-          //hidden fields. does not rely on in-list
-          document.getElementById("imdb_id").value = movie["imdbID"]
-          document.getElementById("title").value = movie["Title"]
-          document.getElementById("release_year").value = movie["Year"]
-          document.getElementById("imdb_img").value = movie["Poster"]
-          document.getElementById("date_added").value = movie["date_added"]
-
-          // not hidden fields. relies on in-list or not.
-          if (movie.favorite) {
-            document.getElementById("favorite").checked = true;
-          }
-
-          if (movie.in_list) {
-            // values coming back from our api request could be null
-            // if values are null, don't set the value attribute (will cause issues)
-            movie["platform"] && (document.getElementById("platform").value = movie["platform"])
-            // convert date to pre-populate date selector - https://stackoverflow.com/a/58880605/7207125
-            // if (movie["date_viewed"]) {
-            //   let d = new Date(movie["date_viewed"]);
-            //   console.log(d)
-            //   let datestring = d.getFullYear().toString().padStart(4, '0') + '-' + (d.getMonth()+1).toString().padStart(2, '0') + '-' + d.getDate().toString().padStart(2, '0');
-            //   console.log(datestring)
-            //   document.getElementById("platform").value = datestring
-            // } 
-            movie["date_viewed"] && (document.getElementById("date_viewed").value = movie["date_viewed"])
-          }
-
-          // show our modal
-          movieDetailModal.classList.add("show")
+        if (!movie.in_list) {
+          modalFunctionsBtnContainer.setAttribute("data-my-list", false)
+          document.getElementById(`ml__movie-modal-my-list-icon`).classList.add("fa-plus")            
+          
+        } else if (movie.in_list) {
+          modalFunctionsBtnContainer.setAttribute("data-my-list", true)
+          document.getElementById(`ml__movie-modal-my-list-icon`).classList.add("fa-check")
+          // show form
+          document.getElementById("ml__edit-movie-form").classList.add("show")
         }
-      })
-      .catch((err) => console.log('err: ', err));
+
+        if (movie.favorite) {
+          document.getElementById(`ml__movie-modal-fav-icon`).classList.add("fas")
+        } else {
+          document.getElementById(`ml__movie-modal-fav-icon`).classList.add("far")
+        }
+
+        // populate movie data.  does not rely on in-list
+        document.getElementById("movie_details-image").setAttribute("style", `background-image: url(${ movie["Poster"] });`)
+        document.getElementById("movie_details-title").innerText = movie["Title"]
+        document.getElementById("movie_details-release-year").innerText = movie["Year"]
+        document.getElementById("movie_details-rated").innerText = movie["Rated"]
+        document.getElementById("movie_details-released").innerText = movie["Released"]
+        document.getElementById("movie_details-runtime").innerText = movie["Runtime"]
+        document.getElementById("movie_details-genre").innerText = movie["Genre"]
+        document.getElementById("movie_details-actors").innerText = movie["Actors"]
+        document.getElementById("movie_details-plot").innerText = movie["Plot"]
+
+        // populate form with create route
+        document.getElementById("ml__edit-movie-form").setAttribute("action", `/movies/${movie["imdbID"]}`)
+
+        // hidden fields. does not rely on in-list. used for update form/route
+        document.getElementById("imdb_id").value = movie["imdbID"]
+        document.getElementById("title").value = movie["Title"]
+        document.getElementById("release_year").value = movie["Year"]
+        document.getElementById("imdb_img").value = movie["Poster"]
+        document.getElementById("date_added").value = movie["date_added"]
+
+        // shown fields. relies on in-list. used for update form/route
+        if (movie.in_list) {
+          // values coming back from our api request could be null
+          // if values are null, don't set the value attribute (will cause issues)
+          movie["platform"] && (document.getElementById("platform").value = movie["platform"])
+          // convert date to pre-populate date selector - https://stackoverflow.com/a/58880605/7207125
+          // if (movie["date_viewed"]) {
+          //   let d = new Date(movie["date_viewed"]);
+          //   console.log(d)
+          //   let datestring = d.getFullYear().toString().padStart(4, '0') + '-' + (d.getMonth()+1).toString().padStart(2, '0') + '-' + d.getDate().toString().padStart(2, '0');
+          //   console.log(datestring)
+          //   document.getElementById("platform").value = datestring
+          // } 
+          movie["date_viewed"] && (document.getElementById("date_viewed").value = movie["date_viewed"])
+        }
+
+        // show our modal
+        movieDetailModal.classList.add("show")
+      }
+    })
+    .catch((err) => console.log('err: ', err));
 }
 
-function closeMovieDetailModal(e) {
+function closeMovieDetailModal() {
+
+  // remove event listener
+  modalFunctionsBtnContainer.removeEventListener("click", handleMovieFunctionsClick)
+
+  // hide the modal
   movieDetailModal.classList.remove("show")
+
+  // remove functions container atts
+  modalFunctionsBtnContainer.removeAttribute("data-my-list")
+  modalFunctionsBtnContainer.removeAttribute("data-id")
+  modalFunctionsBtnContainer.removeAttribute("data-title")
+  modalFunctionsBtnContainer.removeAttribute("data-release-year")
+  modalFunctionsBtnContainer.removeAttribute("data-img")
+
+  // // reset all icons
+  document.getElementById(`ml__movie-modal-my-list-icon`).classList.remove("fa-plus")
+  document.getElementById(`ml__movie-modal-my-list-icon`).classList.remove("fa-check")
+  document.getElementById(`ml__movie-modal-fav-icon`).classList.remove("fas")
+  document.getElementById(`ml__movie-modal-fav-icon`).classList.remove("far")
 
   // clear all data
   document.getElementById("movie_details-image").removeAttribute("style")
@@ -334,8 +437,9 @@ function closeMovieDetailModal(e) {
   document.getElementById("movie_details-actors").innerText = ""
   document.getElementById("movie_details-plot").innerText = ""
 
-  // reset form action
-  document.getElementById("ml__add-edit-movie-form").removeAttribute("action")
+  // reset form
+  document.getElementById("ml__edit-movie-form").classList.remove("show")
+  document.getElementById("ml__edit-movie-form").removeAttribute("action")
 
   // reset hidden fields
   document.getElementById("title").value = ""
@@ -344,7 +448,6 @@ function closeMovieDetailModal(e) {
   document.getElementById("date_added").value = ""
 
   // reset not hidden fields
-  document.getElementById("favorite").checked = false;
   document.getElementById("platform").value = ""
   document.getElementById("date_viewed").value = ""
 }

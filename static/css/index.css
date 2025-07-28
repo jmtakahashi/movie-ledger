@@ -269,7 +269,8 @@ footer {
   background-size: cover;
   display: flex;
   flex-direction: column;
-  overflow: scroll;
+  overflow: hidden;
+  position: relative; /* to hold our movie details modal */
 }
 .pageTitleContainer {
   display: flex;
@@ -323,7 +324,7 @@ footer {
   display: grid;
   justify-items: center;
   align-items: center;
-  position: relative; /* to hold our movie details modal */
+  overflow: scroll;
 }
 
 .ml__content--small {
@@ -413,17 +414,14 @@ footer {
 }
 
 .ml__movie-list--image {
-  display: block;
-  margin-bottom: 1rem;
-  display: block;
   width: 100%;
   aspect-ratio: 2/3;
   background-position: center center;
   background-size: cover;
   margin-bottom: 12px;
   border-radius: 5px;
-  text-decoration: none;
   transition: all 200ms;
+  cursor: pointer;
 }
 .ml__movie-list--info-container {
   display: none;
@@ -474,10 +472,11 @@ footer {
   position: absolute;
   top: 0;
   width: 100%;
-  min-height: 100%;
+  height: 100%;
   margin: auto;
   background: rgba(0, 0, 0, .75);
   z-index: 1;
+  overflow-y: scroll;
 }
 
 .ml__movie-detail-modal.show {
@@ -511,7 +510,7 @@ footer {
   gap: 2rem;
   padding-bottom: 2rem;
   max-width: 500px;
-  margin: auto;
+  margin: 0 auto;
 }
 
 .ml__movie-details-image {
@@ -577,28 +576,8 @@ footer {
   margin-bottom: 0.5rem;
 }
 
-.ml__movie-details--my-list-container{
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px dotted var(--body-border-color);
-}
-
-.ml__movie-details--my-list-container .ml__movie--my-list {
-  display: inline;
-  margin-right: .5rem;
-}
-
-.in-list, .not-in-list {
-  display: none;
-}
-
-.ml__movie-details--edit-title {
-  display: inline;
-  margin-bottom: 0;
-}
-
 .ml__movie-details--edit-note {
-  margin-top: 0;
+  margin-bottom: 1rem;
   font-size: 14px;
 }
 
@@ -682,10 +661,6 @@ footer {
 
 .ml__add-edit-movie--button-wrapper i {
   margin-right: .35rem;
-}
-
-.removeFromListBtn {
-  display: none;
 }
 
 .ml__movie-details--add-edit-form-platform select {
@@ -777,7 +752,7 @@ footer {
   margin: 0;
 }
 
-.ml__movie-list--functions-container {
+.ml__movie--functions-container {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -787,6 +762,22 @@ footer {
 .ml__movie--fav,
 .ml__movie--my-list {
   font-size: 18px;
+}
+
+.ml__movie--functions-container i {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+}
+
+/* .ml__movie--functions-container i.ml__movie--fav {
+  display: none;
+} */
+
+.ml__movie--functions-container i > .ml__movie-function--text {
+  font-family: "Open Sans", sans-serif;
+  font-weight: normal;
 }
 
 /* .fas - favorited */
@@ -799,7 +790,20 @@ footer {
   color: var(--logo-color);
 }
 
+/* the functions container when it show up in the modal */
+.ml__movie-detail-modal .ml__movie--functions-container {
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px dotted var(--body-border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 1rem;
+}
 
+.ml__edit-movie-form {
+  display: none;
+}
 
 .ml__edit-profile--edit-container {
   border-bottom: 1px dotted var(--body-border-color);

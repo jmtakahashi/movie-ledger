@@ -43,15 +43,15 @@ class UserDeleteForm(FlaskForm):
                              InputRequired()])
 
 
-class MovieAddEditForm(FlaskForm):
+class MovieEditForm(FlaskForm):
     """Movie add form on the movie detail page."""
 
     imdb_id = HiddenField("imdb_id", validators=[InputRequired()])
     title = HiddenField("title", validators=[InputRequired()])
     release_year = HiddenField("year", validators=[InputRequired()])
     imdb_img = HiddenField("imdb_img", validators=[InputRequired()])
-    favorite = BooleanField(
-        "Add/Remove to your favorites")
+    # favorite = BooleanField(
+    #     "Add/Remove to your favorites")
     platform = SelectField("Platform (optional)",
                            choices=[
                                ("", ""),

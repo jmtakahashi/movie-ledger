@@ -53,54 +53,56 @@
 {% endblock %}
 
 {% block pagecontent %}
-  <section id="pageContent" class='ml__content--wide'>
-    {% if not movies %}
-      {% if "favorites" in display_params.filters  %}
-        <h3>No favorites found...</h3>
-        <a class='backToMoviesLink' href="/movies">Back to All Movies</a>
-      {% else %}
-        <h3>No movies found...</h3>
-        <a class="button" href="/movie-search">Search Now</a>
-      {% endif %}
-    {% endif %}
-
-    {% if movies %}
-      {% if sort_str %}
-        <div class="ml__my-list--sort-note-container">
-          <p class="ml__my-list--sort-note">{{ sort_str }}</p>
-          
-          {% if "favorites" in display_params.filters and "sort" not in display_params %}
-            <a class="ml__my-list-filter--back-link" href="/movies">Back to All Movies</a>
-          {% endif %}
-          
-          {% if "sort" in display_params %}
-            <a class="ml__my-list-sort-filter--clear-link" href="/movies">Clear All</a>
-          {% endif %}
-        </div>
+  <div class="mainContent">
+    <section id="pageContent" class='ml__content--wide'>
+      {% if not movies %}
+        {% if "favorites" in display_params.filters  %}
+          <h3>No favorites found...</h3>
+          <a class='backToMoviesLink' href="/movies">Back to All Movies</a>
+        {% else %}
+          <h3>No movies found...</h3>
+          <a class="button" href="/movie-search">Search Now</a>
+        {% endif %}
       {% endif %}
 
-      <ul id="myMovieList" class="ml__movie-list">
-        {% for movie in movies %}
-          <li class="ml__movie-list--item">
-            <a class="ml__movie-list--image" href="/movie/{{ movie.movie_id }}" style="background-image: url({{ movie.movie_details.imdb_img }});">
-              <div class="ml__movie-list--info-container" data-id="{{ movie.movie_details.imdb_id }}">
-                <h3 class="ml__movie-list--title">{{ movie.movie_details.title }}</h3>
-                <p class="ml__movie-list--release-year">({{ movie.movie_details.release_year }})</p>
-                <p class="ml__movie-list--date-added">Date Added: {{ movie.date_added }}</p>
-                <p class="ml__movie-list--date-viewed">Date Viewed: {{ movie.date_viewed }}</p>
-                <p class="ml__movie-list--platform">Platform: {{ movie.platform }}</p>
-              </div>
-            </a>
+      {% if movies %}
+        {% if sort_str %}
+          <div id="ml__my-list--sort-note-container" class="ml__my-list--sort-note-container">
+            <p class="ml__my-list--sort-note">{{ sort_str }}</p>
             
-            <div class="ml__movie-list--functions-container" data-id="{{ movie.movie_id }}" data-my-list="true">
-              <i class="{% if movie.favorite %}fas{% else %}far{% endif %} fa-heart ml__movie--fav"></i>
-              <i class="fas fa-check ml__movie--my-list"></i>
-            </div>
-          </li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  </section>
+            {% if "favorites" in display_params.filters and "sort" not in display_params %}
+              <a class="ml__my-list-filter--back-link" href="/movies">Back to All Movies</a>
+            {% endif %}
+            
+            {% if "sort" in display_params %}
+              <a class="ml__my-list-sort-filter--clear-link" href="/movies">Clear All</a>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <ul id="myMovieList" class="ml__movie-list">
+          {% for movie in movies %}
+            <li id="ml__movie-list-item-{{ movie.movie_id }}" class="ml__movie-list--item">
+              <div class="ml__movie-list--image" href="/movie/{{ movie.movie_id }}" style="background-image: url({{ movie.movie_details.imdb_img }});">
+                <div class="ml__movie-list--info-container" data-id="{{ movie.movie_details.imdb_id }}">
+                  <h3 class="ml__movie-list--title">{{ movie.movie_details.title }}</h3>
+                  <p class="ml__movie-list--release-year">({{ movie.movie_details.release_year }})</p>
+                  <p class="ml__movie-list--date-added">Date Added: {{ movie.date_added }}</p>
+                  <p class="ml__movie-list--date-viewed">Date Viewed: {{ movie.date_viewed }}</p>
+                  <p class="ml__movie-list--platform">Platform: {{ movie.platform }}</p>
+                </div>
+              </div>
+              
+              <div id="ml__movie--functions-container=={{ movie.movie_id }}" class="ml__movie--functions-container" data-id="{{ movie.movie_id }}" data-my-list="true">
+                <i id="ml__movie-my-list-icon--{{ movie.movie_id }}" class="fas fa-check ml__movie--my-list"></i>
+                <i id="ml__movie-fav-icon--{{ movie.movie_id }}" class="{% if movie.favorite %}fas{% else %}far{% endif %} fa-heart ml__movie--fav"></i>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+  </div>
   {% include 'movie-detail-modal.html' %}
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="/static/js/movies.js"></script>

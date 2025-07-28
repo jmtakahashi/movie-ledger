@@ -9,43 +9,45 @@
 {% endblock %}
 
 {% block pagecontent %}
-  <section class="ml__content--small">
-    <div class="ml__edit-profile--edit-container">
-      <h2 class="sectionTitle">Edit Profile</h1>
-      <form id="ml__profile-edit-form" method="POST">
-        {{ editForm.hidden_tag() }}
-        {% for field in editForm if field.widget.input_type != 'hidden' %}
+  <div class="mainContent">
+    <section class="ml__content--small">
+      <div class="ml__edit-profile--edit-container">
+        <h2 class="sectionTitle">Edit Profile</h1>
+        <form id="ml__profile-edit-form" method="POST">
+          {{ editForm.hidden_tag() }}
+          {% for field in editForm if field.widget.input_type != 'hidden' %}
 
-        <div>
-          {{ field.label }} {{ field }}
-          {% for error in field.errors %}
-            <span class="error">{{ error}}</span>
+          <div>
+            {{ field.label }} {{ field }}
+            {% for error in field.errors %}
+              <span class="error">{{ error}}</span>
+            {% endfor %}
+          </div>
+
           {% endfor %}
-        </div>
+          <button type="submit">Edit Profile</button>
+        </form>
+      </div>
 
-        {% endfor %}
-        <button type="submit">Edit Profile</button>
-      </form>
-    </div>
+      <div class="ml__edit-profile--delete-container">
+        <h2 class="sectionTitle">Delete Profile</h2>
+        <p class="ml__edit-profile--delete-warning">WARNING: Deleting your profile is permanent! Please be be absolutely sure
+          you want to delete your profile before clicking the button below!</p>
+        <form id="ml__profile-delete-form" action="/profile/delete" method="POST">
+          {{ deleteForm.hidden_tag() }}
+          {% for field in deleteForm if field.widget.input_type != 'hidden' %}
 
-    <div class="ml__edit-profile--delete-container">
-      <h2 class="sectionTitle">Delete Profile</h2>
-      <p class="ml__edit-profile--delete-warning">WARNING: Deleting your profile is permanent! Please be be absolutely sure
-        you want to delete your profile before clicking the button below!</p>
-      <form id="ml__profile-delete-form" action="/profile/delete" method="POST">
-        {{ deleteForm.hidden_tag() }}
-        {% for field in deleteForm if field.widget.input_type != 'hidden' %}
+          <div>
+            {{ field.label }} {{ field }}
+            {% for error in field.errors %}
+              <span class="error">{{ error}}</span>
+            {% endfor %}
+          </div>
 
-        <div>
-          {{ field.label }} {{ field }}
-          {% for error in field.errors %}
-            <span class="error">{{ error}}</span>
           {% endfor %}
-        </div>
-
-        {% endfor %}
-        <button type="submit">Delete Profile</button>
-      </form>
-    </div>
-  </section>
+          <button type="submit">Delete Profile</button>
+        </form>
+      </div>
+    </section>
+  </div>
 {% endblock %}
