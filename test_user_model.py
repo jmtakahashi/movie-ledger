@@ -179,7 +179,7 @@ class UserModelTestCase(TestCase):
 
     def test_relationship_on_user_model(self):
         """Does the relationship work?
-        Can we access a user's movies throught the user model?
+        Can we access a user's movies through the user model?
         """
 
         # add a user to our db to test against, use User.signup to
@@ -217,4 +217,4 @@ class UserModelTestCase(TestCase):
 
         # we should be able to get the details of the movie through user relationship
         self.assertEqual(u.movies[0].title, m.title)
-        self.assertEqual(u.movies[0].release_year, '2023')
+        self.assertEqual(u.movies[0].release_year, 2023)
