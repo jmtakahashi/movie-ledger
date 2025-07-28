@@ -426,7 +426,7 @@ def add_user_movie():
             #   for value="" (different than date_viewed) and sqlalchemy will
             #   store that empty string in our db.
             um = UserMovie(movie_id=movie_id,
-                           user_id=g.user.id,
+                           user_id=session[CURR_USER_KEY],
                            favorite=False if not form.favorite.data else form.favorite.data,
                            platform=None if not form.platform.data else form.platform.data,
                            date_viewed=form.date_viewed.data,
@@ -669,6 +669,10 @@ def add_movie():
 def get_movie_details(movie_id):
     """Get movie details for a single movie"""
 
+    if not CURR_USER_KEY in session:
+        flash("Please login.", "danger")
+        return redirect("/login")
+
     # get the movie data from the api.  data returned will be
     # a dictionary containing a key title "Response".
     # If "True", a movie was found.  if "False", no movie found.
@@ -687,7 +691,7 @@ def get_movie_details(movie_id):
 
     # .first() returns the movie, or no movies
     movie_in_users_list = UserMovie.query.filter_by(
-        user_id=g.user.id, movie_id=movie['imdbID']).first()
+        user_id=session[CURR_USER_KEY], movie_id=movie['imdbID']).first()
 
     # if the movie is already in the current user's list we can pre-populate
     # the data that is exclusive to our db into our response as well.
