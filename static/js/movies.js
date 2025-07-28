@@ -42,12 +42,13 @@ for (let item of functionsBtnContainers) {
 }
 
 /* --------------------------------------------------------------------------- */
-// functions
+
+// sort box functions
 
 function showHideSortBox(e) {
   sortContainer.classList.toggle("hidden")
 }
-
+// enables or disables sort "apply" button based on existence of values
 function checkValuesSet(e) { 
   if (sortBy.value && (sortOrderAsc.checked || sortOrderDesc.checked)) {
     sortButton.classList.remove("disabled")
@@ -57,36 +58,34 @@ function checkValuesSet(e) {
   }
 }
 
-// click handler - run func based on button clicked
+// movie add/remove + fav/unfav click handler. click listener is on the encompassing div
 async function handleMovieFunctionsClick(e) {
   if (e.target.classList.contains('ml__movie--my-list')) {
-    const imdb_id = e.target.parentElement.getAttribute('data-id');
-    toggleMyList(imdb_id, e)
+    toggleMyList(e)
   }
 
   if (e.target.classList.contains('ml__movie--fav')) {
-    const imdb_id = e.target.parentElement.getAttribute('data-id');
-    toggleFavorite(imdb_id, e)
+    toggleFavorite(e)
   }
 }
+
+/**
+ * icon classes:
+ * far = false - not fav
+ * fas = true - fav
+ * check = fa-check - added to list
+ * plus = fa-plus - add to list
+ */
 
 /**
  * add or remove a movie from myList
  *
  * if we are on the "my movies" view, dynamically
  * remove the movie from the list when deleting
- * 
- * if we are on the "movie search" view, toggle
- * the icon classes and dynamically show/hide the
- * favorite icon
  */
+function toggleMyList(e) {
+  const movieID = e.target.parentElement.getAttribute('data-id');
 
-/**
- * favorite classes:
- * far = false
- * fas = true
- */
-function toggleMyList(movieID, e) {
   const config = {
     headers: { 'Content-Type': 'application/json' },
   };
@@ -98,23 +97,23 @@ function toggleMyList(movieID, e) {
     const release_year = e.target.parentElement.getAttribute('data-release-year');
     const imdb_img = e.target.parentElement.getAttribute('data-img');
     
-    const params = { movieID, title, release_year, imdb_img };
+    const data = { movieID, title, release_year, imdb_img };
 
     /* send a request to our internal api point to add a movie to our db */
     axios
-      .post(`/api/movies`, JSON.stringify(params), config)
+      .post(`/api/movies`, JSON.stringify(data), config)
       .then((resp) => {
         if (resp.status == 201) {
           // do this regardless of view.  show check mark
           e.target.parentElement.setAttribute('data-my-list', true)
-          e.target.classList.add('fa-check');
           e.target.classList.remove('fa-plus');
+          e.target.classList.add('fa-check');
 
           // sync the modal and main page UI
           if (e.target.parentElement.getAttribute("data-click-source") == "modal") {
-            document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.add('fa-check');
-            document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.remove('fa-plus');
             document.getElementById(`ml__movie--functions-container--${movieID}`).setAttribute('data-my-list', true)
+            document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.remove('fa-plus');
+            document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.add('fa-check');
 
             // show the form
             document.getElementById("ml__edit-movie-form").classList.add("show")
@@ -144,17 +143,17 @@ function toggleMyList(movieID, e) {
 
             // sync the modal and main page UI
             if (e.target.parentElement.getAttribute("data-click-source") == "modal") {
+              document.getElementById(`ml__movie--functions-container--${movieID}`).setAttribute('data-my-list', false)
               document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.remove('fa-check');
               document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.add('fa-plus');
-              document.getElementById(`ml__movie--functions-container--${movieID}`).setAttribute('data-my-list', false)
-
 
               // hide the form
               document.getElementById("ml__edit-movie-form").classList.remove("show")
             }
           }
 
-          // if we are on the my movies page, remove the movie from the page, close the modal
+          // if we are on the my movies page, remove the movie from the page, 
+          // if we are clicking from the modal, close the modal
           if (movieList) {
             document.getElementById(`ml__movie-list-item-${movieID}`).remove()
 
@@ -165,7 +164,6 @@ function toggleMyList(movieID, e) {
             /**
              * check if there are an <li>'s left, if all are gone,
              * reset the ui to "no movies found" condition:
-             * remove the filter & sort box, 
              * remove the ul and replace with the <h3>
              */
             if (movieList.children.length == 0) {
@@ -206,21 +204,16 @@ function toggleMyList(movieID, e) {
  * if we are on the favorites filter view, dynamically
  * remove the movie from the list when unfavoriting
  * 
- * if we are on the "my list" view, or the "movie search"
- * view, toggle the icon classes
+ * favoriting a movie thats not in the user list should
+ * automatically add to it to the user list
  */
-
-/**
- * favorite classes:
- * far = false
- * fas = true
- */
-function toggleFavorite(movieID, e) {
-  // if the movie is not in users list when toggling the favorite
-  // we need to add it, so we need to send all the movie data with the request
-
+function toggleFavorite(e) {
+ 
+  const movieID = e.target.parentElement.getAttribute('data-id');
   const inList = e.target.parentElement.getAttribute("data-my-list")
 
+  // if the movie is not in users list when toggling the favorite
+  // we need to add it, so we need to send all the movie data with the request
   data = {}
   
   if (inList == "false") {
@@ -243,34 +236,35 @@ function toggleFavorite(movieID, e) {
          * end correctly represents the data in our database
          */
         if (resp.data.movieDetails.favorite) { 
-          e.target.classList.add('fas');
           e.target.classList.remove('far');
+          e.target.classList.add('fas');
 
           // if movie not already in list, we should toggle the check mark. and show the edit form
           if (inList == "false") {
+            e.target.parentElement.setAttribute("data-my-list", true)
             e.target.parentElement.children[0].classList.remove("fa-plus")
             e.target.parentElement.children[0].classList.add("fa-check")
-            e.target.parentElement.setAttribute("data-my-list", true)
-
-            // show form
-            document.getElementById("ml__edit-movie-form").classList.add("show")
           }
 
           // if we are doing this from the modal, sync the modal and main page UI
           if (e.target.parentElement.getAttribute("data-click-source") == "modal") {
-            document.getElementById(`ml__movie-fav-icon--${movieID}`).classList.add('fas');
             document.getElementById(`ml__movie-fav-icon--${movieID}`).classList.remove('far');
+            document.getElementById(`ml__movie-fav-icon--${movieID}`).classList.add('fas');
 
             if (inList == "false") {
+              document.getElementById(`ml__movie--functions-container--${movieID}`).setAttribute("data-my-list", true)
               document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.remove("fa-plus")
               document.getElementById(`ml__movie-my-list-icon--${movieID}`).classList.add("fa-check")
-              document.getElementById(`ml__movie--functions-container--${movieID}`).setAttribute("data-my-list", true)
+
+              // show edit form
+              document.getElementById("ml__edit-movie-form").classList.add("show")
             } 
           }
 
         } else {
-          e.target.classList.add("far")
+          // resp.data.movieDetails.favorite returns false
           e.target.classList.remove("fas")
+          e.target.classList.add("far")
 
           // do below only if we are in the movie modal sync ui with main page
           if (e.target.parentElement.getAttribute("data-click-source") == "modal") {
@@ -278,10 +272,9 @@ function toggleFavorite(movieID, e) {
             document.getElementById(`ml__movie-fav-icon--${movieID}`).classList.add('far');
           }
           
-
-          /* if we are on the favorites view, we should remove the movie */
+          // if we are on the favorites view, we should remove the movie
+          // if we are clicking from the modal, close the modal
           if (window.location.search.includes('filter=favorites')) {
-            // remove the element from the favorites page ui
             document.getElementById(`ml__movie-list-item-${movieID}`).remove()
 
             if (e.target.parentElement.getAttribute("data-click-source") == "modal") {
@@ -290,6 +283,7 @@ function toggleFavorite(movieID, e) {
 
             /**
              * check if there are an <li>'s left, if all are gone,
+             * reset the ui to "no favorites found" condition:
              * remove the ul and replace with the <h3>
              */
             if (movieList.children.length == 0) {
@@ -314,8 +308,8 @@ function toggleFavorite(movieID, e) {
 }
 
 async function showMovieDetailModal(e) {
-  e.preventDefault()
-  
+
+  // add event listeners for add/remove from list and fav/unfav
   modalFunctionsBtnContainer.addEventListener("click", handleMovieFunctionsClick)
   
   const movieID = e.target.getAttribute("data-id")
@@ -326,7 +320,6 @@ async function showMovieDetailModal(e) {
     .get(`/api/movies/${movieID}`)
     .then((resp) => {
       if (resp.status == 200) {
-        // console.log(resp.data.movie)
         // {
         //     "date_added": "Sat, 26 Jul 2025 01:23:16 GMT",
         //     "date_viewed": null or "Wed, 01 Jan 2025 00:00:00 GMT",
@@ -407,18 +400,19 @@ async function showMovieDetailModal(e) {
 
 function closeMovieDetailModal() {
 
-  // remove event listener
+  // remove event listeners
   modalFunctionsBtnContainer.removeEventListener("click", handleMovieFunctionsClick)
 
   // hide the modal
   movieDetailModal.classList.remove("show")
 
   // remove functions container atts
-  modalFunctionsBtnContainer.removeAttribute("data-my-list")
   modalFunctionsBtnContainer.removeAttribute("data-id")
   modalFunctionsBtnContainer.removeAttribute("data-title")
   modalFunctionsBtnContainer.removeAttribute("data-release-year")
   modalFunctionsBtnContainer.removeAttribute("data-img")
+
+  modalFunctionsBtnContainer.removeAttribute("data-my-list")
 
   // // reset all icons
   document.getElementById(`ml__movie-modal-my-list-icon`).classList.remove("fa-plus")
@@ -442,6 +436,7 @@ function closeMovieDetailModal() {
   document.getElementById("ml__edit-movie-form").removeAttribute("action")
 
   // reset hidden fields
+  document.getElementById("imdb_id").value = ""
   document.getElementById("title").value = ""
   document.getElementById("release_year").value = ""
   document.getElementById("imdb_img").value = ""
